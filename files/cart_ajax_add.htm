@@ -1,0 +1,200 @@
+<div id="cart-ajax" class="cart-ajax">
+  <div class="cart-ajax__wrap">
+    {% IF FORM_NOTICE %}
+    <h4 class="cart-ajax__title title-styled">
+      {% IF FORM_NOTICE_IS_GOOD %}
+      Товар добавлен в корзину
+      {% ELSE %}
+      Не удалось добавить товар
+      {% ENDIF %}
+    </h4>
+    {% ENDIF %}
+    {% FOR cart_items %}
+      {% IF cart_items.GOODS_MOD_ID = FORM_GOODS_MOD_ID %}
+      <div class="cart-ajax__product">
+        <div class="preloader _opacity" style="display:none"><span class="content-loading"></span></div>
+        <div class="cart-ajax__product-image">
+          <a href="{cart_items.GOODS_URL}">
+            <img src="{% IF cart_items.GOODS_IMAGE_EMPTY %}{ASSETS_IMAGES_PATH}no-photo-icon.png?design=tourism{% ELSE %}{cart_items.GOODS_IMAGE_ICON}{% ENDIF %}" class="goods-image-icon" alt="{cart_items.GOODS_NAME}" title="{cart_items.GOODS_NAME}">
+          </a>
+        </div>
+        <div class="cart-ajax__product-info">
+          <h4 class="cart-ajax__product-name">{cart_items.GOODS_NAME}</h4>
+          {% IFNOT cart_items.distinctive_properties_empty %}<div class="cart-ajax__product-properties">{% FOR distinctive_properties %}{cart_items.distinctive_properties.NAME}: {cart_items.distinctive_properties.VALUE}{% IFNOT cart_items.distinctive_properties.last %},<br> {% ENDIF %}{% ENDFOR %}</div>{% ENDIF %}
+          <form class="cart-ajax__product-action" id="cart-ajax-form">
+            <input type="hidden" name="hash" value="{HASH}" />
+
+            <div class="qty cart-ajax__product-qty">
+                <div class="qty__wrap">
+                  <button class="qty__btn qty__btn--minus" title="Уменьшить">
+                    <svg class="icon">
+                      <use xlink:href="/design/sprite.svg#minus-icon"></use>
+                    </svg>
+                  </button>
+                  <input type="number" pattern="\d*" name="form[quantity][{FORM_GOODS_MOD_ID}]" data-goods-mod-id="{FORM_GOODS_MOD_ID}" max="4" value="{cart_items.ORDER_LINE_QUANTITY}" min="1" title="Количество" class="input qty__input cart-ajax-input-qty" onkeypress="return keyPress(this, event);"  autocomplete="off">
+                  <button class="qty__btn qty__btn--plus" title="Увеличить">
+                    <svg class="icon">
+                      <use xlink:href="/design/sprite.svg#plus-icon"></use>
+                    </svg>                                        
+                  </button>
+                </div>
+            </div>
+            <span class="price cart-ajax__product-price {CURRENCY_CHAR_CODE}">{cart_items.ORDER_LINE_PRICE_NOW | money_format}</span>             
+          </form>
+        </div>
+      </div>
+      {% ENDIF %}
+    {% ENDFOR %}
+    <div class="cart-ajax__buttons">
+      <!-- Избранное -->
+        <a class="cart-ajax__button-wishlist add-wishlist {% IF favorites_goods_empty %} {% ELSE %}{% FOR favorites_goods %}{% IF favorites_goods.MAX_PRICE_NOW_ID = FORM_GOODS_MOD_ID || favorites_goods.MIN_PRICE_NOW_ID = FORM_GOODS_MOD_ID%}_added{% ENDIF %}{% ENDFOR %}{% ENDIF %}"
+            {% IF favorites_goods_empty %}
+                data-action-is-add="1"
+            {% ELSE %}
+              {% FOR favorites_goods %}
+                {% IF favorites_goods.MAX_PRICE_NOW_ID = FORM_GOODS_MOD_ID || favorites_goods.MIN_PRICE_NOW_ID = FORM_GOODS_MOD_ID%}
+                  data-action-is-add="0"
+                {% ELSE %}
+                  data-action-is-add="1"
+                {% ENDIF %}
+              {% ENDFOR %}
+            {% ENDIF %}
+            
+            {% FOR cart_items %}
+              {% IF cart_items.GOODS_MOD_ID = FORM_GOODS_MOD_ID %}             
+                data-action-add-url="{FAVORITES_ADD_URL}"
+                data-action-delete-url="{FAVORITES_DELETE_URL}"
+                data-action-add-title="Добавить &laquo;{cart_items.GOODS_NAME}&raquo; в избранное"
+                data-action-delete-title="Убрать &laquo;{cart_items.GOODS_NAME}&raquo; из избранного"
+                data-prodname="{cart_items.GOODS_NAME}"
+                data-prodimage="{% IF cart_items.IMAGE_EMPTY %}{ASSETS_IMAGES_PATH}no-photo-small.png?design=conditer{% ELSE %}{cart_items.IMAGE_MEDIUM}{% ENDIF %}"
+                data-produrl="{cart_items.GOODS_URL}"
+                data-id="{cart_items.GOODS_ID}"
+                data-mod-id="{cart_items.GOODS_MOD_ID}" 
+                data-mod-id-price="{cart_items.MIN_PRICE_NOW}"                              
+                data-add-tooltip="В Избранное"
+                data-del-tooltip="Убрать из избранного"
+                data-tooltip="Убрать из избранного"
+              {% ENDIF %}
+            {% ENDFOR %}
+            
+            title="{% IF favorites_goods_empty %}Добавить в избранное{% ELSE %}{% FOR favorites_goods %}{% IF favorites_goods.MAX_PRICE_NOW_ID = FORM_GOODS_MOD_ID || favorites_goods.MIN_PRICE_NOW_ID = FORM_GOODS_MOD_ID%}Удалить из избранного{% ELSE %}Добавить в избранное{% ENDIF %}{% ENDFOR %}{% ENDIF %}"
+            href="{% IF favorites_goods_empty %}{FAVORITES_ADD_URL}{% ELSE %}{% FOR favorites_goods %}{% IF favorites_goods.MAX_PRICE_NOW_ID = FORM_GOODS_MOD_ID || favorites_goods.MIN_PRICE_NOW_ID = FORM_GOODS_MOD_ID%}{FAVORITES_DELETE_URL}{% ELSE %}{FAVORITES_ADD_URL}{% ENDIF %}{% ENDFOR %}{% ENDIF %}?id={FORM_GOODS_MOD_ID}&amp;return_to={CURRENT_URL | urlencode}"                                  
+            data-default-text="В избранное"
+            data-add-text="Добавлено"                                  
+            rel="nofollow"
+          >
+            <svg class="icon _favorites">
+              <use xlink:href="/design/sprite.svg#favorites"></use>
+            </svg>
+        </a>
+      <!-- /END Избранное -->
+      <!-- Сравнение -->
+      {% IF TARIFF_FEATURE_GOODS_COMPARE && SETTINGS_COMPARE_DISABLE=0 %}
+        <a class="cart-ajax__button-compare add-compare {% IF compare_goods_empty %} {% ELSE %}{% FOR compare_goods %}{% IF compare_goods.MAX_PRICE_NOW_ID = FORM_GOODS_MOD_ID || compare_goods.MIN_PRICE_NOW_ID = FORM_GOODS_MOD_ID%}_added{% ENDIF %}{% ENDFOR %}{% ENDIF %}"
+            {% IF compare_goods_empty %}
+                data-action-is-add="1"
+            {% ELSE %}
+              {% FOR compare_goods %}
+                {% IF compare_goods.MAX_PRICE_NOW_ID = FORM_GOODS_MOD_ID || compare_goods.MIN_PRICE_NOW_ID = FORM_GOODS_MOD_ID%}
+                  data-action-is-add="0"
+                {% ELSE %}
+                  data-action-is-add="1"
+                {% ENDIF %}
+              {% ENDFOR %}
+            {% ENDIF %}
+            
+            {% FOR cart_items %}
+              {% IF cart_items.GOODS_MOD_ID = FORM_GOODS_MOD_ID %}             
+                data-action-add-url="{COMPARE_ADD_URL}"
+                data-action-delete-url="{COMPARE_DELETE_URL}"
+                data-action-add-title="Добавить &laquo;{cart_items.NAME}&raquo; в список сравнения с другими товарами"
+                data-action-delete-title="Убрать &laquo;{cart_items.NAME}&raquo; из списка сравнения с другими товарами"
+                data-prodname="{cart_items.NAME}"
+                data-prodimage="{% IF cart_items.IMAGE_EMPTY %}{ASSETS_IMAGES_PATH}no-photo-small.png?design=conditer{% ELSE %}{cart_items.IMAGE_MEDIUM}{% ENDIF %}"
+                data-produrl="{cart_items.URL}"
+                data-id="{cart_items.ID}"
+                data-mod-id="{cart_items.MIN_PRICE_NOW_ID}"
+                data-mod-id-price="{cart_items.MIN_PRICE_NOW}"
+                data-add-tooltip="В Сравнение"
+                data-del-tooltip="Убрать из сравнения"
+                data-tooltip="Убрать из сравнения"
+              {% ENDIF %}
+            {% ENDFOR %}   
+
+            title="{% IF compare_goods_empty %}Добавить в сравнение{% ELSE %}{% FOR compare_goods %}{% IF compare_goods.MAX_PRICE_NOW_ID = FORM_GOODS_MOD_ID || compare_goods.MIN_PRICE_NOW_ID = FORM_GOODS_MOD_ID%}Удалить из сравнения{% ELSE %}Добавить в сравнение{% ENDIF %}{% ENDFOR %}{% ENDIF %}" 
+            href="{% IF compare_goods_empty %}{COMPARE_ADD_URL}{% ELSE %}{% FOR compare_goods %}{% IF compare_goods.MAX_PRICE_NOW_ID = FORM_GOODS_MOD_ID || compare_goods.MIN_PRICE_NOW_ID = FORM_GOODS_MOD_ID%}{COMPARE_DELETE_URL}{% ELSE %}{COMPARE_ADD_URL}{% ENDIF %}{% ENDFOR %}{% ENDIF %}?id={FORM_GOODS_MOD_ID}&amp;return_to={CURRENT_URL | urlencode}"   
+            data-default-text="Сравнить"
+            data-add-text="Добавлено"
+            rel="nofollow"
+          >
+          <svg class="icon _compare">
+            <use xlink:href="/design/sprite.svg#compare"></use>
+          </svg>
+          </a>
+      {% ENDIF %}
+      <!-- /END Сравнение -->      
+      <button type="submit" class="button cart-ajax__button _return" onclick="$.fancybox.close()">
+        <div class="cart-ajax__button-icon">
+          <svg class="icon _return">
+            <use xlink:href="/design/sprite.svg#return-back"></use>
+          </svg>
+        </div>
+        Вернуться к покупкам
+      </button>
+      <a type="button" class="button cart-ajax__button _to-cart" href="/cart">
+        <svg class="icon _cart">
+          <use xlink:href="/design/sprite.svg#cart"></use>
+        </svg>
+        В корзину
+      </a>
+    </div>
+  </div>
+</div>
+
+<div id="cart-message" data-message-type="{% IF FORM_NOTICE_IS_GOOD %}success{% ELSE %}error{% ENDIF %}">
+  {% IF FORM_NOTICE %}{FORM_NOTICE}{% ENDIF %}
+</div>
+<!-- Блок для обновления данных корзины. Не виден пользователю -->
+<div style="display:none;" id="newCartCount">
+  {CART_COUNT_TOTAL}
+</div>
+<div style="display:none;" id="newCartSum">
+  {CART_SUM_NOW | money_format}
+</div>
+<div style="display:none;" id="newCartData">
+  <!-- Выпадающая корзина-->
+  <div class="cart-content">
+    <div class="empty hide">Корзина покупок пуста.<br/> Вы можете выбрать товар из <a href="{CATALOG_URL}" title="Перейти в каталог">Каталога</a>.</div>
+    {% IF cart_count_empty %}
+    <div class="empty">Корзина покупок пуста.<br/> Вы можете выбрать товар из <a href="{CATALOG_URL}" title="Перейти в каталог">Каталога</a>.</div>
+    {% ELSE %}
+    <ul class="cart-products-list">
+      {% FOR cart_items %}
+      <li class="item">
+        <a data-href="{cart_items.ORDER_LINE_DELETE_URL}" data-count="{cart_items.ORDER_LINE_QUANTITY}" title="Удалить позицию" class="remove item-remove" onclick="removeFromCart($(this))"></a>
+        <a href="{cart_items.GOODS_URL}" title="{cart_items.GOODS_NAME}" class="product-image">
+          <img src="{% IF cart_items.GOODS_IMAGE_EMPTY %}{ASSETS_IMAGES_PATH}no-photo-icon.png?design=tourism{% ELSE %}{cart_items.GOODS_IMAGE_ICON}{% ENDIF %}" alt="{cart_items.GOODS_NAME}" class="goods-image-icon">
+        </a>
+        <div class="product-details">
+          <div class="product-name"><a href="{cart_items.GOODS_URL}" title="{cart_items.GOODS_NAME}">{cart_items.GOODS_NAME}</a></div>
+          <div class="product-price">
+            <span class="header-toolsAmount quantity">{cart_items.ORDER_LINE_QUANTITY}</span>
+            <span class="price {CURRENCY_CHAR_CODE}" data-price="{cart_items.GOODS_MOD_PRICE_NOW}">{cart_items.GOODS_MOD_PRICE_NOW | money_format}</span>
+          </div>
+        </div>
+      </li>
+      {% ENDFOR %}
+    </ul>
+    <div class="subtotal">
+      <span class="label">Итого:</span>
+      <span class="price total-sum {CURRENCY_CHAR_CODE}">{CART_SUM_NOW | money_format}</span>
+    </div>
+    <div class="actions">
+      <a class="button _dropdown" title="Очистить корзину" href="{CART_TRUNCATE_URL}" data-href="{CART_TRUNCATE_URL}" onclick="removeFromCartAll($(this))">Очистить</a>
+      <a class="button" title="Перейти к оформлению заказа" href="{CART_URL}">В корзину</a>
+    </div>
+    {% ENDIF %}
+  </div>
+  <!-- /END Выпадающая корзина-->
+</div>

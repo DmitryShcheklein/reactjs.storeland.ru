@@ -1,0 +1,179 @@
+{% IF FORM_NOTICE %}<div class="message {% IF FORM_NOTICE_IS_GOOD %}success{% ELSE %}warning{% ENDIF %}">{FORM_NOTICE | nl2br}</div>{% ENDIF %}
+
+{% IF compare_list_empty %}
+  <p class="attention">Ваш список сравнения пуст. Вы можете добавлять сюда товары из <a href="{CATALOG_URL}">каталога</a> и сравнивать их между собой</p>
+{% ELSE %}
+  <div class="compare-info scroll">
+    <!-- Фильтры таблицы сравнения -->
+    <div class="CompareGoodsTable">
+      <ul class="CompareNavigation navigation" {% IF COMPARE_GOODS_COUNT < 5 %}style="display:none;"{% ENDIF %}>
+        <li class="CompareGoodsTablePrev prev disable" title="Предыдущий товар">
+          <svg class="icon"><use xlink:href="/design/sprite.svg#arrow"></use></svg>        
+        </li>
+        <li class="CompareGoodsTableNext next {% IF COMPARE_GOODS_COUNT < 5 %}disable{% ENDIF %}" title="Следующий товар">
+          <svg class="icon"><use xlink:href="/design/sprite.svg#arrow"></use></svg>
+        </li>
+      </ul>
+      <div class="CompareGoodsTableFilter">
+        <span class="bold">Отображать: </span>
+        <a href="#" class="CompareGoodsTableFilterShowAll CompareGoodsTableFilterSelected button small">Все характеристики</a>
+        <a class="CompareGoodsTableFilterShowOnlyDifferent button small" href="#">Различающиеся характеристики</a>
+      </div>
+    </div>
+    <!-- Тело таблицы сравнения товаров -->
+    <table class="CompareGoodsTableTbody table-box">
+      <!-- Строка №1 Ссылка на удаление товара из таблицы сравнения товаров -->
+      <tr>
+        <td class="cell" rowspan="4">
+          <input class="CompareCheckbox invert checkbox-hidden" type="checkbox" id="compare_tb_check_all" />
+          <label class="checkbox-name" for="compare_tb_check_all">Выбрать все</label>
+        </td>
+        {% FOR goods_mod_info %}
+          <td class="compare-td compare-td-{goods_mod_info.index}" {% IF goods_mod_info.index>4 %}style="display:none;"{% ENDIF %}>
+            <a class="button-remove" href="{COMPARE_DELETE_URL}?id={goods_mod_info.GOODS_MOD_ID}" title="Убрать из таблицы сравнения">
+              <svg class="icon _close"><use xlink:href="/design/sprite.svg#close"></use></svg>
+            </a><br />
+          </td>
+        {% ENDFOR %}
+      </tr>
+      <!-- END Строка №1 Ссылка на удаление товара из таблицы сравнения товаров -->
+
+      <!-- Строка №2 Название товара -->
+      <tr>
+        {% FOR goods_mod_info %}
+          <td class="compare-td compare-td-{goods_mod_info.index}" {% IF goods_mod_info.index>4 %}style="display:none;"{% ENDIF %}>
+            <a href="{goods_mod_info.GOODS_MOD_URL}" class="CompareGoodsHeader">
+              {goods_mod_info.GOODS_NAME}
+              <!-- Если у товара есть отличительные свойства для модификации товара, допишем их к названию товара -->
+              {% IFNOT goods_mod_info.goods_mod_distinctive_properties_empty %}<span>({% FOR goods_mod_distinctive_properties %}{goods_mod_info.goods_mod_distinctive_properties.NAME}: {goods_mod_info.goods_mod_distinctive_properties.VALUE}{% IFNOT goods_mod_info.goods_mod_distinctive_properties.last %}, {% ENDIF %}{% ENDFOR %})</span>{% ENDIF %}
+            </a>
+          </td>
+        {% ENDFOR %}
+      </tr>
+      <!-- END Строка №2 Название товара -->
+
+      <!-- Строка №3 Главное изображение товара и галлерея изображений -->
+      <tr>
+        {% FOR goods_mod_info %}
+          <td class="compare-td compare-td-{goods_mod_info.index}" {% IF goods_mod_info.index>4 %}style="display:none;"{% ENDIF %}>
+            <div class="image">
+              <!-- Если изображения товара нет -->
+              {% IF goods_mod_info.GOODS_IMAGE_EMPTY %}
+                <img src="{ASSETS_IMAGES_PATH}no-photo-icon.png?design=conditer" />
+              <!-- Если же изображение есть подгрузим изображение и галлерею изображений товара -->
+              {% ELSE %}
+                <a href="{goods_mod_info.GOODS_MOD_URL}" title="Перейти к странице &laquo;{goods_mod_info.GOODS_NAME}&raquo;"><img alt="{goods_mod_info.GOODS_NAME}" class="CompareGoodsImageMain{goods_mod_info.GOODS_MOD_ID} goods-image-icon" rel="{goods_mod_info.GOODS_IMAGE_ID}" src="{goods_mod_info.GOODS_IMAGE_ICON}" /></a> 
+              {% ENDIF %}
+            </div>
+          </td>
+        {% ENDFOR %}
+      </tr>
+      <!-- END Строка №3 Главное изображение товара и галлерея изображений -->
+      
+      <!-- Строка №4 Кнопка добавления товара в корзину -->
+      <tr>
+        {% FOR goods_mod_info %}
+          <td class="compare-td compare-td-{goods_mod_info.index}" {% IF goods_mod_info.index>4 %}style="display:none;"{% ENDIF %}>
+            <div class="buy-item">
+              <form action="{CART_ADD_GOODS_MODIFICATION_URL}" method="post" class="goodsToCartFromCompareForm{goods_mod_info.GOODS_MOD_ID} goodsListForm">
+                <input type="hidden" name="hash" value="{HASH}" />
+                <input type="hidden" name="form[goods_from]" value="{goods_mod_info.GOODS_FROM}" />
+                <input type="hidden" name="form[goods_mod_id]" value="{goods_mod_info.GOODS_MOD_ID}" class="goodsDataMainModificationId" />
+                <button type="submit" class="button button2 small add-cart" title="Положить товар в корзину">В корзину</button>
+                <!--button type="submit" class="button button2 small add-cart quick" title="Быстро оформить заказ">Купить</button-->
+              </form>
+            </div>
+          </td>
+        {% ENDFOR %}
+      </tr>
+      <!-- END Строка №4 Кнопка добавления товара в корзину -->
+      
+      <!-- Строка №5 Цены товарных модификаций -->
+      <tr class="CompareGoodsTableTbodyComparisonLine {% IF GOODS_MOD_COST_NOW_IS_SAME %}same{% ENDIF %}" >
+        <td class="cell">
+          <input class="CompareCheckbox checkbox-hidden" type="checkbox" id="compare_tb_check_price" />
+          <label class="checkbox-name" for="compare_tb_check_price">Цена</label>
+        </td>
+        {% FOR goods_mod_info %}
+          <td class="compare-td compare-td-{goods_mod_info.index} bold" {% IF goods_mod_info.index>4 %}style="display:none;"{% ENDIF %}>
+            {goods_mod_info.PRICE_NOW | money}
+          </td>
+        {% ENDFOR %}
+      </tr>
+      <!-- END Строка №5 Цены товарных модификаций -->
+
+      <!-- Строка №6 Наличие товарных модификаций -->
+      <!-- В зависимости от настроек на сайте покажем либо количественное отображение остатка товаров, либо текстовое -->
+      {% IF SETTINGS_COMPARE_REST_VALUE_DISPLAY_TYPE=1%}
+        <tr class="CompareGoodsTableTbodyComparisonLine {% IF GOODS_MOD_REST_VALUE_IS_SAME %}same{% ENDIF %}">
+          <td class="cell">
+            <input class="CompareCheckbox checkbox-hidden" type="checkbox" id="compare_tb_check_rest" />
+            <label class="checkbox-name" for="compare_tb_check_rest">Наличие</label>
+          </td>
+          {% FOR goods_mod_info %}
+            <td class="compare-td compare-td-{goods_mod_info.index}" {% IF goods_mod_info.index>4 %}style="display:none;"{% ENDIF %}>
+              {goods_mod_info.REST_VALUE} {goods_mod_info.MEASURE_NAME}
+            </td>
+          {% ENDFOR %}
+        </tr>
+      {% ELSE %}
+        <tr class="CompareGoodsTableTbodyComparisonLine {% IF GOODS_MOD_REST_BOOLEAN_IS_SAME %}same{% ENDIF %}">
+          <td class="cell">
+            <input class="CompareCheckbox checkbox-hidden" type="checkbox" id="compare_tb_check_rest" />
+            <label class="checkbox-name" for="compare_tb_check_rest">Наличие</label>
+          </td>
+          {% FOR goods_mod_info %}
+            <td class="compare-td compare-td-{goods_mod_info.index}" {% IF goods_mod_info.index>4 %}style="display:none;"{% ENDIF %}>
+              {%IF goods_mod_info.REST_VALUE=0 %}Товара нет в наличии{% ELSE %}Товар есть в наличии{% ENDIF %}
+            </td>
+          {% ENDFOR %}
+        </tr>
+      {% ENDIF %}
+      <!-- END Строка №6 Наличие товарных модификаций -->
+
+      <!-- Строка с артикулом покажется, если она заполнена хотя бы для одной товарной модификации -->
+      <!-- Строка №7 Артикул товара -->
+      {% IFNOT GOODS_ART_NUMBER_IS_EMPTY_FOR_ALL %}
+        <tr class="CompareGoodsTableTbodyComparisonLine {% IF GOODS_ART_NUMBER_IS_SAME %}same{% ENDIF %}">
+          <td class="cell">
+            <input class="CompareCheckbox checkbox-hidden" type="checkbox" id="compare_tb_check_art_number" />
+            <label class="checkbox-name" for="compare_tb_check_art_number">Артикул</label>
+          </td>
+          {% FOR goods_mod_info %}
+            <td class="compare-td compare-td-{goods_mod_info.index}" {% IF goods_mod_info.index>4 %}style="display:none;"{% ENDIF %}>
+              <!-- Если у товара указан артикул, то укажем и его -->
+              {% IF goods_mod_info.ART_NUMBER %}{goods_mod_info.ART_NUMBER}{% ELSE %}Не указан{% ENDIF %}
+            </td>
+          {% ENDFOR %}
+        </tr>
+      {% ENDIF %}
+      <!-- END Строка №7 Артикул товара -->
+
+      <!-- Строки №8 и т.д - Характеристики товаров -->
+      {% FOR goods_attr_list %}
+        <tr class="CompareGoodsTableTbodyComparisonLine {% IF goods_attr_list.IS_SAME%}same{% ENDIF %}">
+          <td class="cell">
+            <input class="CompareCheckbox checkbox-hidden" type="checkbox" id="compare_tb_check_attr_{goods_attr_list.ID}" />
+            <label class="checkbox-name" for="compare_tb_check_attr_{goods_attr_list.ID}">{goods_attr_list.NAME}</label>
+          </td>
+          {% FOR values %}
+            <td class="compare-td compare-td-{goods_attr_list.values.index}" {% IF goods_attr_list.values.index>4 %}style="display:none;"{% ENDIF %}>
+              {goods_attr_list.values.VALUE}
+            </td>
+          {% ENDFOR %}
+        </tr>
+      {% ENDFOR %}
+      <!-- END Строки №8 и т.д - Характеристики товаров -->
+
+    </table>
+    <!-- END Тело таблицы сравнения товаров -->
+
+    <!-- Управление выбранными строками -->
+    <div class="buttons">
+      <a href="#" class="CompareGoodsHideSelected button">Убрать выбранные характеристики</a>  
+      <a href="#" class="CompareGoodsShowAll button" style="display:none;">Отобразить скрытые характеристики</a>
+      <a href="{COMPARE_RESET_URL}" class="button" title="Очистить список сравнения">Очистить список сравнения</a>
+    </div>
+    <!-- END Управление выбранными строками -->
+  </div>
+{% ENDIF %}
