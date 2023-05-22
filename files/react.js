@@ -11,10 +11,24 @@ function App() {
   );
 }
 
+// начальное состояние счетчика
+const initialState = REACT_DATA;
+
+// редуктор
+function reducer(state, action) {
+  switch (action.type) {
+    case "incrementItem":
+      return { count: state.count + 1 };
+    case "decrementItem":
+      return { count: state.count - 1 };
+    default:
+      throw new Error();
+  }
+}
 function CardPage() {
+  const [state, dispatch] = React.useReducer(reducer, initialState);
   const [deliveryItems, setDeliveryItems] = React.useState([]);
-  const [goods, setGoods] = React.useState([]);
-  const totalPrice = goods.reduce((acc, current) => {
+  const totalPrice = state.cartItems.reduce((acc, current) => {
     return (acc += current.GOODS_MOD_PRICE_NOW * current.ORDER_LINE_QUANTITY);
   }, 0);
 
@@ -33,6 +47,7 @@ function CardPage() {
         responseType: "text",
       })
       .then(response => {
+        console.log(response.data);
         const data = JSON.parse(response.data);
         setGoods(data.cartItems);
         // console.log(data);
@@ -43,7 +58,7 @@ function CardPage() {
   };
 
   React.useEffect(() => {
-    loadData();
+    // loadData();
   }, []);
   React.useEffect(() => {
     const params = new URLSearchParams({ ajax_q: 1, fast_order: 1 });
@@ -80,7 +95,7 @@ function CardPage() {
         Очистить корзину
       </a> */}
       <ul>
-        {goods.map(item => {
+        {state.cartItems.map(item => {
           return (
             <li key={item.GOODS_MOD_ID}>
               <h3>{item.GOODS_NAME}</h3>
