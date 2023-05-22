@@ -65,7 +65,7 @@
     </div>
     
     <!-- Шапка -->
-    <header class="header {% IF index_page %}_index{% ENDIF %}">
+    <header class="header {% IF index_page %}_index{% ENDIF %}" style="display: none;">
       <div class="header__top">
         <div class="container">
 
@@ -359,7 +359,7 @@
     
     {% IFNOT index_page %}
     <!-- Хлебные крошки -->
-    <nav id="breadcrumbs" class="breadcrumbs {% IF MOD_LNAME=catalog || MOD_LNAME=cart && cart_count_empty=0 %}_big{% ENDIF %} {% IFNOT CATEGORY_SEO_DESCRIPTION_SHORT%}_without-descr{% ENDIF %}" aria-label="Breadcrumb">
+    <nav style="display: none;" id="breadcrumbs" class="breadcrumbs {% IF MOD_LNAME=catalog || MOD_LNAME=cart && cart_count_empty=0 %}_big{% ENDIF %} {% IFNOT CATEGORY_SEO_DESCRIPTION_SHORT%}_without-descr{% ENDIF %}" aria-label="Breadcrumb">
       <div class="container">
         <div class="breadcrumbs__wrapper">
           <ul class="breadcrumbs__list" itemscope itemtype="https://schema.org/BreadcrumbList">
@@ -1208,9 +1208,10 @@
               {% IF MOD_LNAME = cart  %}
               <div class="col-center col">
                 <div id="root"></div>
-                <script>
+                <script>document.HASH = "{HASH}"</script>
+                <!-- <script>
                   var REACT_DATA = JSON.parse(`{BODY}`)
-                </script>
+                </script> -->
                 <script type="text/babel" src="/design/react.js"></script>
               </div>
               {% ENDIF %}
@@ -2465,7 +2466,7 @@
       
     {% ENDIF %}
     <!-- /END Основная часть -->
-    <section id="offer" class="offer section">
+    <section id="offer" class="offer section" style="display: none;">
       <div class="container">
         <div class="offer__content lozad" data-background-image="{ASSETS_IMAGES_PATH}offer-bg.png">
           <div class="offer__wrap">
@@ -2518,7 +2519,7 @@
 
   </main>
   <!-- Подвал -->
-  <footer id="footer" class="footer">
+  <footer id="footer" class="footer" style="display: none;">
     <div class="footer-top">
       <div class="container">
         <div class="row">
