@@ -73,14 +73,6 @@ function CardPage() {
     });
   }, []);
 
-  const _changeCount = (good, count) => {
-    const { GOODS_MOD_ID } = good;
-    const queryString = `form[quantity][${GOODS_MOD_ID}]=${count}`;
-
-    loadData(queryString);
-  };
-  const changeCount = React.useCallback($.debounce(300, _changeCount), []);
-
   return (
     <>
       <ul>
@@ -93,49 +85,76 @@ function CardPage() {
         Очистить корзину
       </a>
       <ul>
-        {cartItems.map(item => {
-          const {
-            GOODS_MOD_ID,
-            GOODS_NAME,
-            GOODS_MOD_PRICE_NOW,
-            ORDER_LINE_QUANTITY,
-            GOODS_IMAGE,
-          } = item;
-
-          return (
-            <li key={GOODS_MOD_ID}>
-              <h3>{GOODS_NAME}</h3>
-              <div>
-                <strong>Кол-во:{ORDER_LINE_QUANTITY}</strong>
-              </div>
-              <div>
-                <strong>Цена:{GOODS_MOD_PRICE_NOW}</strong>
-              </div>
-              <img width="80" src={GOODS_IMAGE} />
-              <button
-                className="button _reverse"
-                onClick={() => changeCount(item, ORDER_LINE_QUANTITY - 1)}
-              >
-                -
-              </button>
-              <input
-                type="number"
-                value={ORDER_LINE_QUANTITY}
-                onChange={evt => changeCount(item, evt.target.value)}
-              />
-              <button
-                className="button _reverse"
-                onClick={() => changeCount(item, ORDER_LINE_QUANTITY + 1)}
-              >
-                +
-              </button>
-            </li>
-          );
-        })}
+        {cartItems.map(item => (
+          <CardItem item={item} loadData={loadData} key={item.GOODS_MOD_ID} />
+        ))}
       </ul>
+
       <h2>
         Итого: {CART_COUNT_TOTAL} шт. за {CART_SUM_NOW}{" "}
       </h2>
     </>
+  );
+}
+
+function CardItem(props) {
+  const { item, loadData } = props;
+  const {
+    GOODS_MOD_ID,
+    GOODS_NAME,
+    GOODS_MOD_PRICE_NOW,
+    ORDER_LINE_QUANTITY,
+    GOODS_IMAGE,
+  } = item;
+  const [inputValue, setInputValue] = React.useState(ORDER_LINE_QUANTITY);
+
+  React.useEffect(() => {
+    const queryString = `form[quantity][${GOODS_MOD_ID}]=${inputValue}`;
+
+    loadData(queryString);
+  }, [inputValue]);
+
+  const handleChange = event => {
+    setInputValue(event.target.value);
+  };
+
+  return (
+    <li key={GOODS_MOD_ID}>
+      <h3>{GOODS_NAME}</h3>
+      <div>
+        <strong>Кол-во:{inputValue}</strong>
+      </div>
+      <div>
+        <strong>Цена:{GOODS_MOD_PRICE_NOW}</strong>
+      </div>
+      <img width="80" src={GOODS_IMAGE} />
+      <div className="qty">
+        <div className="qty__wrap">
+          <button
+            className="qty__btn"
+            onClick={() => setInputValue(inputValue - 1)}
+          >
+            <svg className="icon">
+              <use xlinkHref="/design/sprite.svg#minus-icon"></use>
+            </svg>
+          </button>
+          <input
+            min="1"
+            type="number"
+            value={inputValue}
+            onChange={handleChange}
+            className="input qty__input"
+          />
+          <button
+            className="qty__btn"
+            onClick={() => setInputValue(inputValue + 1)}
+          >
+            <svg className="icon">
+              <use xlinkHref="/design/sprite.svg#plus-icon"></use>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </li>
   );
 }
