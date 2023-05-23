@@ -1208,25 +1208,27 @@
               {% IF MOD_LNAME = cart  %}
               <div class="col-center col">
                 <div id="root"></div>
+
 <script type="text/babel">
-const REACT_DATA = JSON.parse(`
-{
-  "HASH": "{HASH}",
-  "CartTotal": {CART_COUNT_TOTAL},
-  "CART_TRUNCATE_URL": "{CART_TRUNCATE_URL}",
-  "cartItems": [
-  {% FOR cart_items %}{
-    "GOODS_NAME": "{cart_items.GOODS_NAME}",
-    "GOODS_MOD_ID": {cart_items.GOODS_MOD_ID},
-    "ORDER_LINE_QUANTITY": {cart_items.ORDER_LINE_QUANTITY},
-    "GOODS_MOD_PRICE_NOW": {cart_items.GOODS_MOD_PRICE_NOW},
-    "GOODS_IMAGE": "{% IF cart_items.GOODS_IMAGE_EMPTY %}{ASSETS_IMAGES_PATH}no-photo-icon.png?design=conditer{% ELSE %}{cart_items.GOODS_IMAGE_OTHER}{% ENDIF %}"
-  }
-  {% IFNOT cart_items.last %},{% ENDIF %}
-  {% ENDFOR %}
-  ]
-}
-`)
+const REACT_DATA = JSON.parse(`{BODY}`)
+// const REACT_DATA_FULL = JSON.parse(`
+// {
+//   "HASH": "{HASH}",
+//   "CartTotal": {CART_COUNT_TOTAL},
+//   "CART_TRUNCATE_URL": "{CART_TRUNCATE_URL}",
+//   "cartItems": [
+//   {% FOR cart_items %}{
+//     "GOODS_NAME": "{cart_items.GOODS_NAME}",
+//     "GOODS_MOD_ID": {cart_items.GOODS_MOD_ID},
+//     "ORDER_LINE_QUANTITY": {cart_items.ORDER_LINE_QUANTITY},
+//     "GOODS_MOD_PRICE_NOW": {cart_items.GOODS_MOD_PRICE_NOW},
+//     "GOODS_IMAGE": "{% IF cart_items.GOODS_IMAGE_EMPTY %}{ASSETS_IMAGES_PATH}no-photo-icon.png?design=conditer{% ELSE %}{cart_items.GOODS_IMAGE_OTHER}{% ENDIF %}"
+//   }
+//   {% IFNOT cart_items.last %},{% ENDIF %}
+//   {% ENDFOR %}
+//   ]
+// }
+// `)
 </script>
                 <script type="text/babel" src="/design/react.js"></script>
               </div>
