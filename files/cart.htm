@@ -1,7 +1,9 @@
 {
   "HASH": "{HASH}",
-  "CartTotal": {CART_COUNT_TOTAL},
+  "CURRENCY_CHAR_CODE":"{CURRENCY_CHAR_CODE}",
+  "CART_COUNT_TOTAL": {CART_COUNT_TOTAL},
   "CART_TRUNCATE_URL": "{CART_TRUNCATE_URL}",
+  "CART_SUM_NOW": "{CART_SUM_NOW}",
   "cartItems": [
   {% FOR cart_items %}{
     "GOODS_NAME": "{cart_items.GOODS_NAME}",
@@ -12,5 +14,6 @@
   }
   {% IFNOT cart_items.last %},{% ENDIF %}
   {% ENDFOR %}
-  ]
+  ],
+  "FORM_NOTICE": "{% IF FORM_NOTICE %}{FORM_NOTICE}{% ENDIF %}"
 }
