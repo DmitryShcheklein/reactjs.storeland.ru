@@ -17,7 +17,7 @@ const initialState = REACT_DATA;
 function reducer(state, action) {
   switch (action.type) {
     case "update":
-      return { ...state, ...action.payload};
+      return { ...state, ...action.payload };
     case "decrementItem":
       return { count: state.count - 1 };
     default:
@@ -26,7 +26,8 @@ function reducer(state, action) {
 }
 function CardPage() {
   const [state, dispatch] = React.useReducer(reducer, initialState);
-  const {CART_COUNT_TOTAL,CART_TRUNCATE_URL,cartItems,CART_SUM_NOW,HASH } = state;
+  const { CART_COUNT_TOTAL, CART_TRUNCATE_URL, cartItems, CART_SUM_NOW, HASH } =
+    state;
   const [deliveryItems, setDeliveryItems] = React.useState([]);
 
   const loadData = (queryString = "") => {
@@ -44,9 +45,9 @@ function CardPage() {
         responseType: "text",
       })
       .then(response => {
-        console.log(response.data);
+        // console.log(response.data);
         const data = JSON.parse(response.data);
-        dispatch({ type: 'update', payload: data })
+        dispatch({ type: "update", payload: data });
         // console.log(data);
       })
       .catch(error => {
@@ -72,14 +73,14 @@ function CardPage() {
     });
   }, []);
 
-  const changeCount = (good, type) => {
-    const { ORDER_LINE_QUANTITY, GOODS_MOD_ID } = good;
-    const qty =
-      type === "inc" ? ORDER_LINE_QUANTITY + 1 : ORDER_LINE_QUANTITY - 1;
-    const queryString = `form[quantity][${GOODS_MOD_ID}]=${qty}`;
+  const _changeCount = (good, count) => {
+    const { GOODS_MOD_ID } = good;
+    const queryString = `form[quantity][${GOODS_MOD_ID}]=${count}`;
 
     loadData(queryString);
   };
+  const changeCount = React.useCallback($.debounce(300, _changeCount), []);
+
   return (
     <>
       <ul>
@@ -93,25 +94,38 @@ function CardPage() {
       </a>
       <ul>
         {cartItems.map(item => {
+          const {
+            GOODS_MOD_ID,
+            GOODS_NAME,
+            GOODS_MOD_PRICE_NOW,
+            ORDER_LINE_QUANTITY,
+            GOODS_IMAGE,
+          } = item;
+
           return (
-            <li key={item.GOODS_MOD_ID}>
-              <h3>{item.GOODS_NAME}</h3>
+            <li key={GOODS_MOD_ID}>
+              <h3>{GOODS_NAME}</h3>
               <div>
-                <strong>Кол-во:{item.ORDER_LINE_QUANTITY}</strong>
+                <strong>Кол-во:{ORDER_LINE_QUANTITY}</strong>
               </div>
               <div>
-                <strong>Цена:{item.GOODS_MOD_PRICE_NOW}</strong>
+                <strong>Цена:{GOODS_MOD_PRICE_NOW}</strong>
               </div>
-              <img width="80" src={item.GOODS_IMAGE} />
+              <img width="80" src={GOODS_IMAGE} />
               <button
                 className="button _reverse"
-                onClick={() => changeCount(item, "dec")}
+                onClick={() => changeCount(item, ORDER_LINE_QUANTITY - 1)}
               >
                 -
               </button>
+              <input
+                type="number"
+                value={ORDER_LINE_QUANTITY}
+                onChange={evt => changeCount(item, evt.target.value)}
+              />
               <button
                 className="button _reverse"
-                onClick={() => changeCount(item, "inc")}
+                onClick={() => changeCount(item, ORDER_LINE_QUANTITY + 1)}
               >
                 +
               </button>
@@ -119,7 +133,9 @@ function CardPage() {
           );
         })}
       </ul>
-      <h2>Итого: {CART_COUNT_TOTAL} шт. за {CART_SUM_NOW} </h2>
+      <h2>
+        Итого: {CART_COUNT_TOTAL} шт. за {CART_SUM_NOW}{" "}
+      </h2>
     </>
   );
 }

@@ -8,6 +8,7 @@
   <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.core.min.js" integrity="sha512-ChZ5l881NIBx9sxdDy5gEynup6bC4+E8GPWBylkyRYwwK1fHAlGa7+D9m1o4OEjqYA+nygyMR48vNh5kmZWPLg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <title>{PAGE_TITLE}</title>
   <meta name="description" content="{PAGE_META_DESCRIPTION}" />
   <meta name="keywords" content="{PAGE_META_KEYWORDS}" />
@@ -463,84 +464,9 @@
     {% ENDIF %}     
 
     {% IF index_page %}
-      <!-- Категории каталога-->
-      {% IFNOT catalog_full_empty%}
-      <section class="categories _index-page">
-        <div class="container">
-          <div class="categories-list owl-carousel owl-animated">
-            {% FOR catalog_full%}
-              {% IFNOT catalog_full.HIDE %}
-                {% IF catalog_full.LEVEL = 0 %}
-                <div class="categories-list__item">
-                  <a class="categories-list__item-link" href="{catalog_full.URL}" title="Перейти к категории &laquo;{catalog_full.NAME}&raquo;">
-                    <img class="categories-list__item-image lozad" data-src="{% IFNOT catalog_full.IMAGE_MEDIUM %}{ASSETS_IMAGES_PATH}no-photo-medium.png?design=conditer{% ELSE %}{catalog_full.IMAGE_MEDIUM}{% ENDIF %}" alt="{catalog_full.NAME}">  
-                  </a>
-                  <a class="categories-list__item-name" href="{catalog_full.URL}" title="Перейти к категории &laquo;{catalog_full.NAME}&raquo;">{catalog_full.NAME}</a>
-                </div>   
-                {% ENDIF %}
-              {% ENDIF %}
-            {% ENDFOR %}
-          </div>
-        </div>
-      </section>
-      {% ENDIF %}
 
-    
-      <!-- Слайдшоу-->
-      <div id="slideshow" class="slideshow">
-        <div class="container">
-          <!-- <div class="preloader"><span class="content-loading"></span></div> -->
-          <div class="slideshow__container owl-carousel">
-            <!-- Слайд 1 -->
-            <div class="slideshow__item lozad" data-background-image="{ASSETS_IMAGES_PATH}slide-1.jpg">
-                <div class="slideshow__image">
-                  <picture>
-                    <source class="lozad" media="(max-width: 576px)" data-srcset="{ASSETS_IMAGES_PATH}slide-1-mobile.jpg">
-                    <img class="lozad" data-src="{ASSETS_IMAGES_PATH}slide-1-mobile.jpg" alt="Слайд 1">
-                  </picture>
-                </div>
-                <div class="slideshow__item-content">
-                  <h3 class="slideshow__item-content-title">Печем вкусные пироги для уютных домашних посиделок</h3>
-                  <a href="#" class="slideshow__item-button button _reverse _big">Подробнее</a>
-                </div>                  
 
-            </div>
-            <!-- /Слайд 1 -->
-            
-            <!-- Слайд 2 -->
-            <div class="slideshow__item _overlay lozad" data-background-image="{ASSETS_IMAGES_PATH}slide-2.jpg">
-                <div class="slideshow__image">
-                  <picture>
-                    <source class="lozad" media="(max-width: 576px)" data-srcset="{ASSETS_IMAGES_PATH}slide-2-mobile.jpg">
-                    <img class="lozad" data-src="{ASSETS_IMAGES_PATH}slide-2-mobile.jpg" alt="Слайд 2">                                        
-                  </picture>
-                </div>
-                <div class="slideshow__item-content">
-                  <h3 class="slideshow__item-content-title">Готовимся к самому страшному дню в году вместе!</h3>
-                  <a href="#" class="slideshow__item-button button _reverse _big">Подробнее</a>
-                </div>
-            </div>
-            <!-- /Слайд 2 -->
-            
-            <!-- Слайд 3 -->
-            <div class="slideshow__item _overlay lozad" data-background-image="{ASSETS_IMAGES_PATH}slide-3.jpg">
-                <div class="slideshow__image">
-                  <picture>
-                    <source class="lozad" media="(max-width: 576px)" data-srcset="{ASSETS_IMAGES_PATH}slide-3-mobile.jpg">
-                    <img class="lozad" data-src="{ASSETS_IMAGES_PATH}slide-3-mobile.jpg" alt="Слайд 3">                    
-                  </picture>
-                </div>
-                <div class="slideshow__item-content">
-                  <h3 class="slideshow__item-content-title">Новое поступление шоколада для создания ваших сладких шедевров!</h3>
-                  <a href="#" class="slideshow__item-button button _reverse _big">Подробнее</a>
-                </div>            
-            </div>
-            <!-- /Слайд 3 -->
-    
-          </div>
-        </div>
-      </div>
-      <!-- /Слайдшоу-->
+
 
       <!-- Бестселлеры (хиты) -->
       {% IFNOT index_page_favorites_goods_empty %}
@@ -1058,9 +984,9 @@
                     <!-- /END Заголовок страницы -->
                     {% ENDIF %}
                   
-                  <pre>
+                  <!-- <pre>
                     {BODY}
-                  </pre>
+                  </pre> -->
               </div>
               
               
@@ -1210,25 +1136,29 @@
                 <div id="root"></div>
 
 <script type="text/babel">
-const REACT_DATA = JSON.parse(`{BODY}`)
-// const REACT_DATA_FULL = JSON.parse(`
-// {
-//   "HASH": "{HASH}",
-//   "CartTotal": {CART_COUNT_TOTAL},
-//   "CART_TRUNCATE_URL": "{CART_TRUNCATE_URL}",
-//   "cartItems": [
-//   {% FOR cart_items %}{
-//     "GOODS_NAME": "{cart_items.GOODS_NAME}",
-//     "GOODS_MOD_ID": {cart_items.GOODS_MOD_ID},
-//     "ORDER_LINE_QUANTITY": {cart_items.ORDER_LINE_QUANTITY},
-//     "GOODS_MOD_PRICE_NOW": {cart_items.GOODS_MOD_PRICE_NOW},
-//     "GOODS_IMAGE": "{% IF cart_items.GOODS_IMAGE_EMPTY %}{ASSETS_IMAGES_PATH}no-photo-icon.png?design=conditer{% ELSE %}{cart_items.GOODS_IMAGE_OTHER}{% ENDIF %}"
-//   }
-//   {% IFNOT cart_items.last %},{% ENDIF %}
-//   {% ENDFOR %}
-//   ]
-// }
-// `)
+// const REACT_DATA = JSON.parse(``)
+
+const REACT_DATA = JSON.parse(`
+{
+  "HASH": "{HASH}",
+  "CURRENCY_CHAR_CODE":"{CURRENCY_CHAR_CODE}",
+  "CART_COUNT_TOTAL": {CART_COUNT_TOTAL},
+  "CART_TRUNCATE_URL": "{CART_TRUNCATE_URL}",
+  "CART_SUM_NOW": "{CART_SUM_NOW}",
+  "cartItems": [
+  {% FOR cart_items %}{
+    "GOODS_NAME": "{cart_items.GOODS_NAME}",
+    "GOODS_MOD_ID": {cart_items.GOODS_MOD_ID},
+    "ORDER_LINE_QUANTITY": {cart_items.ORDER_LINE_QUANTITY},
+    "GOODS_MOD_PRICE_NOW": {cart_items.GOODS_MOD_PRICE_NOW},
+    "GOODS_IMAGE": "{% IF cart_items.GOODS_IMAGE_EMPTY %}{ASSETS_IMAGES_PATH}no-photo-icon.png?design=conditer{% ELSE %}{cart_items.GOODS_IMAGE_OTHER}{% ENDIF %}"
+  }
+  {% IFNOT cart_items.last %},{% ENDIF %}
+  {% ENDFOR %}
+  ],
+  "FORM_NOTICE": "{% IF FORM_NOTICE %}{FORM_NOTICE}{% ENDIF %}"
+}
+`)
 </script>
                 <script type="text/babel" src="/design/react.js"></script>
               </div>
@@ -1241,19 +1171,7 @@ const REACT_DATA = JSON.parse(`{BODY}`)
     {% ENDIF %}
     
     {% IF index_page %}
-      <section class="index-banner section _no-padding">
-        <div class="container">
-          <div class="index-banner__wrap lozad" data-background-image="{ASSETS_IMAGES_PATH}index-banner.jpg">
-            <h2 class="index-banner__title title-styled">
-              Скидка 5%
-            </h2>
-            <p class="index-banner__text">
-              при заказе с сайта <br>
-              до 30 октября
-            </p>
-          </div>
-        </div>
-      </section>
+
       <!-- Распродажа -->
       {% IFNOT index_page_sale_goods_empty %}
       <section class="section _no-padding pdt-sale products-container">
@@ -1571,102 +1489,7 @@ const REACT_DATA = JSON.parse(`{BODY}`)
       </section>
       {% ENDIF %}       
       
-      <section id="our-features" class="our-features section">
-        <div class="container">
-          <h2 class="section-title"><span class="section-title__word">Почему</span> выгодно покупать у нас?</h2>
-          <div class="our-features-list owl-carousel owl-animated">
-            
-            <div class="our-features-list__item">
-              <div class="our-features-list__item-wrap">
-                <div class="our-features-list__content">
-                    <div class="our-features-list__image-wrap">
-                      <img class="our-features-list__image _1 lozad" src="{ASSETS_IMAGES_PATH}no-photo-icon.png" data-src="/design/features-discount.svg" alt="Скидочная карта">
-                    </div>
-                    <span class="our-features-list__label">Скидочная карта</span>
-                    <p class="our-features-list__text">
-                      при первом заказе вы 
-                      получаете скидочную 
-                      карту. Мы ценим каждого 
-                      нашего клиента.
-                    </p>
-                </div>
-              </div>
-            </div>
-            
-            <div class="our-features-list__item">
-              <div class="our-features-list__item-wrap">
-                <div class="our-features-list__content">
-                    <div class="our-features-list__image-wrap">
-                      <img class="our-features-list__image _2 lozad" src="{ASSETS_IMAGES_PATH}no-photo-icon.png" data-src="/design/features-brands.svg" alt="Популярные бренды">
-                    </div>
-                    <span class="our-features-list__label">Популярные бренды</span>
-                    <p class="our-features-list__text">
-                      регулярная поставка 
-                      качественных товаров 
-                      от надежных итальянских
-                      брендов Martellato, Pavoni,
-                      Silikomart и других.
-                    </p>
-                </div>
-              </div>
-            </div>
-            
-            <div class="our-features-list__item">
-              <div class="our-features-list__item-wrap">
-                <div class="our-features-list__content">
-                    <div class="our-features-list__image-wrap">
-                      <img class="our-features-list__image _3 lozad" src="{ASSETS_IMAGES_PATH}no-photo-icon.png" data-src="/design/features-speed.svg" alt="Скорость оформления">
-                    </div>
-                    <span class="our-features-list__label">Скорость оформления</span>
-                    <p class="our-features-list__text">
-                      уже в ближайший час 
-                      после оформления заказа
-                      наши сотрудники 
-                      подготовят его к отправке.
-                    </p>
-                </div>
-              </div>
-            </div>
-            
-            <div class="our-features-list__item">
-              <div class="our-features-list__item-wrap">
-                <div class="our-features-list__content">
-                    <div class="our-features-list__image-wrap">
-                      <img class="our-features-list__image _4 lozad" src="{ASSETS_IMAGES_PATH}no-photo-icon.png" data-src="/design/features-price.svg" alt="Низкие цены">
-                    </div>
-                    <span class="our-features-list__label">Низкие цены</span>
-                    <p class="our-features-list__text">
-                      в нашем магазине Вы 
-                      сможете найти самые
-                      выгодные предложения
-                      в представленном 
-                      сегменте.
-                    </p>
-                </div>
-              </div>
-            </div>
-            
-            <div class="our-features-list__item">
-              <div class="our-features-list__item-wrap">
-                <div class="our-features-list__content">
-                    <div class="our-features-list__image-wrap">
-                      <img class="our-features-list__image _5 lozad" src="{ASSETS_IMAGES_PATH}no-photo-icon.png" data-src="/design/features-garanty.svg" alt="Гарантия качества">
-                    </div>
-                    <span class="our-features-list__label">Гарантия качества</span>
-                    <p class="our-features-list__text">
-                      все товары перед 
-                      отправкой проходят
-                      тщательную проверку, 
-                      что исключает наличие
-                      брака.
-                    </p>
-                </div>
-              </div>
-            </div>
-            
-          </div>
-        </div>
-      </section>
+
       
       <!-- Новинки -->
       {% IFNOT index_page_new_goods_empty %}
@@ -1981,95 +1804,13 @@ const REACT_DATA = JSON.parse(`{BODY}`)
       </section>
       {% ENDIF %} 
       
-      <!-- Баннеры -->
-      <section id="banners" class="banners section">
-        <div class="container">
-          <div class="banners__wrapper">
-            <div class="preloader"><span class="content-loading"></span></div>
-            <div class="banners__row">
-            <div class="banners__col _left">
-              
-                <div class="banner _full _first _1">
-                  <a href="{CATALOG_URL}" class="banner__image lozad" data-background-image="{ASSETS_IMAGES_PATH}banner1.jpg" data-mobile-bg="{ASSETS_IMAGES_PATH}banner-mobile-1.jpg">
-                    <div class="banner__content">
-                       <span class="banner__content-title">Все для пончиков</span>
-                    </div>
-                  </a>
-                </div>
-                
-                <div class="banners__row _sub">
-                  
-                  <div class="banners__col">
-                    <div class="banner _2">
-                      <a href="{CATALOG_URL}" class="banner__image lozad" data-background-image="{ASSETS_IMAGES_PATH}banner2.jpg" data-mobile-bg="{ASSETS_IMAGES_PATH}banner-mobile-2.jpg">
-                        <div class="banner__content">
-                          <span class="banner__content-title">Все для<br> кейк-попс</span>
-                        </div>
-                      </a>
-                    </div>
-                  </div>
-                  
-                  <div class="banners__col">
-                    <div class="banner _3">
-                      <a href="{CATALOG_URL}" class="banner__image lozad" data-background-image="{ASSETS_IMAGES_PATH}banner3.jpg" data-mobile-bg="{ASSETS_IMAGES_PATH}banner-mobile-3.jpg">
-                        <div class="banner__content">
-                          <span class="banner__content-title _white">Все для<br> печенья</span>
-                        </div>
-                      </a>
-                    </div>
-                  </div>
-                  
-                </div>
-              
-            </div>
-            <div class="banners__col _right">
-                <div class="banners__row">
-                  <div class="banners__col _left">
-                    
-                    <div class="banner _first _full _4">
-                      <a href="{CATALOG_URL}" class="banner__image lozad" data-background-image="{ASSETS_IMAGES_PATH}banner4.jpg" data-mobile-bg="{ASSETS_IMAGES_PATH}banner-mobile-4.jpg">
-                        <div class="banner__content">
-                          <span class="banner__content-title">Все для<br> капкейков</span>
-                        </div>
-                      </a>
-                    </div>
-                    
-                    <div class="banner _5">
-                      <a href="{CATALOG_URL}" class="banner__image lozad" data-background-image="{ASSETS_IMAGES_PATH}banner5.jpg" data-mobile-bg="{ASSETS_IMAGES_PATH}banner-mobile-5.jpg">
-                        <div class="banner__content">
-                          <span class="banner__content-title">Все для<br> тортов</span>
-                        </div>
-                      </a>
-                    </div>
-                  
-                  </div>
-                  
-                  <div class="banners__col _right">
-                    
-                    <div class="banner _full-height _6">
-                      <a href="{CATALOG_URL}" class="banner__image lozad" data-background-image="{ASSETS_IMAGES_PATH}banner6.jpg" data-mobile-bg="{ASSETS_IMAGES_PATH}banner-mobile-6.jpg">
-                        <div class="banner__content">
-                          <span class="banner__content-title _white">Все для<br> макарун</span>
-                        </div>
-                      </a>
-                    </div>
-                    
-                  </div>
-                </div>
-            </div>
-          </div>
-          </div>
-          <div class="banners-mobile">
-            
-          </div>
-        </div>        
-      </section>
+
       
       <!-- Товары на главной -->
       {% IFNOT index_page_goods_empty %}
       <section class="section _no-padding pdt-index products-container">
         <div class="container">
-            <h2 class="section-title"><span class="section-title__word">Товары</span> на главной</h2>
+            <!-- <h2 class="section-title"><span class="section-title__word">Товары</span> на главной</h2> -->
             <div class="products-grid owl-carousel">
                 {% FOR index_page_goods %}
                 <div class="product _carousel {% IF index_page_goods.MAX_REST_VALUE=0 && SETTINGS_GOODS_DONT_PUT_TO_CART_MORE_THAN_AVAILABLE %}_empty{% ENDIF %}">
@@ -2130,13 +1871,13 @@ const REACT_DATA = JSON.parse(`{BODY}`)
                               <span>Быстрый просмотр</span>
                             </a>
                         </div>
-                        <a href="{index_page_goods.URL_MIN_PRICE_NOW | url_amp}" class="product__image-link">
+                        <!-- <a href="{index_page_goods.URL_MIN_PRICE_NOW | url_amp}" class="product__image-link">
                           {% IF index_page_goods.IMAGE_EMPTY %}
                             <img class="lozad" src="{ASSETS_IMAGES_PATH}loader-min.gif" data-src="{ASSETS_IMAGES_PATH}no-photo-medium.png?design=conditer" alt="{index_page_goods.NAME}" title="{index_page_goods.NAME}"  itemprop="image">
                           {% ELSE %}
                             <img class="lozad" src="{ASSETS_IMAGES_PATH}loader-min.gif" data-src="{index_page_goods.IMAGE_MEDIUM}" alt="{index_page_goods.NAME}" title="{index_page_goods.NAME}"  itemprop="image">
                           {% ENDIF %}
-                        </a>
+                        </a> -->
                       </div>
                       <div class="product__shop">
                         <meta itemprop="name" content="{index_page_goods.NAME}">
@@ -2380,7 +2121,7 @@ const REACT_DATA = JSON.parse(`{BODY}`)
 
       <section id="main" class="main _index section">
         <div class="container">
-          {BODY}
+          <!-- {BODY} -->
         </div>
       </section>
       
