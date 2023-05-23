@@ -1,4 +1,3 @@
-const HASH = document.HASH;
 const container = document.getElementById("root");
 const root = ReactDOM.createRoot(container);
 root.render(<App />);
@@ -17,8 +16,8 @@ const initialState = REACT_DATA;
 // редуктор
 function reducer(state, action) {
   switch (action.type) {
-    case "incrementItem":
-      return { count: state.count + 1 };
+    case "update":
+      return { ...state, ...action.payload};
     case "decrementItem":
       return { count: state.count - 1 };
     default:
@@ -27,10 +26,8 @@ function reducer(state, action) {
 }
 function CardPage() {
   const [state, dispatch] = React.useReducer(reducer, initialState);
+  const {CART_COUNT_TOTAL,CART_TRUNCATE_URL,cartItems,CART_SUM_NOW,HASH } = state;
   const [deliveryItems, setDeliveryItems] = React.useState([]);
-  const totalPrice = state.cartItems.reduce((acc, current) => {
-    return (acc += current.GOODS_MOD_PRICE_NOW * current.ORDER_LINE_QUANTITY);
-  }, 0);
 
   const loadData = (queryString = "") => {
     const params = new URLSearchParams({
@@ -49,7 +46,7 @@ function CardPage() {
       .then(response => {
         console.log(response.data);
         const data = JSON.parse(response.data);
-        setGoods(data.cartItems);
+        dispatch({ type: 'update', payload: data })
         // console.log(data);
       })
       .catch(error => {
@@ -91,11 +88,11 @@ function CardPage() {
         })}
       </ul>
 
-      {/* <a className="button _transparent" href={REACT_DATA.CART_TRUNCATE_URL}>
+      <a className="button _transparent" href={CART_TRUNCATE_URL}>
         Очистить корзину
-      </a> */}
+      </a>
       <ul>
-        {state.cartItems.map(item => {
+        {cartItems.map(item => {
           return (
             <li key={item.GOODS_MOD_ID}>
               <h3>{item.GOODS_NAME}</h3>
@@ -122,7 +119,7 @@ function CardPage() {
           );
         })}
       </ul>
-      <h2>Итого: {totalPrice} </h2>
+      <h2>Итого: {CART_COUNT_TOTAL} шт. за {CART_SUM_NOW} </h2>
     </>
   );
 }
