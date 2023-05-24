@@ -8,6 +8,8 @@
   <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-redux/8.0.5/react-redux.min.js" integrity="sha512-Vhrd0FFt2WqbwkMmfOHRax4CDMGHJPLtcXcKnKuAxcUSnfiZ576tM4YrkQ3EbuQbnyOSBeCaMFSnrPlNSctq4g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://unpkg.com/@reduxjs/toolkit/dist/redux-toolkit.umd.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.core.min.js" integrity="sha512-ChZ5l881NIBx9sxdDy5gEynup6bC4+E8GPWBylkyRYwwK1fHAlGa7+D9m1o4OEjqYA+nygyMR48vNh5kmZWPLg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <title>{PAGE_TITLE}</title>
   <meta name="description" content="{PAGE_META_DESCRIPTION}" />
@@ -1133,7 +1135,8 @@
               {% ENDIF %}
               {% IF MOD_LNAME = cart  %}
               <div class="col-center col">
-                <div id="root"></div>
+                <!-- <div id="root"></div> -->
+                <div id="rootCounter"></div>
 
 <script type="text/babel">
 // const REACT_DATA = JSON.parse(``)
@@ -1160,7 +1163,8 @@ const REACT_DATA = JSON.parse(`
 }
 `)
 </script>
-                <script type="text/babel" src="/design/react.js"></script>
+                <!-- <script type="text/babel" type="module" src="/design/react.js"></script> -->
+                <script type="text/babel" type="module" src="/design/counter.js"></script>
               </div>
               {% ENDIF %}
             </div>
