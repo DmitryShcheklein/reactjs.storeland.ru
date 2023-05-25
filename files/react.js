@@ -1,104 +1,167 @@
+const {configureStore,createSlice,createAsyncThunk} = RTK;
+const {Provider, useSelector, useDispatch} = ReactRedux;
 const container = document.getElementById("root");
 const root = ReactDOM.createRoot(container);
-root.render(<App />);
 
-function App() {
-  return (
-    <>
-      <CardPage />
-    </>
-  );
-}
+const api = axios.create();
 
-// начальное состояние счетчика
-const initialState = REACT_DATA;
-
-// редуктор
-function reducer(state, action) {
-  switch (action.type) {
-    case "update":
-      return { ...state, ...action.payload };
-    case "decrementItem":
-      return { count: state.count - 1 };
-    default:
-      throw new Error();
-  }
-}
-function CardPage() {
-  const [state, dispatch] = React.useReducer(reducer, initialState);
-  const { CART_COUNT_TOTAL, CART_TRUNCATE_URL, cartItems, CART_SUM_NOW, HASH } =
-    state;
-  const [deliveryItems, setDeliveryItems] = React.useState([]);
-
-  const loadData = (queryString = "") => {
+const updateCardAction = createAsyncThunk(
+  'card/update',
+  async (cardData, { extra: api }) => {
+    const {modId, count} = cardData;
+    const queryString = `form[quantity][${modId}]=${count}`;
     const params = new URLSearchParams({
       fast_order: 1,
       only_body: 1,
-      hash: HASH,
-      ...params,
+      hash: REACT_DATA.HASH
     });
     params.append(queryString.split("=")[0], queryString.split("=")[1]);
 
-    axios
-      .get("/cart", {
-        params,
-        responseType: "text",
-      })
-      .then(response => {
-        // console.log(response.data);
-        const data = JSON.parse(response.data);
-        dispatch({ type: "update", payload: data });
-        // console.log(data);
-      })
-      .catch(error => {
-        console.log(error);
-      });
-  };
-
-  React.useEffect(() => {
-    // loadData();
-  }, []);
-  React.useEffect(() => {
-    const params = new URLSearchParams({ ajax_q: 1, fast_order: 1 });
-    axios({
-      method: "post",
-      url: "/cart/add",
-      responseType: "text",
-      data: params,
-    }).then(response => {
-      const data = JSON.parse(response.data);
-      // console.log(response.data);
-      setDeliveryItems(data.orderDelivery);
-      console.log(data);
+    const {data} = await api.get(`/cart`, {
+      params,
+      responseType: "text"
     });
-  }, []);
+    const newCardData = JSON.parse(data)
 
+    return newCardData;
+  },
+);
+const clearCardAction = createAsyncThunk(
+  'card/clear',
+  async (_, { extra: api }) => {
+    const response = await api.get(`/cart/truncate/`);    
+
+    return response.status === 200;
+  },
+);
+
+const getOrderFormAction = createAsyncThunk(
+  'orderForm/get',
+  async (_, { extra: api }) => {
+    const params = new URLSearchParams({ ajax_q: 1, fast_order: 1 });
+    const {data} = await api.post(`/cart/add`, params, {
+      responseType: "text"
+    });
+
+    const newOrderFormData= JSON.parse(data)
+    console.log(newOrderFormData);
+
+    return newOrderFormData;
+  },
+);
+
+const cardSlice = createSlice({
+  name: 'card',
+  initialState: {
+    data: REACT_DATA,
+    loading: false,
+    error: false
+  },
+  extraReducers(builder) {
+    builder.addCase(updateCardAction.fulfilled, (state, action) => {
+      state.data =  action.payload;
+      state.loading = false;
+    });
+    builder.addCase(updateCardAction.pending, (state) => {
+      state.loading = true;
+    });
+    builder.addCase(updateCardAction.rejected, (state) => {      
+      state.loading = false;
+    });
+    builder.addCase(clearCardAction.fulfilled, (state, action) => {    
+      state.data.cartItems =  action.payload ? []: state.data.cartItems;  
+      state.loading = false;
+    });
+    builder.addCase(clearCardAction.pending, (state) => {
+      state.loading = true;
+    });
+    builder.addCase(clearCardAction.rejected, (state) => {      
+      state.loading = false;
+    });
+  }  
+});
+
+
+const orderFormSlice = createSlice({
+  name: 'orderForm',
+  initialState: {
+    data: {
+      orderDelivery: []
+    },
+    loading: false,
+    error: false
+  },
+  extraReducers(builder) {
+    builder.addCase(getOrderFormAction.fulfilled, (state, action) => {
+      state.data =  action.payload;
+      state.loading = false;
+    });
+    builder.addCase(getOrderFormAction.pending, (state) => {
+      state.loading = true;
+    });
+    builder.addCase(getOrderFormAction.rejected, (state) => {      
+      state.loading = false;
+    });
+  }  
+});
+
+
+const store = configureStore({
+  reducer: {
+    card: cardSlice.reducer,
+    orderForm: orderFormSlice.reducer
+  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      thunk: {
+        extraArgument: api,
+      },
+    }),
+});
+
+
+
+
+
+function Card() {
+  const { CART_COUNT_TOTAL, cartItems, CART_SUM_NOW } =  useSelector((state) => state.card.data);;
+  const isLoading = useSelector((state) => state.card.loading);;
+  const dispatch = useDispatch();
+  
   return (
     <>
-      <ul>
-        {deliveryItems.map(el => {
-          return <li key={el.id}>{el.name}</li>;
-        })}
-      </ul>
+    {cartItems.length ? (
+      <>
+        <button className="button _transparent" onClick={()=> {
+          console.log(
+            'clear'
+          );
+          dispatch(clearCardAction())
+        }}>
+          Очистить корзину
+        </button>
 
-      <a className="button _transparent" href={CART_TRUNCATE_URL}>
-        Очистить корзину
-      </a>
-      <ul>
-        {cartItems.map(item => (
-          <CardItem item={item} loadData={loadData} key={item.GOODS_MOD_ID} />
-        ))}
-      </ul>
+        {isLoading && <>Обновление...</>}
+        <ul>
+          {cartItems.map(item => (
+            <CardItem item={item} key={item.GOODS_MOD_ID} />
+          ))}
+        </ul>
 
-      <h2>
-        Итого: {CART_COUNT_TOTAL} шт. за {CART_SUM_NOW}{" "}
-      </h2>
+        <h2>
+          Итого: {CART_COUNT_TOTAL} шт. за {CART_SUM_NOW}
+        </h2>      
+      </>
+    ): (
+    <>
+      <h2>Корзина пуста</h2>
+    </>)
+    }
     </>
   );
 }
 
-function CardItem(props) {
-  const { item, loadData } = props;
+function CardItem({ item }) {  
   const {
     GOODS_MOD_ID,
     GOODS_NAME,
@@ -107,15 +170,19 @@ function CardItem(props) {
     GOODS_IMAGE,
   } = item;
   const [inputValue, setInputValue] = React.useState(ORDER_LINE_QUANTITY);
+  const dispatch = useDispatch();
 
-  React.useEffect(() => {
-    const queryString = `form[quantity][${GOODS_MOD_ID}]=${inputValue}`;
-
-    loadData(queryString);
-  }, [inputValue]);
+  React.useEffect(()=>{
+    dispatch(updateCardAction({
+      modId: GOODS_MOD_ID,
+      count: inputValue
+    })) 
+  },[inputValue])
 
   const handleChange = event => {
-    setInputValue(event.target.value);
+    const {value} = event.target
+    setInputValue(value);
+    
   };
 
   return (
@@ -132,7 +199,7 @@ function CardItem(props) {
         <div className="qty__wrap">
           <button
             className="qty__btn"
-            onClick={() => setInputValue(inputValue - 1)}
+            onClick={() => {setInputValue(inputValue - 1);}}
           >
             <svg className="icon">
               <use xlinkHref="/design/sprite.svg#minus-icon"></use>
@@ -147,7 +214,7 @@ function CardItem(props) {
           />
           <button
             className="qty__btn"
-            onClick={() => setInputValue(inputValue + 1)}
+            onClick={() => {setInputValue(inputValue + 1);}}
           >
             <svg className="icon">
               <use xlinkHref="/design/sprite.svg#plus-icon"></use>
@@ -158,3 +225,41 @@ function CardItem(props) {
     </li>
   );
 }
+
+function OrderForm(){
+  const {orderDelivery} =  useSelector((state) => state.orderForm.data);
+  const isLoading =  useSelector((state) => state.orderForm.loading);
+  const dispatch = useDispatch();
+  
+  React.useEffect(() => {
+    dispatch(getOrderFormAction())
+  }, []);
+
+  return <>
+      {isLoading && <>Загружаю варианты доставки...</>}
+      <ul>
+        {orderDelivery.map(el => {
+          return (
+          <li key={el.id}>
+            <h3>{el.name}</h3>
+            <strong>{el.price}</strong>
+          </li>            
+          )
+        })}
+      </ul>
+  </>
+}
+
+function App() {
+  return (
+    <>
+      <Card />
+      <OrderForm />
+    </>
+  );
+}
+root.render(
+  <Provider store={store}>
+    <App />
+  </Provider>
+);
