@@ -68,7 +68,7 @@ function CardPage() {
     }).then(response => {
       const data = JSON.parse(response.data);
       // console.log(response.data);
-      setDeliveryItems(data);
+      setDeliveryItems(data.orderDelivery);
       console.log(data);
     });
   }, []);
