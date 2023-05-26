@@ -1,3 +1,4 @@
+const {useState, useEffect} = React;
 const {configureStore,createSlice,createAsyncThunk} = RTK;
 const {Provider, useSelector, useDispatch} = ReactRedux;
 const container = document.getElementById("root");
@@ -169,10 +170,10 @@ function CardItem({ item }) {
     ORDER_LINE_QUANTITY,
     GOODS_IMAGE,
   } = item;
-  const [inputValue, setInputValue] = React.useState(ORDER_LINE_QUANTITY);
+  const [inputValue, setInputValue] = useState(ORDER_LINE_QUANTITY);
   const dispatch = useDispatch();
 
-  React.useEffect(()=>{
+  useEffect(()=>{
     dispatch(updateCardAction({
       modId: GOODS_MOD_ID,
       count: inputValue
@@ -231,22 +232,57 @@ function OrderForm(){
   const isLoading =  useSelector((state) => state.form.loading);
   const dispatch = useDispatch();
   
-  React.useEffect(() => {
+  useEffect(() => {
     dispatch(getFormAction())
   }, []);
 
+  const [formState, setFormState] = useState({
+    person: "Bobo",
+    phone: "89876543210",
+    deliveryId: '',
+    paymentId: ''
+  });
+
+  const handleSubmit = event => {
+    event.preventDefault(); // Отменяем стандартное поведение формы
+
+    console.log(formState); // Выводим данные формы в консоль
+  };
+
+  const handleChange = event => {
+    const { name, value } = event.target;
+    setFormState(prevState => ({ ...prevState, [name]: value }));
+  };
+
   return <>
-      {isLoading && <>Загружаю варианты доставки...</>}
-      <ul>
-        {orderDelivery.map(el => {
-          return (
-          <li key={el.id}>
-            <h3>{el.name}</h3>
-            <strong>{el.price}</strong>
-          </li>            
-          )
-        })}
-      </ul>
+        {isLoading && <>Загружаю варианты доставки...</>}
+        {/* Форма заказа */}
+        <form onSubmit={handleSubmit}>
+          <input className="input" name="person" value={formState.person} onChange={handleChange} maxLength="100" type="text" placeholder="" required/>
+          <input className="input" name="phone" value={formState.phone} onChange={handleChange} maxLength="255" pattern="\+?\d*" type="tel" placeholder="" required />
+          {orderDelivery.length ?(
+            <>
+            <select onChange={handleChange} name="deliveryId" className="quickform__select" value={formState.deliveryId}>
+              {orderDelivery.map(({id, name}) => (
+                <option value={id} key={id}>
+                {name}
+                </option>
+              ))}
+            </select>
+            <select onChange={handleChange} name="paymentId" className="quickform__select" value={formState.paymentId}>
+              {orderDelivery.filter(el=>el.id === Number(formState.deliveryId)).map((el)=>{
+                return el.availablePaymentList.map(({id, name}) => (
+                  <option value={id} key={id}>
+                  {name}
+                  </option>
+                ))
+              })}
+            </select>
+            </>
+          ): null}
+          <hr/>
+          <button className="button">Оформить</button>
+        </form>
   </>
 }
 
