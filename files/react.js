@@ -35,7 +35,7 @@ const clearCardAction = createAsyncThunk(
   },
 );
 
-const getOrderFormAction = createAsyncThunk(
+const getFormAction = createAsyncThunk(
   'orderForm/get',
   async (_, { extra: api }) => {
     const params = new URLSearchParams({ ajax_q: 1, fast_order: 1 });
@@ -82,8 +82,8 @@ const cardSlice = createSlice({
 });
 
 
-const orderFormSlice = createSlice({
-  name: 'orderForm',
+const formSlice = createSlice({
+  name: 'form',
   initialState: {
     data: {
       orderDelivery: []
@@ -92,14 +92,14 @@ const orderFormSlice = createSlice({
     error: false
   },
   extraReducers(builder) {
-    builder.addCase(getOrderFormAction.fulfilled, (state, action) => {
+    builder.addCase(getFormAction.fulfilled, (state, action) => {
       state.data =  action.payload;
       state.loading = false;
     });
-    builder.addCase(getOrderFormAction.pending, (state) => {
+    builder.addCase(getFormAction.pending, (state) => {
       state.loading = true;
     });
-    builder.addCase(getOrderFormAction.rejected, (state) => {      
+    builder.addCase(getFormAction.rejected, (state) => {      
       state.loading = false;
     });
   }  
@@ -109,7 +109,7 @@ const orderFormSlice = createSlice({
 const store = configureStore({
   reducer: {
     card: cardSlice.reducer,
-    orderForm: orderFormSlice.reducer
+    form: formSlice.reducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -227,12 +227,12 @@ function CardItem({ item }) {
 }
 
 function OrderForm(){
-  const {orderDelivery} =  useSelector((state) => state.orderForm.data);
-  const isLoading =  useSelector((state) => state.orderForm.loading);
+  const {orderDelivery} =  useSelector((state) => state.form.data);
+  const isLoading =  useSelector((state) => state.form.loading);
   const dispatch = useDispatch();
   
   React.useEffect(() => {
-    dispatch(getOrderFormAction())
+    dispatch(getFormAction())
   }, []);
 
   return <>
