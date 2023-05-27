@@ -46,29 +46,18 @@ const getFormAction = createAsyncThunk(
     });
 
     const newOrderFormData= JSON.parse(data)
-    console.log(newOrderFormData);
 
     return newOrderFormData;
   },
 );
 const createOrderAction = createAsyncThunk(
   'form/createOrder',
-  async (orderData, { extra: api }) => {
-    console.log(orderData);
-    orderData.append('ajax_q', 1);
-    orderData.append('hash', REACT_DATA.HASH);
-  // const {form: {contact:{person, phone}, delivery: {id:deliveryId}, payment: {id: paymentId}}} = orderData;
-  // const params = new URLSearchParams({ ajax_q: 1, hash: REACT_DATA.HASH, ...orderData });
-  // params.append(`form[contact][person]`, person)
-  // params.append(`form[contact][phone]`, phone)
-  // params.append(`form[delivery][id]`, deliveryId)
-  // params.append(`form[payment][id]`, paymentId)
+  async (formData, { extra: api }) => {    
+    formData.append('ajax_q', 1);
+    formData.append('hash', REACT_DATA.HASH);
+    const {data} = await api.post(`/order/stage/confirm`, formData);
 
-  const {data} = await api.post(`/order/stage/confirm`, orderData, {
-    responseType: "json"
-  });
-
-  console.log(data);  
+    console.log(data);  
   },
 );
 
@@ -107,31 +96,37 @@ const cardSlice = createSlice({
 const formSlice = createSlice({
   name: 'form',
   initialState: {
+    order: {
+      loading: false,
+      location: undefined,
+      status: undefined,
+      error: undefined
+    },    
     data: {
       orderDelivery: []
     },
-    loading: false,
+    dataLoading: false,
     error: false
   },
   extraReducers(builder) {
     builder.addCase(getFormAction.fulfilled, (state, action) => {
       state.data =  action.payload;
-      state.loading = false;
+      state.dataLoading = false;
     });
     builder.addCase(getFormAction.pending, (state) => {
-      state.loading = true;
+      state.dataLoading = true;
     });
     builder.addCase(getFormAction.rejected, (state) => {      
-      state.loading = false;
+      state.dataLoading = false;
     });
     builder.addCase(createOrderAction.fulfilled, (state, action) => {
-      state.loading = false;
+      state.order.loading = false;
     });
     builder.addCase(createOrderAction.pending, (state) => {
-      state.loading = true;
+      state.order.loading = true;
     });
     builder.addCase(createOrderAction.rejected, (state) => {      
-      state.loading = false;
+      state.order.loading = false;
     });
   }  
 });
@@ -250,63 +245,84 @@ function CardItem({ item }) {
 
 function OrderForm(){
   const {orderDelivery} =  useSelector((state) => state.form.data);
-  const isLoading =  useSelector((state) => state.form.loading);
+  const isDataLoading =  useSelector((state) => state.form.dataLoading);
+  const isOrderLoading =  useSelector((state) => state.form.order.loading);
   const dispatch = useDispatch();
   const [formState, setFormState] = useState({
-      person: 'Bobooo',
-      phone: '898739525',
-      deliveryId: '',
-      paymentId: ''
+    form: {
+      contact: {
+        person: 'Bob',
+        phone: '898739525'
+      },
+      delivery: {
+        id: ''
+      },
+      payment: {
+        id: ''
+      }
+    }
   });
 
   useEffect(()=>{
     const delivery = orderDelivery[0]
 
     setFormState(prev=>({
-      ...prev.form,
-      deliveryId: delivery?.id,
-      paymentId: delivery?.availablePaymentList[0]?.id      
+      form: {      
+          ...prev.form,
+          delivery: {
+            id: delivery?.id
+          },
+          payment: {
+            id: delivery?.availablePaymentList[0]?.id
+          }        
+      }
     }))
 }, [orderDelivery])  
   
 
   const handleSubmit = event => {
-    event.preventDefault(); // Отменяем стандартное поведение формы
+    event.preventDefault();
 
-    const formData =new FormData(event.target)
-    for (let pair of formData.entries()) {
-      console.log(pair[0] + ': ' + pair[1]);
-    }
-    // console.log(formState); // Выводим данные формы в консоль
+    const formData = new FormData(event.target)
+    
     dispatch(createOrderAction(formData))
   };
 
   const handleChange = event => {
     const { name, value } = event.target;
     // Разбиваем строку "form[contact][person]" на массив ключей ["form", "contact", "person"]
-    const keys = name.split(/\[|\]/).filter(Boolean);
-    const fieldName = keys[keys.length - 1]
-    setFormState(prevState => ({ ...prevState, [fieldName]: value }));
+    const keys = name.split(/\[|\]/).filter(Boolean)   
+
+    const fieldData = keys.reduceRight((acc, key, index) => {
+      const isLast = index === keys.length - 1; 
+
+      return {[key]: isLast? value : acc}
+    }, {});
+    console.dir(fieldData)
+    const newData =  _.mergeWith({...formState}, fieldData);    
+    console.log(newData);
+    setFormState(newData)
+    
 
   };
 
   return <>
-        {isLoading && <>Загружаю варианты доставки...</>}
+        {isDataLoading && <>Загружаю варианты доставки...</>}
         {/* Форма заказа */}
         <form onSubmit={handleSubmit}>
-          <input className="input" name="form[contact][person]" value={formState.person} onChange={handleChange} maxLength="100" type="text" placeholder="" required/>
-          <input className="input" name="form[contact][phone]" value={formState.phone} onChange={handleChange} maxLength="255" pattern="\+?\d*" type="tel" placeholder="" required />
+          <input className="input" name="form[contact][person]" value={formState.form.contact.person} onChange={handleChange} maxLength="100" type="text" placeholder="" required/>
+          <input className="input" name="form[contact][phone]" value={formState.form.contact.phone} onChange={handleChange} maxLength="255" pattern="\+?\d*" type="tel" placeholder="" required />
           {orderDelivery.length ?(
             <>
-            <select onChange={handleChange} name="form[delivery][id]" className="quickform__select" value={formState.deliveryId}>
+            <select onChange={handleChange} name="form[delivery][id]" className="quickform__select" value={formState.form.delivery.id}>
               {orderDelivery.map(({id, name}) => (
                 <option value={id} key={id}>
                 {name}
                 </option>
               ))}
             </select>
-            <select onChange={handleChange} name="form[payment][id]" className="quickform__select" value={formState.paymentId}>
-              {orderDelivery.filter(el=>el.id === Number(formState.deliveryId)).map((el)=>{
+            <select onChange={handleChange} name="form[payment][id]" className="quickform__select" value={formState.form.payment.id}>
+              {orderDelivery.filter(el=>el.id === Number(formState.form.delivery.id)).map((el)=>{
                 return el.availablePaymentList.map(({id, name}) => (
                   <option value={id} key={id}>
                   {name}
@@ -317,7 +333,9 @@ function OrderForm(){
             </>
           ): null}
           <hr/>
-          <button className="button">Оформить</button>
+          <button className="button" disabled={isOrderLoading}>
+            {isOrderLoading? 'Оформляется': 'Оформить'}            
+          </button>
         </form>
   </>
 }

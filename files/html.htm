@@ -7,7 +7,7 @@
   <script src="{ASSETS_JS_PATH}babel.min.js"></script>  
   <script src="{ASSETS_JS_PATH}react-redux.min.js"></script>
   <script src="{ASSETS_JS_PATH}redux-toolkit.umd.min.js"></script>
-  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
   <title>{PAGE_TITLE}</title>
   <meta name="description" content="{PAGE_META_DESCRIPTION}" />
   <meta name="keywords" content="{PAGE_META_KEYWORDS}" />
@@ -1132,6 +1132,7 @@
               {% ENDIF %}
               {% IF MOD_LNAME = cart  %}
               <div class="col-center col">
+                <a href="/cart/add/?hash={HASH}&form%5Bgoods_from%5D=&form%5Bgoods_mod_id%5D=160093968">add</a>
                 <div id="root"></div>
                 <!-- <div id="rootCounter"></div> -->
 
@@ -1161,7 +1162,8 @@ const REACT_DATA = JSON.parse(`
 `)
 </script>
                 <script type="text/babel" type="module" src="/design/react.js"></script>
-                <!-- <script type="text/babel" type="module" src="/design/counter.js"></script> -->
+                <!-- <script type="text/babel" type="module" src="/design/counter.js"></script> -->                
+
               </div>
               {% ENDIF %}
             </div>
