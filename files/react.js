@@ -54,14 +54,17 @@ const getFormAction = createAsyncThunk(
 const createOrderAction = createAsyncThunk(
   'form/createOrder',
   async (orderData, { extra: api }) => {
-  const {form: {contact:{person, phone}, delivery: {id:deliveryId}, payment: {id: paymentId}}} = orderData;
-  const params = new URLSearchParams({ ajax_q: 1, hash: REACT_DATA.HASH });
-  params.append(`form[contact][person]`, person)
-  params.append(`form[contact][phone]`, phone)
-  params.append(`form[delivery][id]`, deliveryId)
+    console.log(orderData);
+    orderData.append('ajax_q', 1);
+    orderData.append('hash', REACT_DATA.HASH);
+  // const {form: {contact:{person, phone}, delivery: {id:deliveryId}, payment: {id: paymentId}}} = orderData;
+  // const params = new URLSearchParams({ ajax_q: 1, hash: REACT_DATA.HASH, ...orderData });
+  // params.append(`form[contact][person]`, person)
+  // params.append(`form[contact][phone]`, phone)
+  // params.append(`form[delivery][id]`, deliveryId)
   // params.append(`form[payment][id]`, paymentId)
 
-  const {data} = await api.post(`/order/stage/confirm`, params, {
+  const {data} = await api.post(`/order/stage/confirm`, orderData, {
     responseType: "json"
   });
 
@@ -250,33 +253,19 @@ function OrderForm(){
   const isLoading =  useSelector((state) => state.form.loading);
   const dispatch = useDispatch();
   const [formState, setFormState] = useState({
-    form: {
-      contact: {
-        person: 'Bob',
-        phone: '898739525'
-      },
-      delivery: {
-        id: ''
-      },
-      payment: {
-        id: ''
-      }
-    }
+      person: 'Bobooo',
+      phone: '898739525',
+      deliveryId: '',
+      paymentId: ''
   });
 
   useEffect(()=>{
     const delivery = orderDelivery[0]
 
     setFormState(prev=>({
-      form: {      
-          ...prev.form,
-          delivery: {
-            id: delivery?.id
-          },
-          payment: {
-            id: delivery?.availablePaymentList[0]?.id
-          }        
-      }
+      ...prev.form,
+      deliveryId: delivery?.id,
+      paymentId: delivery?.availablePaymentList[0]?.id      
     }))
 }, [orderDelivery])  
   
@@ -284,47 +273,40 @@ function OrderForm(){
   const handleSubmit = event => {
     event.preventDefault(); // Отменяем стандартное поведение формы
 
-    console.log(formState); // Выводим данные формы в консоль
-    dispatch(createOrderAction(formState))
+    const formData =new FormData(event.target)
+    for (let pair of formData.entries()) {
+      console.log(pair[0] + ': ' + pair[1]);
+    }
+    // console.log(formState); // Выводим данные формы в консоль
+    dispatch(createOrderAction(formData))
   };
 
   const handleChange = event => {
     const { name, value } = event.target;
     // Разбиваем строку "form[contact][person]" на массив ключей ["form", "contact", "person"]
     const keys = name.split(/\[|\]/).filter(Boolean);
+    const fieldName = keys[keys.length - 1]
+    setFormState(prevState => ({ ...prevState, [fieldName]: value }));
 
-    // Используем метод reduce для создания вложенной структуры объекта formData, соответствующей ключам
-    const updatedFormData = keys.reduce((acc, key, index) => {
-      if (index === keys.length - 1) {
-        // Если достигнут последний ключ, устанавливаем значение
-        acc[key] = value;
-      } else {
-        // Если ключ не является последним, создаем вложенный объект, если его еще нет
-        acc[key] = acc[key] || {};
-      }
-      return acc[key];
-    }, { ...formState });
-    console.log(updatedFormData);
-    // setFormState(updatedFormData);
   };
 
   return <>
         {isLoading && <>Загружаю варианты доставки...</>}
         {/* Форма заказа */}
         <form onSubmit={handleSubmit}>
-          <input className="input" name="form[contact][person]" value={formState.form.contact.person} onChange={handleChange} maxLength="100" type="text" placeholder="" required/>
-          <input className="input" name="form[contact][phone]" value={formState.form.contact.phone} onChange={handleChange} maxLength="255" pattern="\+?\d*" type="tel" placeholder="" required />
+          <input className="input" name="form[contact][person]" value={formState.person} onChange={handleChange} maxLength="100" type="text" placeholder="" required/>
+          <input className="input" name="form[contact][phone]" value={formState.phone} onChange={handleChange} maxLength="255" pattern="\+?\d*" type="tel" placeholder="" required />
           {orderDelivery.length ?(
             <>
-            <select onChange={handleChange} name="form[delivery][id]" className="quickform__select" value={formState.form.delivery.id}>
+            <select onChange={handleChange} name="form[delivery][id]" className="quickform__select" value={formState.deliveryId}>
               {orderDelivery.map(({id, name}) => (
                 <option value={id} key={id}>
                 {name}
                 </option>
               ))}
             </select>
-            <select onChange={handleChange} name="form[payment][id]" className="quickform__select" value={formState.form.payment.id}>
-              {orderDelivery.filter(el=>el.id === Number(formState.form.delivery.id)).map((el)=>{
+            <select onChange={handleChange} name="form[payment][id]" className="quickform__select" value={formState.paymentId}>
+              {orderDelivery.filter(el=>el.id === Number(formState.deliveryId)).map((el)=>{
                 return el.availablePaymentList.map(({id, name}) => (
                   <option value={id} key={id}>
                   {name}
