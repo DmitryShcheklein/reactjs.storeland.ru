@@ -150,10 +150,10 @@ store.dispatch(getFormAction())
 
 
 function Card() {
-  const { CART_COUNT_TOTAL, cartItems, CART_SUM_NOW } =  useSelector((state) => state.card.data);;
+  const { CART_COUNT_TOTAL, cartItems, CART_SUM_NOW,FORM_NOTICE} =  useSelector((state) => state.card.data);;
   const isLoading = useSelector((state) => state.card.loading);;
   const dispatch = useDispatch();
-  
+
   return (
     <>
         <button className="button _transparent" onClick={()=> {
@@ -166,6 +166,7 @@ function Card() {
         </button>
 
         {isLoading && <>Обновление...</>}
+        {FORM_NOTICE && <p>{FORM_NOTICE}</p>}
         <ul>
           {cartItems.map(item => (
             <CardItem item={item} key={item.GOODS_MOD_ID} />
@@ -186,15 +187,17 @@ function CardItem({ item }) {
     GOODS_MOD_PRICE_NOW,
     ORDER_LINE_QUANTITY,
     GOODS_IMAGE,
-  } = item;
+  } = item;  
   const [inputValue, setInputValue] = useState(ORDER_LINE_QUANTITY);
   const dispatch = useDispatch();
 
   useEffect(()=>{
-    dispatch(updateCardAction({
-      modId: GOODS_MOD_ID,
-      count: inputValue
-    })) 
+    
+      dispatch(updateCardAction({
+        modId: GOODS_MOD_ID,
+        count: inputValue
+      })) 
+    
   },[inputValue])
 
   const handleChange = event => {
