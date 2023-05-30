@@ -1,4 +1,4 @@
-const { useState, useEffect } = React;
+const { useState, useEffect, useRef } = React;
 const { Provider, useSelector, useDispatch } = ReactRedux;
 const { configureStore, createSlice, createAsyncThunk } = RTK;
 const container = document.getElementById("root");
@@ -12,6 +12,10 @@ const updateCardAction = createAsyncThunk(
     formData.append("fast_order", 1);
     formData.append("only_body", 1);
     formData.append("hash", REACT_DATA.HASH);
+
+    formData.append("form[delivery][id]", "430658");
+    formData.append("form[payment][id]", "422958");
+    formData.append("form[coupon_code]", "mini");
 
     const { data } = await api.post(`/cart`, formData, {
       responseType: "text",
@@ -34,6 +38,7 @@ const getFormAction = createAsyncThunk(
   "form/get",
   async (_, { extra: api }) => {
     const params = new URLSearchParams({ ajax_q: 1, fast_order: 1 });
+    params.append("form[coupon_code]", "mini");
     const { data } = await api.post(`/cart/add`, params, {
       responseType: "text",
     });
@@ -48,6 +53,7 @@ const createOrderAction = createAsyncThunk(
   async (formData, { extra: api }) => {
     formData.append("ajax_q", 1);
     formData.append("hash", REACT_DATA.HASH);
+    formData.append("form[coupon_code]", "mini");
     const { data } = await api.post(`/order/stage/confirm`, formData);
 
     console.log(data);
@@ -139,10 +145,11 @@ const store = configureStore({
 store.dispatch(getFormAction());
 
 function Card() {
-  const { CART_COUNT_TOTAL, cartItems, CART_SUM_NOW, FORM_NOTICE } =
+  const {CART_SUM_DISCOUNT,CART_SUM_DISCOUNT_PERCENT, CART_COUNT_TOTAL, CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT,cartItems, CART_SUM_NOW, FORM_NOTICE,CART_SUM_DELIVERY,CART_SUM_NOW_WITH_DELIVERY } =
     useSelector(state => state.card.data);
   const isLoading = useSelector(state => state.card.loading);
   const dispatch = useDispatch();
+  const formRef = useRef();
 
   const debouncedSubmit = _.debounce(formData => {
     console.log("submit");
@@ -150,8 +157,9 @@ function Card() {
   }, 300);
 
   const handleSubmit = event => {
-    event.preventDefault();
-    const formData = new FormData(event.target);
+    event?.preventDefault();
+    const form = formRef.current;
+    const formData = new FormData(form);
     debouncedSubmit(formData);
   };
 
@@ -169,22 +177,29 @@ function Card() {
 
       {isLoading && <>Обновление...</>}
       {FORM_NOTICE && <p>{FORM_NOTICE}</p>}
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} ref={formRef}>
+        {/* <input name="form[coupon_code]" value="mini" className="input"/> */}
         <ul>
           {cartItems.map(item => (
-            <CardItem item={item} key={item.GOODS_MOD_ID} />
+            <CardItem item={item} key={item.GOODS_MOD_ID} handleSubmit={handleSubmit} />
           ))}
         </ul>
       </form>
 
-      <h2>
-        Итого: {CART_COUNT_TOTAL} шт. за {CART_SUM_NOW}
-      </h2>
+      <ul>
+        <li>Товаров: {CART_COUNT_TOTAL} шт.</li>
+        <li>Сумма товаров: {CART_SUM_NOW}</li>
+        <li>Доставка:  {CART_SUM_DELIVERY}</li>
+        <li>Скидка:  {CART_SUM_DISCOUNT}</li>
+        <li>Скидка процент:  {CART_SUM_DISCOUNT_PERCENT}</li>
+        <li>Итого с доставкой: {CART_SUM_NOW_WITH_DELIVERY}</li>
+        <li>Итого с доставкой и скидкой: {CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT}</li>
+      </ul>
     </>
   );
 }
 
-function CardItem({ item }) {
+function CardItem({ item, handleSubmit }) {
   const {
     GOODS_MOD_ID,
     GOODS_NAME,
@@ -194,20 +209,26 @@ function CardItem({ item }) {
   } = item;
   const [inputValue, setInputValue] = useState(ORDER_LINE_QUANTITY);
 
-  // useEffect(() => {
-  //   dispatch(
-  //     updateCardAction({
-  //       modId: GOODS_MOD_ID,
-  //       count: inputValue,
-  //     })
-  //   );
-  // }, [inputValue]);
+  useEffect(()=>{
+    if(inputValue > 0){
+      handleSubmit()
+    }
+  }, [inputValue])
+
+  const handleBlur = event =>{
+    const { value } = event.target;
+
+    if(value < 1){
+      setInputValue(1)
+    }
+  }
 
   const handleChange = event => {
     const { value } = event.target;
-
     setInputValue(value);
   };
+
+  const handlePaste = ()=>{}
 
   return (
     <li key={GOODS_MOD_ID}>
@@ -237,6 +258,8 @@ function CardItem({ item }) {
             type="number"
             value={inputValue}
             onChange={handleChange}
+            onBlur={handleBlur}
+            onPaste={handlePaste}
             className="input qty__input"
           />
           <button
