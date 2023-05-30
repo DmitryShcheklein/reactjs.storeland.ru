@@ -13,8 +13,8 @@ const updateCardAction = createAsyncThunk(
     formData.append("only_body", 1);
     formData.append("hash", REACT_DATA.HASH);
 
-    formData.append("form[delivery][id]", "430658");
-    formData.append("form[payment][id]", "422958");
+    // formData.append("form[delivery][id]", "430658");
+    // formData.append("form[payment][id]", "422958");
     formData.append("form[coupon_code]", "mini");
 
     const { data } = await api.post(`/cart`, formData, {
@@ -94,6 +94,10 @@ const cardSlice = createSlice({
 const formSlice = createSlice({
   name: "form",
   initialState: {
+    form: {
+      currentDeliveryId: "",
+      currentPaymentId: "",
+    },
     order: {
       loading: false,
       location: undefined,
@@ -105,6 +109,15 @@ const formSlice = createSlice({
     },
     dataLoading: false,
     error: false,
+  },
+  reducers: {
+    setCurrentDeliveryId: (state, action) => {
+      console.log("act", action);
+      state.form.currentDeliveryId = action.payload;
+    },
+    setCurrentPaymentId: (state, action) => {
+      state.form.currentPaymentId = action.payload;
+    },
   },
   extraReducers(builder) {
     builder.addCase(getFormAction.fulfilled, (state, action) => {
@@ -128,6 +141,7 @@ const formSlice = createSlice({
     });
   },
 });
+const { setCurrentDeliveryId, setCurrentPaymentId } = formSlice.actions;
 
 const store = configureStore({
   reducer: {
@@ -145,9 +159,21 @@ const store = configureStore({
 store.dispatch(getFormAction());
 
 function Card() {
-  const {CART_SUM_DISCOUNT,CART_SUM_DISCOUNT_PERCENT, CART_COUNT_TOTAL, CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT,cartItems, CART_SUM_NOW, FORM_NOTICE,CART_SUM_DELIVERY,CART_SUM_NOW_WITH_DELIVERY } =
-    useSelector(state => state.card.data);
+  const {
+    CART_SUM_DISCOUNT,
+    CART_SUM_DISCOUNT_PERCENT,
+    CART_COUNT_TOTAL,
+    CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT,
+    cartItems,
+    CART_SUM_NOW,
+    FORM_NOTICE,
+    CART_SUM_DELIVERY,
+    CART_SUM_NOW_WITH_DELIVERY,
+  } = useSelector(state => state.card.data);
   const isLoading = useSelector(state => state.card.loading);
+  const form = useSelector(state => state.form.form);
+  const { currentDeliveryId, currentPaymentId } = form;
+  console.log(currentDeliveryId, currentPaymentId, form);
   const dispatch = useDispatch();
   const formRef = useRef();
 
@@ -178,10 +204,16 @@ function Card() {
       {isLoading && <>Обновление...</>}
       {FORM_NOTICE && <p>{FORM_NOTICE}</p>}
       <form onSubmit={handleSubmit} ref={formRef}>
+        <input name="form[delivery][id]" value={currentDeliveryId} hidden />
+        <input name="form[payment][id]" value={currentPaymentId} hidden />
         {/* <input name="form[coupon_code]" value="mini" className="input"/> */}
         <ul>
           {cartItems.map(item => (
-            <CardItem item={item} key={item.GOODS_MOD_ID} handleSubmit={handleSubmit} />
+            <CardItem
+              item={item}
+              key={item.GOODS_MOD_ID}
+              handleSubmit={handleSubmit}
+            />
           ))}
         </ul>
       </form>
@@ -189,12 +221,16 @@ function Card() {
       <ul>
         <li>Товаров: {CART_COUNT_TOTAL} шт.</li>
         <li>Сумма товаров: {CART_SUM_NOW}</li>
-        <li>Доставка:  {CART_SUM_DELIVERY}</li>
-        <li>Скидка:  {CART_SUM_DISCOUNT}</li>
-        <li>Скидка процент:  {CART_SUM_DISCOUNT_PERCENT}</li>
+        <li>Доставка: {CART_SUM_DELIVERY}</li>
+        <li>Скидка: {CART_SUM_DISCOUNT}</li>
+        <li>Скидка процент: {CART_SUM_DISCOUNT_PERCENT}</li>
         <li>Итого с доставкой: {CART_SUM_NOW_WITH_DELIVERY}</li>
-        <li>Итого с доставкой и скидкой: {CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT}</li>
+        <li>
+          Итого с доставкой и скидкой: {CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT}
+        </li>
       </ul>
+
+      <OrderForm cardFormHandleSubmit={handleSubmit} />
     </>
   );
 }
@@ -209,26 +245,26 @@ function CardItem({ item, handleSubmit }) {
   } = item;
   const [inputValue, setInputValue] = useState(ORDER_LINE_QUANTITY);
 
-  useEffect(()=>{
-    if(inputValue > 0){
-      handleSubmit()
+  useEffect(() => {
+    if (inputValue > 0) {
+      handleSubmit();
     }
-  }, [inputValue])
+  }, [inputValue]);
 
-  const handleBlur = event =>{
+  const handleBlur = event => {
     const { value } = event.target;
 
-    if(value < 1){
-      setInputValue(1)
+    if (value < 1) {
+      setInputValue(1);
     }
-  }
+  };
 
   const handleChange = event => {
     const { value } = event.target;
-    setInputValue(value);
+    setInputValue(Number(value));
   };
 
-  const handlePaste = ()=>{}
+  const handlePaste = () => {};
 
   return (
     <li key={GOODS_MOD_ID}>
@@ -278,7 +314,7 @@ function CardItem({ item, handleSubmit }) {
   );
 }
 
-function OrderForm() {
+function OrderForm({ cardFormHandleSubmit }) {
   const { orderDelivery } = useSelector(state => state.form.data);
   const isDataLoading = useSelector(state => state.form.dataLoading);
   const isOrderLoading = useSelector(state => state.form.order.loading);
@@ -297,6 +333,13 @@ function OrderForm() {
       },
     },
   });
+
+  useEffect(() => {
+    console.log("use", formState.form.delivery.id);
+    dispatch(setCurrentDeliveryId(formState.form.delivery.id));
+    dispatch(setCurrentPaymentId(formState.form.payment.id));
+    cardFormHandleSubmit();
+  }, [formState.form.delivery.id, formState.form.payment.id]);
 
   useEffect(() => {
     const delivery = orderDelivery[0];
@@ -412,7 +455,6 @@ function App() {
       {cartItems.length ? (
         <>
           <Card />
-          <OrderForm />
         </>
       ) : (
         <>
