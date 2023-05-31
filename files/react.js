@@ -112,7 +112,7 @@ const formSlice = createSlice({
   },
   reducers: {
     setCurrentDeliveryId: (state, action) => {
-      console.log("act", action);
+      // console.log("act", action);
       state.form.currentDeliveryId = action.payload;
     },
     setCurrentPaymentId: (state, action) => {
@@ -173,7 +173,6 @@ function Card() {
   const isLoading = useSelector(state => state.card.loading);
   const form = useSelector(state => state.form.form);
   const { currentDeliveryId, currentPaymentId } = form;
-  console.log(currentDeliveryId, currentPaymentId, form);
   const dispatch = useDispatch();
   const formRef = useRef();
 
@@ -188,7 +187,12 @@ function Card() {
     const formData = new FormData(form);
     debouncedSubmit(formData);
   };
-
+  useEffect(()=>{
+    if(currentDeliveryId){
+      console.log(currentDeliveryId, currentPaymentId, form);
+      handleSubmit()
+    }
+  }, [currentDeliveryId])
   return (
     <>
       <button
@@ -229,8 +233,6 @@ function Card() {
           Итого с доставкой и скидкой: {CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT}
         </li>
       </ul>
-
-      <OrderForm cardFormHandleSubmit={handleSubmit} />
     </>
   );
 }
@@ -314,7 +316,7 @@ function CardItem({ item, handleSubmit }) {
   );
 }
 
-function OrderForm({ cardFormHandleSubmit }) {
+function OrderForm() {
   const { orderDelivery } = useSelector(state => state.form.data);
   const isDataLoading = useSelector(state => state.form.dataLoading);
   const isOrderLoading = useSelector(state => state.form.order.loading);
@@ -333,13 +335,14 @@ function OrderForm({ cardFormHandleSubmit }) {
       },
     },
   });
+  const {form: {delivery: {id: deliveryId}, payment: {id: paymentId}}} = formState;
 
   useEffect(() => {
-    console.log("use", formState.form.delivery.id);
-    dispatch(setCurrentDeliveryId(formState.form.delivery.id));
-    dispatch(setCurrentPaymentId(formState.form.payment.id));
-    cardFormHandleSubmit();
-  }, [formState.form.delivery.id, formState.form.payment.id]);
+    if(deliveryId || paymentId){
+      dispatch(setCurrentDeliveryId(deliveryId));
+      dispatch(setCurrentPaymentId(paymentId));
+    }
+  }, [deliveryId, paymentId]);
 
   useEffect(() => {
     const delivery = orderDelivery[0];
@@ -413,7 +416,7 @@ function OrderForm({ cardFormHandleSubmit }) {
               onChange={handleChange}
               name="form[delivery][id]"
               className="quickform__select"
-              value={formState.form.delivery.id}
+              value={deliveryId}
             >
               {orderDelivery.map(({ id, name }) => (
                 <option value={id} key={id}>
@@ -425,10 +428,10 @@ function OrderForm({ cardFormHandleSubmit }) {
               onChange={handleChange}
               name="form[payment][id]"
               className="quickform__select"
-              value={formState.form.payment.id}
+              value={paymentId}
             >
               {orderDelivery
-                .filter(el => el.id === Number(formState.form.delivery.id))
+                .filter(el => el.id === Number(deliveryId))
                 .map(el => {
                   return el.availablePaymentList.map(({ id, name }) => (
                     <option value={id} key={id}>
@@ -455,6 +458,7 @@ function App() {
       {cartItems.length ? (
         <>
           <Card />
+          <OrderForm />
         </>
       ) : (
         <>
