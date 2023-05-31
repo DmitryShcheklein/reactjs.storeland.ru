@@ -23,5 +23,6 @@
   {% ENDFOR %}
   ],
   "FORM_NOTICE": "{% IF FORM_NOTICE %}{FORM_NOTICE}{% ENDIF %}",
+  "FORM_NOTICE_STATUS": "{% IF FORM_NOTICE_IS_GOOD %}success{% ELSE %}error{% ENDIF %}",
   "cartSum": "{% FOR cart_sum %}NOW: {cart_sum.NOW};DISCOUNT:{cart_sum.DISCOUNT};NOW_WITH_DELIVERY_AND_DISCOUNT:{cart_sum.NOW_WITH_DELIVERY_AND_DISCOUNT};{% ENDFOR %}"
 }

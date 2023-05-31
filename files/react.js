@@ -167,6 +167,7 @@ function Card() {
     cartItems,
     CART_SUM_NOW,
     FORM_NOTICE,
+    FORM_NOTICE_STATUS,
     CART_SUM_DELIVERY,
     CART_SUM_NOW_WITH_DELIVERY,
   } = useSelector(state => state.card.data);
@@ -193,6 +194,14 @@ function Card() {
       handleSubmit()
     }
   }, [currentDeliveryId])
+
+  useEffect(()=>{
+    new Noty({
+      text: `<div class="noty_content">${FORM_NOTICE}</div>`,
+      type: `${FORM_NOTICE_STATUS}`
+    }).show()   
+  }, [FORM_NOTICE])
+
   return (
     <>
       <button
@@ -206,7 +215,7 @@ function Card() {
       </button>
 
       {isLoading && <>Обновление...</>}
-      {FORM_NOTICE && <p>{FORM_NOTICE}</p>}
+      {/* {FORM_NOTICE && <p>{FORM_NOTICE}</p>} */}
       <form onSubmit={handleSubmit} ref={formRef}>
         <input name="form[delivery][id]" value={currentDeliveryId} hidden />
         <input name="form[payment][id]" value={currentPaymentId} hidden />
