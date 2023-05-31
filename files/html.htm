@@ -1158,7 +1158,8 @@ const REACT_DATA = JSON.parse(`
   {% IFNOT cart_items.last %},{% ENDIF %}
   {% ENDFOR %}
   ],
-  "FORM_NOTICE": "{% IF FORM_NOTICE %}{FORM_NOTICE}{% ENDIF %}"
+  "FORM_NOTICE": "{% IF FORM_NOTICE %}{FORM_NOTICE}{% ENDIF %}",
+  "FORM_NOTICE_STATUS": "{% IF FORM_NOTICE_IS_GOOD %}success{% ELSE %}error{% ENDIF %}"
 }
 `)
 </script>
@@ -1811,20 +1812,92 @@ const REACT_DATA = JSON.parse(`
       {% ENDIF %} 
       
 
-      
+      <script>
+        var indexGoodsEmpty = {% IF index_page_goods_empty=1 && index_page_new_goods_empty=1 && index_page_favorites_goods_empty=1 && index_page_sale_goods_empty=1 %}1{% ELSE%}0{% ENDIF %};
+      </script>
       <!-- Товары на главной -->
       {% IFNOT index_page_goods_empty %}
+      <script>
+        var index_page_goods = [];
+      </script>  
       <section class="section _no-padding pdt-index products-container">
         <div class="container">
             <!-- <h2 class="section-title"><span class="section-title__word">Товары</span> на главной</h2> -->
             <div class="products-grid owl-carousel">
                 {% FOR index_page_goods %}
-                <div class="product _carousel {% IF index_page_goods.MAX_REST_VALUE=0 && SETTINGS_GOODS_DONT_PUT_TO_CART_MORE_THAN_AVAILABLE %}_empty{% ENDIF %}">
+                <div class="product {% IF index_page_goods.MAX_REST_VALUE=0 && SETTINGS_GOODS_DONT_PUT_TO_CART_MORE_THAN_AVAILABLE %}_empty{% ENDIF %}">
                   <div class="product__inner" itemscope itemtype="https://schema.org/Product">
                     <form action="{CART_ADD_GOODS_MODIFICATION_URL | url_amp}" method="post" class="product-form-{index_page_goods.MIN_PRICE_NOW_ID} product__form">
+
+                      <div id="root-{index_page_goods.ID}"></div>
+                      <script type="text/babel">
+                        const good = {
+                          id: '{index_page_goods.ID}',
+                          mods: [
+                            {% FOR mods %}
+                            {
+                              id: '{index_page_goods.mods.ID}',
+                              rest: '{index_page_goods.mods.REST_VALUE}',
+                              v: [
+                                {% FOR v %}
+                                {
+                                  property_id: '{index_page_goods.mods.v.PROPERTY_ID}',
+                                  value_id: '{index_page_goods.mods.v.VALUE_ID}',
+                                  name: '{index_page_goods.mods.v.NAME}',
+                                  value: '{index_page_goods.mods.v.VALUE}'
+                                },
+                                {% ENDFOR %}
+                              ]
+                            },
+                            {% ENDFOR %}
+                          ]
+                        };
+      
+                        function bootstrap(item){
+                          console.log(item.id);
+                          const { useState, useEffect, useRef } = React;
+                          const { Provider, useSelector, useDispatch } = ReactRedux;
+                          const { configureStore, createSlice, createAsyncThunk } = RTK;
+                          const container = document.getElementById("root-{index_page_goods.ID}");
+                          const root = ReactDOM.createRoot(container);
+      
+                          function App(){
+                            return (<h3>hello { item.id }</h3>)      
+                          }
+                          root.render(                      
+                              <App />                      
+                          );
+                        }
+                        bootstrap(good)
+                      </script>
+                      <script>
+                        index_page_goods.push({
+                          id: '{index_page_goods.ID}',
+                          mods: [
+                            {% FOR mods %}
+                            {
+                              id: '{index_page_goods.mods.ID}',
+                              rest: '{index_page_goods.mods.REST_VALUE}',
+                              v: [
+                                {% FOR v %}
+                                {
+                                  property_id: '{index_page_goods.mods.v.PROPERTY_ID}',
+                                  value_id: '{index_page_goods.mods.v.VALUE_ID}',
+                                  name: '{index_page_goods.mods.v.NAME}',
+                                  value: '{index_page_goods.mods.v.VALUE}'
+                                },
+                                {% ENDFOR %}
+                              ]
+                            },
+                            {% ENDFOR %}
+                          ]
+                        })
+                      </script>
+
                       <input type="hidden" name="hash" value="{HASH}" />
                       <input type="hidden" name="form[goods_from]" value="{index_page_goods.GOODS_FROM}" />
                       <input type="hidden" name="form[goods_mod_id]" value="{index_page_goods.MIN_PRICE_NOW_ID}" />
+                      
                       <div class="product__image">
                         
                         {% IF index_page_goods.IS_NEW %}

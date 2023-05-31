@@ -3144,22 +3144,22 @@ function indexPage() {
   );
 
   // Товары на главной | Хиты | Новинки |Распродажа
-  $(
-    ".pdt-index .products-grid, .pdt-favorites .products-grid, .pdt-new .products-grid, .pdt-sale .products-grid"
-  ).owlCarousel(
-    $.extend(OWL_DEFAULT, {
-      items: 4,
-      responsive: {
-        0: { items: 1 },
-        320: { items: 1 },
-        480: { items: 1 },
-        540: { items: 2 },
-        768: { items: 3 },
-        992: { items: 4 },
-        1200: { items: 4, nav: true, margin: 15, autoWidth: false },
-      },
-    })
-  );
+  // $(
+  //   ".pdt-index .products-grid, .pdt-favorites .products-grid, .pdt-new .products-grid, .pdt-sale .products-grid"
+  // ).owlCarousel(
+  //   $.extend(OWL_DEFAULT, {
+  //     items: 4,
+  //     responsive: {
+  //       0: { items: 1 },
+  //       320: { items: 1 },
+  //       480: { items: 1 },
+  //       540: { items: 2 },
+  //       768: { items: 3 },
+  //       992: { items: 4 },
+  //       1200: { items: 4, nav: true, margin: 15, autoWidth: false },
+  //     },
+  //   })
+  // );
   // Баннеры на главной
   $(function () {
     var $bannersMobile = $(".banners-mobile");
