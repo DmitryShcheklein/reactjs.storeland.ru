@@ -57,6 +57,8 @@ const createOrderAction = createAsyncThunk(
     const { data } = await api.post(`/order/stage/confirm`, formData);
 
     console.log(data);
+
+    return data;
   }
 );
 
@@ -112,7 +114,6 @@ const formSlice = createSlice({
   },
   reducers: {
     setCurrentDeliveryId: (state, action) => {
-      // console.log("act", action);
       state.form.currentDeliveryId = action.payload;
     },
     setCurrentPaymentId: (state, action) => {
@@ -131,7 +132,11 @@ const formSlice = createSlice({
       state.dataLoading = false;
     });
     builder.addCase(createOrderAction.fulfilled, (state, action) => {
+      const {status, location} = action.payload;
+
       state.order.loading = false;
+      state.order.status = status;
+      state.order.location = location;
     });
     builder.addCase(createOrderAction.pending, state => {
       state.order.loading = true;
@@ -195,12 +200,12 @@ function Card() {
     }
   }, [currentDeliveryId])
 
-  useEffect(()=>{
-    new Noty({
-      text: `<div class="noty_content">${FORM_NOTICE}</div>`,
-      type: `${FORM_NOTICE_STATUS}`
-    }).show()   
-  }, [FORM_NOTICE])
+  // useEffect(()=>{
+  //   new Noty({
+  //     text: `<div class="noty_content">${FORM_NOTICE}</div>`,
+  //     type: `${FORM_NOTICE_STATUS}`
+  //   }).show()   
+  // }, [FORM_NOTICE])
 
   return (
     <>
@@ -217,8 +222,8 @@ function Card() {
       {isLoading && <>Обновление...</>}
       {/* {FORM_NOTICE && <p>{FORM_NOTICE}</p>} */}
       <form onSubmit={handleSubmit} ref={formRef}>
-        <input name="form[delivery][id]" value={currentDeliveryId} hidden />
-        <input name="form[payment][id]" value={currentPaymentId} hidden />
+        <input name="form[delivery][id]" defaultValue={currentDeliveryId} hidden />
+        <input name="form[payment][id]" defaultValue={currentPaymentId} hidden />
         {/* <input name="form[coupon_code]" value="mini" className="input"/> */}
         <ul>
           {cartItems.map(item => (
@@ -453,7 +458,7 @@ function OrderForm() {
         ) : null}
         <hr />
         <button className="button" disabled={isOrderLoading}>
-          {isOrderLoading ? "Оформляется" : "Оформить"}
+          {isOrderLoading ? "Оформляется..." : "Оформить"}
         </button>
       </form>
     </>
@@ -462,6 +467,16 @@ function OrderForm() {
 
 function App() {
   const { cartItems } = useSelector(state => state.card.data);
+  const status = useSelector(state => state.form.order.status);
+  const location = useSelector(state => state.form.order.location);
+  
+  if(status === 'ok'){
+    return <>
+      <h2>Заказ успешно оформлен!</h2>
+      <a href={location}>ссылка на заказ</a>
+    </>
+  }
+
   return (
     <>
       {cartItems.length ? (
