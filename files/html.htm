@@ -7,8 +7,9 @@
   <script src="{ASSETS_JS_PATH}babel.min.js"></script>  
   <script src="{ASSETS_JS_PATH}react-redux.min.js"></script>
   <script src="{ASSETS_JS_PATH}redux-toolkit.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
-  <script src="https://api-maps.yandex.ru/3.0/?apikey=ed0d2062-286e-4d1c-af19-7f7f0a67740a&lang=ru_RU"></script>
+  <script src="{ASSETS_JS_PATH}utils.js"></script>
+  <!-- <script src="{ASSETS_JS_PATH}lodash.min.js"></script> -->
+  <!-- <script src="https://api-maps.yandex.ru/3.0/?apikey=ed0d2062-286e-4d1c-af19-7f7f0a67740a&lang=ru_RU"></script> -->
   <title>{PAGE_TITLE}</title>
   <meta name="description" content="{PAGE_META_DESCRIPTION}" />
   <meta name="keywords" content="{PAGE_META_KEYWORDS}" />
@@ -530,35 +531,7 @@
               {% IF MOD_LNAME = cart  %}
               <div class="col-center col">                
                 <div id="root"></div>
-                <!-- <div id="rootCounter"></div> -->
-
-<script type="text/babel">
-// const REACT_DATA = JSON.parse(``)
-
-const REACT_DATA = JSON.parse(`
-{
-  "HASH": "{HASH}",
-  "SETTINGS_GOODS_DONT_PUT_TO_CART_MORE_THAN_AVAILABLE": {SETTINGS_GOODS_DONT_PUT_TO_CART_MORE_THAN_AVAILABLE},
-  "CURRENCY_CHAR_CODE":"{CURRENCY_CHAR_CODE}",
-  "CART_COUNT_TOTAL": {CART_COUNT_TOTAL},
-  "CART_TRUNCATE_URL": "{CART_TRUNCATE_URL}",
-  "CART_SUM_NOW": "{CART_SUM_NOW}",
-  "cartItems": [
-  {% FOR cart_items %}{
-    "GOODS_NAME": "{cart_items.GOODS_NAME}",
-    "GOODS_MOD_ID": {cart_items.GOODS_MOD_ID},
-    "ORDER_LINE_QUANTITY": {cart_items.ORDER_LINE_QUANTITY},
-    "GOODS_MOD_PRICE_NOW": {cart_items.GOODS_MOD_PRICE_NOW},
-    "GOODS_IMAGE": "{% IF cart_items.GOODS_IMAGE_EMPTY %}{ASSETS_IMAGES_PATH}no-photo-icon.png?design=conditer{% ELSE %}{cart_items.GOODS_IMAGE_OTHER}{% ENDIF %}"
-  }
-  {% IFNOT cart_items.last %},{% ENDIF %}
-  {% ENDFOR %}
-  ],
-  "FORM_NOTICE": "{% IF FORM_NOTICE %}{FORM_NOTICE}{% ENDIF %}",
-  "FORM_NOTICE_STATUS": "{% IF FORM_NOTICE_IS_GOOD %}success{% ELSE %}error{% ENDIF %}"
-}
-`)
-</script>
+                <script>window.HASH = '{HASH}'</script>
                 <script type="text/babel" type="module" src="/design/react.js"></script>
                 <!-- <script type="text/babel" type="module" src="/design/counter.js"></script> -->                
                 <pre>
