@@ -229,10 +229,8 @@ function Card() {
   const formRef = useRef();
 
   const debouncedSubmit = Utils.debounce(() => {
-    const form = formRef.current;
-    const formData = new FormData(form);
+    const formData = new FormData(formRef.current);
 
-    console.log("submit", form.elements);
     dispatch(updateCardAction(formData));
   }, 300);
 
@@ -243,7 +241,6 @@ function Card() {
 
   useEffect(() => {
     if (currentDeliveryId) {
-      console.log(currentDeliveryId, currentPaymentId, form);
       handleSubmit();
     }
   }, [currentDeliveryId]);
@@ -269,7 +266,7 @@ function Card() {
 
       {isUpdating && <>Обновление корзины...</>}
       {/* {FORM_NOTICE && <p>{FORM_NOTICE}</p>} */}
-      <form onSubmit={handleSubmit} ref={formRef}>
+      <form onSubmit={handleSubmit} ref={formRef} id="card">
         <input
           name="form[delivery][id]"
           defaultValue={currentDeliveryId}
@@ -428,12 +425,12 @@ function OrderForm() {
     }
   }, [couponCode]);
 
-  useEffect(() => {
-    if (deliveryId || paymentId) {
-      dispatch(setCurrentDeliveryId(deliveryId));
-      dispatch(setCurrentPaymentId(paymentId));
-    }
-  }, [deliveryId, paymentId]);
+  // useEffect(() => {
+  //   if (deliveryId || paymentId) {
+  //     dispatch(setCurrentDeliveryId(deliveryId));
+  //     dispatch(setCurrentPaymentId(paymentId));
+  //   }
+  // }, [deliveryId, paymentId]);
 
   // useEffect(() => {
   //   const [delivery] = orderDelivery;
@@ -484,7 +481,7 @@ function OrderForm() {
     <>
       {isDataLoading && <>Загружаю варианты доставки...</>}
       {/* Форма заказа */}
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} id="orderForm">
         <input
           className="input"
           name="form[contact][person]"
