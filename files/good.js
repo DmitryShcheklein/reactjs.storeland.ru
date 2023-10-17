@@ -16,7 +16,7 @@ function GoodBlock({ item }) {
   return (
     <>
       <h2>Hello from: {item.id}</h2>
-      {/* <button
+      <button
         type="button"
         onClick={() => {
           console.log(added);
@@ -31,7 +31,7 @@ function GoodBlock({ item }) {
         className="button"
       >
         {!added ? "add" : "remove"}
-      </button> */}
+      </button>
     </>
   );
 }

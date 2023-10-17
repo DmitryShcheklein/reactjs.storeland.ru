@@ -996,7 +996,7 @@ function mainFunctions() {
     }
   }
   if (getClientWidth() >= 1200) {
-    headerMenu();
+    // headerMenu();
   }
   // Основной каталог в шапке
   function headerCatalog() {

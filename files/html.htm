@@ -98,7 +98,7 @@
     </div>
     
     <!-- Шапка -->
-    <header class="header {% IF index_page %}_index{% ENDIF %}" style="display: none;">
+    <header class="header {% IF index_page %}_index{% ENDIF %}" >
       <div class="header__top">
         <div class="container">
 
@@ -177,7 +177,7 @@
 
             <div class="header-actions">
               <!-- Логин -->
-              <div class="login-header header-actions__login {% IF CLIENT_IS_LOGIN %}_isLogin{% ENDIF %}" >
+              <div style="display: none;" class="login-header header-actions__login {% IF CLIENT_IS_LOGIN %}_isLogin{% ENDIF %}" >
                 <div class="login-header__menu">
                   <div class="login-header__body">
                     <div class="login-header__icon-wrap icon-wrap">
@@ -218,7 +218,7 @@
               <!-- /Логин -->
               <!-- Сравнение -->
               {% IF TARIFF_FEATURE_GOODS_COMPARE && SETTINGS_COMPARE_DISABLE=0 %}
-              <div class="compare-header {% IF MOD_LNAME = compare %}_page{% ENDIF %} header-actions__item">
+              <div style="display: none;" class="compare-header {% IF MOD_LNAME = compare %}_page{% ENDIF %} header-actions__item">
                 <a href="{COMPARE_URL}" title="Перейти к Сравнению" class="compare-header__link">
                   <div class="icon-wrap header-actions__icon-wrap">
                     <svg class="icon _compare" width="30px" height="30px">
@@ -229,7 +229,7 @@
                 </a>
               </div>
               {% ENDIF %}
-              <div class="favorites-header {% IF MOD_LNAME = user && ACT = favorites %}_page{% ENDIF %} header-actions__item">
+              <div style="display: none;" class="favorites-header {% IF MOD_LNAME = user && ACT = favorites %}_page{% ENDIF %} header-actions__item">
                 <a href="{%IF CLIENT_IS_LOGIN%}{USER_FAVORITES_URL}{%ELSE%}{USER_REGISTER_URL}{%ENDIF%}" title="Перейти к Избранному" class="favorites-header__link">
                     <div class="icon-wrap header-actions__icon-wrap">
                       <svg class="icon _favorites" width="30px" height="30px">
@@ -263,7 +263,7 @@
           </div>
         </div>
       </div>
-      <div class="header__main">
+      <div class="header__main" style="display: none;">
         <div class="container">
           <div class="header__wrapper">
               <!-- Логотип -->
@@ -564,12 +564,12 @@
       {% IFNOT index_page_goods_empty %}
       <script>
         var index_page_goods = [];
-      </script>  
+      </script>
       <div id="cartBlock"></div>
       <script type="text/babel">
-        const container = document.getElementById("cartBlock");
-        const root = ReactDOM.createRoot(container);
-        root.render(React.createElement(GoodsCart));
+        const cartContainer = document.getElementById("cartBlock");
+        const rootCart = ReactDOM.createRoot(cartContainer);
+        rootCart.render(React.createElement(GoodsCart));
       </script>
       <section class="section _no-padding pdt-index products-container">
         <div class="container">
@@ -603,9 +603,9 @@
                             {% ENDFOR %}
                           ]
                         };
-                        const container = document.getElementById("root-{index_page_goods.ID}");
-                        const root = ReactDOM.createRoot(container);
-                        root.render(React.createElement(Good, {
+                        const containerGood = document.getElementById("root-{index_page_goods.ID}");
+                        const rootGood = ReactDOM.createRoot(containerGood);
+                        rootGood.render(React.createElement(Good, {
                           item: good
                         }));
                       </script>
