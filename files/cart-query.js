@@ -7,13 +7,60 @@ const {
   useQueryClient,
   QueryClient,
   QueryClientProvider,
-} = window.ReactQuery
+} = window.ReactQuery;
 const container = document.getElementById("root");
 const root = ReactDOM.createRoot(container);
 const { HASH, Utils } = window;
 const axios = window.axios;
 
-function Card() {
+const useForm = () => {
+  return useQuery({
+    queryKey: ["form"],
+    queryFn: async () => {
+      const { data } = await axios.get(`/cart/add?ajax_q=1&fast_order=1`, {
+        responseType: "text",
+      });
+      const formData = JSON.parse(data);
+
+      return formData;
+    },
+  });
+};
+
+const useCart = () => {
+  return useQuery({
+    queryKey: ["cart"],
+    queryFn: async () => {
+      const formData = new FormData();
+      formData.append("only_body", 1);
+      formData.append("hash", HASH);
+      formData.append("form[delivery][id]", "");
+      formData.append("form[payment][id]", "");
+
+      const { data } = await axios.post(`/cart`, formData, {
+        responseType: "text",
+      });
+
+      const cardData = JSON.parse(data);
+
+      return cardData;
+    },
+  });
+};
+
+const useCreateOrderMutation = () => {
+  return useMutation({
+    mutationFn: (formData) => {
+      formData.append("ajax_q", 1);
+      formData.append("hash", HASH);
+
+      return axios.post(`/order/stage/confirm`, formData);
+    },
+  });
+};
+
+function Cart() {
+  const { data } = useCart();
   const {
     CART_SUM_DISCOUNT,
     CART_SUM_DISCOUNT_PERCENT,
@@ -25,29 +72,32 @@ function Card() {
     FORM_NOTICE_STATUS,
     CART_SUM_DELIVERY,
     CART_SUM_NOW_WITH_DELIVERY,
-  } = useSelector(state => state.card.data);
-  const isUpdating = useSelector(state => state.card.updating);
-  const form = useSelector(state => state.form.form);
-  const { currentDeliveryId, currentPaymentId, couponCode } = form;
-  const dispatch = useDispatch();
+  } = data;
+  // const isUpdating = useSelector((state) => state.card.updating);
+  // const form = useSelector((state) => state.form.form);
+  // const { currentDeliveryId, currentPaymentId, couponCode } = form;
+  const { currentDeliveryId, currentPaymentId, couponCode } = {};
+  // const dispatch = useDispatch();
   const formRef = useRef();
 
   const debouncedSubmit = Utils.debounce(() => {
     const formData = new FormData(formRef.current);
-
-    dispatch(updateCardAction(formData));
+    for (const pair of formData.entries()) {
+      console.log(pair[0] + ", " + pair[1]);
+    }
+    // dispatch(updateCardAction(formData));
   }, 300);
 
-  const handleSubmit = event => {
+  const handleSubmit = (event) => {
     event?.preventDefault();
     debouncedSubmit();
   };
 
-  useEffect(() => {
-    if (currentDeliveryId) {
-      handleSubmit();
-    }
-  }, [currentDeliveryId]);
+  // useEffect(() => {
+  //   if (currentDeliveryId) {
+  //     handleSubmit();
+  //   }
+  // }, [currentDeliveryId]);
 
   // useEffect(()=>{
   //   new Noty({
@@ -55,10 +105,9 @@ function Card() {
   //     type: `${FORM_NOTICE_STATUS}`
   //   }).show()
   // }, [FORM_NOTICE])
-
   return (
     <>
-      <button
+      {/* <button
         className="button _transparent"
         onClick={() => {
           console.log("clear");
@@ -66,9 +115,9 @@ function Card() {
         }}
       >
         Очистить корзину
-      </button>
+      </button> */}
 
-      {isUpdating && <>Обновление корзины...</>}
+      {/* {isUpdating && <>Обновление корзины...</>} */}
       {/* {FORM_NOTICE && <p>{FORM_NOTICE}</p>} */}
       <form onSubmit={handleSubmit} ref={formRef} id="card">
         <input
@@ -83,8 +132,8 @@ function Card() {
         />
         <input name="form[coupon_code]" defaultValue={couponCode} hidden />
         <ul>
-          {cartItems.map(item => (
-            <CardItem
+          {cartItems.map((item) => (
+            <CartItem
               item={item}
               key={item.GOODS_MOD_ID}
               handleSubmit={handleSubmit}
@@ -108,7 +157,7 @@ function Card() {
   );
 }
 
-function CardItem({ item, handleSubmit }) {
+function CartItem({ item, handleSubmit }) {
   const {
     GOODS_MOD_ID,
     GOODS_NAME,
@@ -124,7 +173,7 @@ function CardItem({ item, handleSubmit }) {
   //   }
   // }, [inputValue]);
 
-  const handleBlur = event => {
+  const handleBlur = (event) => {
     const { value } = event.target;
 
     if (value < 1) {
@@ -132,7 +181,7 @@ function CardItem({ item, handleSubmit }) {
     }
   };
 
-  const handleChange = event => {
+  const handleChange = (event) => {
     const { value } = event.target;
     setInputValue(Number(value));
 
@@ -141,10 +190,10 @@ function CardItem({ item, handleSubmit }) {
     }
   };
 
-  const handlePaste = () => { };
+  const handlePaste = () => {};
 
   return (
-    <li key={GOODS_MOD_ID}>
+    <li data-key={GOODS_MOD_ID}>
       <h3>{GOODS_NAME}</h3>
       <div>
         <strong>Кол-во:{inputValue}</strong>
@@ -194,12 +243,22 @@ function CardItem({ item, handleSubmit }) {
 }
 
 function OrderForm() {
-  const { orderDelivery } = useSelector(state => state.form.data);
-  const form = useSelector(state => state.form.form);
-  const { currentDeliveryId, currentPaymentId } = form;
-  const isDataLoading = useSelector(state => state.form.dataLoading);
-  const isOrderLoading = useSelector(state => state.form.order.loading);
-  const dispatch = useDispatch();
+  const { data, isLoading } = useForm();
+
+  // const { orderDelivery } = useSelector((state) => state.form.data);
+  const orderDelivery = data?.orderDelivery;
+  console.log(data, orderDelivery);
+
+  // const form = useSelector((state) => state.form.form);
+  // const { currentDeliveryId, currentPaymentId } = form;
+  const { currentDeliveryId, currentPaymentId } = {
+    currentDeliveryId: "123",
+    currentPaymentId: "111",
+  };
+  // const isDataLoading = useSelector((state) => state.form.dataLoading);
+  const createOrderMutation = useCreateOrderMutation();
+  const isOrderLoading = createOrderMutation.isLoading;
+  // const dispatch = useDispatch();
   const [formState, setFormState] = useState({
     form: {
       contact: {
@@ -222,12 +281,12 @@ function OrderForm() {
       coupon_code: couponCode,
     },
   } = formState;
-
-  useEffect(() => {
-    if (couponCode) {
-      dispatch(setCouponCode(couponCode));
-    }
-  }, [couponCode]);
+  console.log(formState);
+  // useEffect(() => {
+  //   if (couponCode) {
+  //     dispatch(setCouponCode(couponCode));
+  //   }
+  // }, [couponCode]);
 
   // useEffect(() => {
   //   if (deliveryId || paymentId) {
@@ -252,15 +311,16 @@ function OrderForm() {
   //   }));
   // }, [orderDelivery]);
 
-  const handleSubmit = event => {
+  const handleSubmit = (event) => {
     event.preventDefault();
 
     const formData = new FormData(event.target);
 
-    dispatch(createOrderAction(formData));
+    createOrderMutation.mutate(formData);
+    // dispatch(createOrderAction(formData));
   };
 
-  const handleChange = event => {
+  const handleChange = (event) => {
     const { name, value } = event.target;
     // Разбиваем строку "form[contact][person]" на массив ключей ["form", "contact", "person"]
     const keys = name.split(/\[|\]/).filter(Boolean);
@@ -283,122 +343,98 @@ function OrderForm() {
 
   return (
     <>
-      {isDataLoading && <>Загружаю варианты доставки...</>}
-      {/* Форма заказа */}
-      <form onSubmit={handleSubmit} id="orderForm">
-        <input
-          className="input"
-          name="form[contact][person]"
-          value={formState.form.contact.person}
-          onChange={handleChange}
-          maxLength="100"
-          type="text"
-          placeholder="Имя"
-          required
-        />
-        <input
-          className="input"
-          name="form[contact][phone]"
-          value={formState.form.contact.phone}
-          onChange={handleChange}
-          maxLength="255"
-          pattern="\+?\d*"
-          type="tel"
-          placeholder="Телефон"
-          required
-        />
-        <input
-          className="input"
-          name="form[coupon_code]"
-          value={couponCode}
-          onChange={handleChange}
-          maxLength="255"
-          type="text"
-          placeholder="Купон"
-        />
-        {orderDelivery.length ? (
-          <>
-            <select
+      {isLoading ? (
+        <>Загружаю варианты доставки...</>
+      ) : (
+        <>
+          {/* Форма заказа */}
+          <form onSubmit={handleSubmit} id="orderForm">
+            <input
+              className="input"
+              name="form[contact][person]"
+              value={formState.form.contact.person}
               onChange={handleChange}
-              name="form[delivery][id]"
-              className="quickform__select"
-              value={deliveryId}
-            >
-              {orderDelivery.map(({ id, name }) => (
-                <option value={id} key={id}>
-                  {name}
-                </option>
-              ))}
-            </select>
-            <select
+              maxLength="100"
+              type="text"
+              placeholder="Имя"
+              required
+            />
+            <input
+              className="input"
+              name="form[contact][phone]"
+              value={formState.form.contact.phone}
               onChange={handleChange}
-              name="form[payment][id]"
-              className="quickform__select"
-              value={paymentId}
-            >
-              {orderDelivery
-                .filter(el => el.id === Number(deliveryId))
-                .map(el => {
-                  return el.availablePaymentList.map(({ id, name }) => (
+              maxLength="255"
+              pattern="\+?\d*"
+              type="tel"
+              placeholder="Телефон"
+              required
+            />
+            <input
+              className="input"
+              name="form[coupon_code]"
+              value={couponCode}
+              onChange={handleChange}
+              maxLength="255"
+              type="text"
+              placeholder="Купон"
+            />
+            {orderDelivery?.length ? (
+              <>
+                <select
+                  onChange={handleChange}
+                  name="form[delivery][id]"
+                  className="quickform__select"
+                  value={deliveryId}
+                >
+                  {orderDelivery.map(({ id, name }) => (
                     <option value={id} key={id}>
                       {name}
                     </option>
-                  ));
-                })}
-            </select>
-          </>
-        ) : null}
-        <hr />
-        <button className="button" disabled={isOrderLoading}>
-          {isOrderLoading ? "Оформляется..." : "Оформить"}
-        </button>
-      </form>
+                  ))}
+                </select>
+                <select
+                  onChange={handleChange}
+                  name="form[payment][id]"
+                  className="quickform__select"
+                  value={paymentId}
+                >
+                  {orderDelivery
+                    .filter((el) => el.id === Number(deliveryId))
+                    .map((el) => {
+                      return el.availablePaymentList.map(({ id, name }) => (
+                        <option value={id} key={id}>
+                          {name}
+                        </option>
+                      ));
+                    })}
+                </select>
+              </>
+            ) : null}
+            <hr />
+            <button className="button" disabled={isOrderLoading}>
+              {isOrderLoading ? "Оформляется..." : "Оформить"}
+            </button>
+          </form>
+        </>
+      )}
     </>
   );
 }
 
 function App() {
-  // const { isLoading, error, data, isFetching } = useQuery({
-  //   queryKey: ['repoData'],
-  //   queryFn: async () => {
-  //     const { data } = await axios.get(`/cart/add?ajax_q=1&fast_order=1`, {
-  //       responseType: "text",
-  //     });
+  const { data, isLoading, error } = useCart();
 
-  //     return JSON.parse(data)
-  //   }
-  // })
+  if (isLoading) return "Loading...";
 
-  const { isLoading, error, data, isFetching } = useQuery({
-    queryKey: ['cart'],
-    queryFn: async () => {
-      const formData = new FormData();
-      formData.append("only_body", 1);
-      formData.append("hash", HASH);
-      formData.append("form[delivery][id]", '');
-      formData.append("form[payment][id]", '');
-
-      const { data } = await axios.post(`/cart`, formData, {
-        responseType: "text",
-      });
-
-      const cardData = JSON.parse(data);
-
-      return cardData;
-    }
-  })
-
-  if (isLoading) return 'Loading...'
-
-  if (error) return 'An error has occurred: ' + error.message
-  console.log(data);
+  if (error) return "An error has occurred: " + error.message;
 
   return (
     <>
       {data?.cartItems?.length ? (
         <>
-          {/* <Card /> */}
-          {/* <OrderForm /> */}
+          <Cart />
+          <OrderForm />
         </>
       ) : (
         <>
@@ -409,7 +445,7 @@ function App() {
   );
 }
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient();
 
 root.render(
   <QueryClientProvider client={queryClient}>
