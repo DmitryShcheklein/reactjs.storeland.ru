@@ -1,14 +1,17 @@
 <!DOCTYPE html> 
 <html lang="ru">
 <head>  
-  <script src="{ASSETS_JS_PATH}axios.min.js"></script>
-  <script src="{ASSETS_JS_PATH}react.development.js"></script>
-  <script src="{ASSETS_JS_PATH}react-dom.development.js"></script>
-  <script src="{ASSETS_JS_PATH}babel.min.js"></script>  
-  <script src="{ASSETS_JS_PATH}react-redux.min.js"></script>
-  <script src="{ASSETS_JS_PATH}redux-toolkit.umd.min.js"></script>
-  <script src="{ASSETS_JS_PATH}react-query.production.js"></script>
-  <script src="{ASSETS_JS_PATH}utils.js"></script>
+  <script src="{ASSETS_JS_PATH}axios.min.js" defer></script>
+  <script src="{ASSETS_JS_PATH}react.development.js" defer></script>
+  <script src="{ASSETS_JS_PATH}react-dom.development.js" defer></script>
+  <script src="{ASSETS_JS_PATH}babel.min.js" defer></script>  
+  <!-- <script src="{ASSETS_JS_PATH}react-redux.min.js"></script> -->
+  <!-- <script src="{ASSETS_JS_PATH}redux-toolkit.umd.min.js"></script> -->
+  <script src="{ASSETS_JS_PATH}react-query.production.js" defer></script>
+  <!-- <script src="{ASSETS_JS_PATH}zustand.min.js"></script> -->
+  <!-- <script src="{ASSETS_JS_PATH}zustand.vanilla.js"></script> -->
+  <!-- <script src="{ASSETS_JS_PATH}zustand.umd.js" defer></script> -->
+  <script src="{ASSETS_JS_PATH}utils.js" defer></script>
   <!-- <script src="{ASSETS_JS_PATH}lodash.min.js"></script> -->
   <!-- <script src="https://api-maps.yandex.ru/3.0/?apikey=ed0d2062-286e-4d1c-af19-7f7f0a67740a&lang=ru_RU"></script> -->
   <title>{PAGE_TITLE}</title>
@@ -533,7 +536,8 @@
               <div class="col-center col">                
                 <div id="root"></div>
                 <script>window.HASH = '{HASH}'</script>
-                <script type="text/babel" type="module" src="/design/react.js"></script>
+                <!-- <script type="text/babel" type="module" src="/design/react.js"></script> -->
+                <script type="text/babel" type="module" src="/design/cart-query.js"></script>
                 <!-- <script type="text/babel" type="module" src="/design/counter.js"></script> -->                
                 <pre>
                   <!-- {print_r} -->
