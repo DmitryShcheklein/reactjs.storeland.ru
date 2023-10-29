@@ -1,6 +1,6 @@
-const { useState, useEffect, useRef } = window.React;
-const { Provider, useSelector, useDispatch } = window.ReactRedux;
-const { configureStore, createSlice, createAsyncThunk } = window.RTK;
+const { useState, useEffect, useRef, createContext, useContext } = window.React;
+// const { Provider, useSelector, useDispatch } = window.ReactRedux;
+// const { configureStore, createSlice, createAsyncThunk } = window.RTK;
 const {
   useQuery,
   useMutation,
@@ -13,12 +13,42 @@ const root = ReactDOM.createRoot(container);
 const { HASH, Utils } = window;
 const axios = window.axios;
 
+const FormContext = createContext(null);
+
+const FormProvider = ({ children }) => {
+  const [orderState, setOrderState] = useState({
+    form: {
+      contact: {
+        person: "Bob",
+        phone: "898739525",
+      },
+      delivery: {
+        id: undefined,
+      },
+      payment: {
+        id: undefined,
+      },
+      coupon_code: "",
+    },
+  });
+
+  return (
+    <FormContext.Provider value={{ orderState, setOrderState }}>
+      {children}
+    </FormContext.Provider>
+  );
+};
+
 const useForm = () => {
   return useQuery({
     queryKey: ["form"],
     queryFn: async () => {
-      const { data } = await axios.get(`/cart/add?ajax_q=1&fast_order=1`, {
+      const { data } = await axios.get(`/cart/add`, {
         responseType: "text",
+        params: {
+          ajax_q: 1,
+          fast_order: 1,
+        },
       });
       const formData = JSON.parse(data);
 
@@ -60,6 +90,7 @@ const useCreateOrderMutation = () => {
 };
 
 function Cart() {
+  const { orderState } = useContext(FormContext);
   const { data } = useCart();
   const {
     CART_SUM_DISCOUNT,
@@ -76,7 +107,10 @@ function Cart() {
   // const isUpdating = useSelector((state) => state.card.updating);
   // const form = useSelector((state) => state.form.form);
   // const { currentDeliveryId, currentPaymentId, couponCode } = form;
-  const { currentDeliveryId, currentPaymentId, couponCode } = {};
+  const { currentDeliveryId, currentPaymentId, couponCode } = {
+    currentDeliveryId: orderState?.form?.delivery?.id,
+    currentPaymentId: orderState?.form?.payment?.id,
+  };
   // const dispatch = useDispatch();
   const formRef = useRef();
 
@@ -244,44 +278,40 @@ function CartItem({ item, handleSubmit }) {
 
 function OrderForm() {
   const { data, isLoading } = useForm();
-
+  const { orderState, setOrderState } = useContext(FormContext);
+  console.log(orderState);
   // const { orderDelivery } = useSelector((state) => state.form.data);
   const orderDelivery = data?.orderDelivery;
-  console.log(data, orderDelivery);
-
+  // console.log(data, orderDelivery);
   // const form = useSelector((state) => state.form.form);
   // const { currentDeliveryId, currentPaymentId } = form;
-  const { currentDeliveryId, currentPaymentId } = {
-    currentDeliveryId: "123",
-    currentPaymentId: "111",
-  };
   // const isDataLoading = useSelector((state) => state.form.dataLoading);
   const createOrderMutation = useCreateOrderMutation();
   const isOrderLoading = createOrderMutation.isLoading;
   // const dispatch = useDispatch();
-  const [formState, setFormState] = useState({
-    form: {
-      contact: {
-        person: "Bob",
-        phone: "898739525",
-      },
-      delivery: {
-        id: currentDeliveryId,
-      },
-      payment: {
-        id: currentPaymentId,
-      },
-      coupon_code: "",
-    },
-  });
+  // const [formState, setFormState] = useState({
+  //   form: {
+  //     contact: {
+  //       person: "Bob",
+  //       phone: "898739525",
+  //     },
+  //     delivery: {
+  //       id: undefined,
+  //     },
+  //     payment: {
+  //       id: undefined,
+  //     },
+  //     coupon_code: "",
+  //   },
+  // });
   const {
     form: {
       delivery: { id: deliveryId },
       payment: { id: paymentId },
       coupon_code: couponCode,
     },
-  } = formState;
-  console.log(formState);
+  } = orderState;
+  // console.log('formState',formState);
   // useEffect(() => {
   //   if (couponCode) {
   //     dispatch(setCouponCode(couponCode));
@@ -295,28 +325,28 @@ function OrderForm() {
   //   }
   // }, [deliveryId, paymentId]);
 
-  // useEffect(() => {
-  //   const [delivery] = orderDelivery;
+  useEffect(() => {
+    const [delivery] = orderDelivery || [];
 
-  //   setFormState(prev => ({
-  //     form: {
-  //       ...prev.form,
-  //       delivery: {
-  //         id: delivery?.id,
-  //       },
-  //       payment: {
-  //         id: delivery?.availablePaymentList[0]?.id,
-  //       },
-  //     },
-  //   }));
-  // }, [orderDelivery]);
+    setOrderState((prev) => ({
+      form: {
+        ...prev.form,
+        delivery: {
+          id: delivery?.id,
+        },
+        payment: {
+          id: delivery?.availablePaymentList[0]?.id,
+        },
+      },
+    }));
+  }, [orderDelivery]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
 
     const formData = new FormData(event.target);
 
-    createOrderMutation.mutate(formData);
+    // createOrderMutation.mutate(formData);
     // dispatch(createOrderAction(formData));
   };
 
@@ -332,13 +362,13 @@ function OrderForm() {
     }, {});
     // console.dir(fieldData);
     const newData = Utils.mergeWith(
-      { ...formState },
+      { ...orderState },
       fieldData,
       Utils.customizer
     );
     // const newData = _.mergeWith({ ...formState }, fieldData);
     // console.log(newData);
-    setFormState(newData);
+    setOrderState(newData);
   };
 
   return (
@@ -352,7 +382,7 @@ function OrderForm() {
             <input
               className="input"
               name="form[contact][person]"
-              value={formState.form.contact.person}
+              value={orderState.form.contact.person}
               onChange={handleChange}
               maxLength="100"
               type="text"
@@ -362,7 +392,7 @@ function OrderForm() {
             <input
               className="input"
               name="form[contact][phone]"
-              value={formState.form.contact.phone}
+              value={orderState.form.contact.phone}
               onChange={handleChange}
               maxLength="255"
               pattern="\+?\d*"
@@ -449,6 +479,8 @@ const queryClient = new QueryClient();
 
 root.render(
   <QueryClientProvider client={queryClient}>
-    <App />
+    <FormProvider>
+      <App />
+    </FormProvider>
   </QueryClientProvider>
 );
