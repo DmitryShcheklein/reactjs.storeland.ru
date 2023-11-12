@@ -39,9 +39,12 @@ const FormProvider = ({ children }) => {
   );
 };
 
-const useForm = () => {
+const useDeliveries = () => {
   return useQuery({
     queryKey: ["form"],
+    initialData: () => {
+      return { data: [] };
+    },
     queryFn: async () => {
       const { data } = await axios.get(`/cart/add`, {
         responseType: "text",
@@ -52,8 +55,9 @@ const useForm = () => {
       });
       const formData = JSON.parse(data);
 
-      return formData;
+      return formData.data;
     },
+    // enabled: false
   });
 };
 
@@ -75,6 +79,7 @@ const useCart = () => {
 
       return cardData;
     },
+    // enabled: Boolean(dataLength)
   });
 };
 
@@ -90,8 +95,13 @@ const useCreateOrderMutation = () => {
 };
 
 function Cart() {
-  const { orderState } = useContext(FormContext);
+  // const { orderState } = useContext(FormContext);
+  const formRef = useRef();
+  const { data: formData, isLoading } = useDeliveries();
   const { data } = useCart();
+
+  if (!data) return null;
+
   const {
     CART_SUM_DISCOUNT,
     CART_SUM_DISCOUNT_PERCENT,
@@ -108,11 +118,12 @@ function Cart() {
   // const form = useSelector((state) => state.form.form);
   // const { currentDeliveryId, currentPaymentId, couponCode } = form;
   const { currentDeliveryId, currentPaymentId, couponCode } = {
-    currentDeliveryId: orderState?.form?.delivery?.id,
-    currentPaymentId: orderState?.form?.payment?.id,
+    // currentDeliveryId: orderState?.form?.delivery?.id,
+    // currentPaymentId: orderState?.form?.payment?.id,
+    currentDeliveryId: "",
+    currentPaymentId: "",
   };
   // const dispatch = useDispatch();
-  const formRef = useRef();
 
   const debouncedSubmit = Utils.debounce(() => {
     const formData = new FormData(formRef.current);
@@ -277,11 +288,11 @@ function CartItem({ item, handleSubmit }) {
 }
 
 function OrderForm() {
-  const { data, isLoading } = useForm();
+  const { data: orderDelivery, isLoading } = useDeliveries();
+  console.log(orderDelivery);
   const { orderState, setOrderState } = useContext(FormContext);
-  console.log(orderState);
+  // console.log(orderState);
   // const { orderDelivery } = useSelector((state) => state.form.data);
-  const orderDelivery = data?.orderDelivery;
   // console.log(data, orderDelivery);
   // const form = useSelector((state) => state.form.form);
   // const { currentDeliveryId, currentPaymentId } = form;
@@ -326,20 +337,23 @@ function OrderForm() {
   // }, [deliveryId, paymentId]);
 
   useEffect(() => {
-    const [delivery] = orderDelivery || [];
+    if (orderDelivery?.length) {
+      const [delivery] = orderDelivery;
+      console.log(orderDelivery);
 
-    setOrderState((prev) => ({
-      form: {
-        ...prev.form,
-        delivery: {
-          id: delivery?.id,
+      setOrderState((prev) => ({
+        form: {
+          ...prev.form,
+          delivery: {
+            id: delivery?.id,
+          },
+          payment: {
+            id: delivery?.availablePaymentList[0]?.id,
+          },
         },
-        payment: {
-          id: delivery?.availablePaymentList[0]?.id,
-        },
-      },
-    }));
-  }, [orderDelivery]);
+      }));
+    }
+  }, [orderDelivery?.length]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -347,7 +361,6 @@ function OrderForm() {
     const formData = new FormData(event.target);
 
     // createOrderMutation.mutate(formData);
-    // dispatch(createOrderAction(formData));
   };
 
   const handleChange = (event) => {
@@ -453,24 +466,10 @@ function OrderForm() {
 }
 
 function App() {
-  const { data, isLoading, error } = useCart();
-
-  if (isLoading) return "Loading...";
-
-  if (error) return "An error has occurred: " + error.message;
-
   return (
     <>
-      {data?.cartItems?.length ? (
-        <>
-          <Cart />
-          <OrderForm />
-        </>
-      ) : (
-        <>
-          <h2>Корзина пуста</h2>
-        </>
-      )}
+      <Cart />
+      <OrderForm />
     </>
   );
 }
