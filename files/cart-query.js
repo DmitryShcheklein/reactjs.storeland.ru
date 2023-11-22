@@ -8,7 +8,7 @@ const {
   QueryClient,
   QueryClientProvider,
 } = window.ReactQuery;
-const container = document.getElementById("root");
+const container = document.getElementById("root-cart");
 const root = ReactDOM.createRoot(container);
 const { HASH, Utils } = window;
 const axios = window.axios;
@@ -64,7 +64,7 @@ const useDeliveries = () => {
 const useCart = ({ currentDeliveryId, currentPaymentId }) => {
   return useQuery({
     queryKey: ["cart"],
-    queryFn: async () => {      
+    queryFn: async () => {
       const formData = new FormData();
       formData.append("only_body", 1);
       formData.append("hash", HASH);
@@ -85,13 +85,16 @@ const useCart = ({ currentDeliveryId, currentPaymentId }) => {
 
 const useCartMutation = () => {
   return useMutation({
-    mutationFn: async (cartFormData) => {
-      const formData = new FormData(cartFormData);
+    mutationFn: async ({form,currentDeliveryId,  currentPaymentId}) => {
+      console.log('data', form, currentDeliveryId, currentPaymentId);
+      const formData = new FormData(form);
       formData.append("only_body", 1);
       formData.append("hash", HASH);
       formData.append("form[delivery][id]", currentDeliveryId);
       formData.append("form[payment][id]", currentPaymentId);
-
+      for (const pair of formData.entries()) {
+        console.log(pair[0] + ", " + pair[1]);
+      }
       const { data } = await axios.post(`/cart`, formData, {
         responseType: "text",
       });
@@ -99,6 +102,8 @@ const useCartMutation = () => {
       const cardData = JSON.parse(data);
 
       console.log(cardData);
+
+      // queryClient.setQueryData(['cart'], cardData)
     },
   });
 };
@@ -121,7 +126,10 @@ function Cart() {
     currentPaymentId: orderState?.form?.payment?.id,
   };
   const formRef = useRef();
-  const { data } = useCart({ currentDeliveryId, currentPaymentId });
+  const { data, refetch } = useCart({ currentDeliveryId, currentPaymentId });
+  useEffect(()=>{
+    refetch()
+  }, [currentDeliveryId])
   const cartMutation = useCartMutation();
 
   if (!data) return null;
@@ -144,15 +152,18 @@ function Cart() {
   // const dispatch = useDispatch();
 
   const debouncedSubmit = Utils.debounce(() => {
+    console.log('subm');
     const formData = new FormData(formRef.current);
     for (const pair of formData.entries()) {
       // console.log(pair[0] + ", " + pair[1]);
     }
-    cartMutation.mutate(formRef.current)
+    cartMutation.mutate({form: formRef.current,currentDeliveryId,  currentPaymentId});
+    refetch()
     // dispatch(updateCardAction(formData));
   }, 300);
 
   const handleSubmit = (event) => {
+    console.log('handl-subm');
     event?.preventDefault();
     debouncedSubmit();
   };
@@ -163,12 +174,7 @@ function Cart() {
   //   }
   // }, [currentDeliveryId]);
 
-  // useEffect(()=>{
-  //   new Noty({
-  //     text: `<div class="noty_content">${FORM_NOTICE}</div>`,
-  //     type: `${FORM_NOTICE_STATUS}`
-  //   }).show()
-  // }, [FORM_NOTICE])
+
   return (
     <>
       {/* <button
@@ -231,11 +237,11 @@ function CartItem({ item, handleSubmit }) {
   } = item;
   const [inputValue, setInputValue] = useState(ORDER_LINE_QUANTITY);
 
-  // useEffect(() => {
-  //   if (inputValue > 0) {
-  //     handleSubmit();
-  //   }
-  // }, [inputValue]);
+  useEffect(() => {
+    if (inputValue > 0) {
+      handleSubmit();
+    }
+  }, [inputValue]);
 
   const handleBlur = (event) => {
     const { value } = event.target;
