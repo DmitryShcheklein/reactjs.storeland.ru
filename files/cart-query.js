@@ -61,18 +61,16 @@ const useDeliveries = () => {
   });
 };
 
-const useCart = ({ currentDeliveryId, currentPaymentId }) => {
+const useCart = () => {
   return useQuery({
     queryKey: ["cart"],
     queryFn: async () => {
-      const formData = new FormData();
-      formData.append("only_body", 1);
-      formData.append("hash", HASH);
-      formData.append("form[delivery][id]", currentDeliveryId);
-      formData.append("form[payment][id]", currentPaymentId);
-
-      const { data } = await axios.post(`/cart`, formData, {
+      const { data } = await axios.get(`/cart`, {
         responseType: "text",
+        params: {
+          only_body: 1,
+          hash: HASH
+        }
       });
 
       const cardData = JSON.parse(data);
@@ -126,7 +124,7 @@ function Cart() {
     currentPaymentId: orderState?.form?.payment?.id,
   };
   const formRef = useRef();
-  const { data, refetch } = useCart({ currentDeliveryId, currentPaymentId });
+  const { data, refetch } = useCart();
   useEffect(()=>{
     refetch()
   }, [currentDeliveryId])
