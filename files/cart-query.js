@@ -8,6 +8,7 @@ const {
   QueryClient,
   QueryClientProvider,
 } = window.ReactQuery;
+const queryClient = new QueryClient();
 const container = document.getElementById("root-cart");
 const root = ReactDOM.createRoot(container);
 const { HASH, Utils } = window;
@@ -38,6 +39,36 @@ const FormProvider = ({ children }) => {
     </FormContext.Provider>
   );
 };
+const INITIAL_FORM_DATA ={
+  form: {
+    contact: {
+      person: "Bob",
+      phone: "898739525",
+    },
+    delivery: {
+      id: undefined,
+    },
+    payment: {
+      id: undefined,
+    },
+    coupon_code: "",
+  },
+}
+const useFormState = (key, initialData)=>{
+  // return [
+  //   useQuery([key], ()=>initialData, {enabled: false, initialData}).data,
+  //   (value)=>queryClient.setQueryData(key, value)
+  // ]
+  return [
+    useQuery({
+      queryKey: [key],
+      initialData,
+      queryFn: ()=>initialData,
+      enabled: false,
+    }).data,
+    (value)=>queryClient.setQueryData([key], value)
+  ]
+}
 
 const useDeliveries = () => {
   return useQuery({
@@ -83,15 +114,14 @@ const useCart = () => {
 
 const useCartMutation = () => {
   return useMutation({
-    mutationFn: async ({form,currentDeliveryId,  currentPaymentId}) => {
-      console.log('data', form, currentDeliveryId, currentPaymentId);
-      const formData = new FormData(form);
+    mutationFn: async (formRef) => {
+      console.log(formRef);
+      // console.log('data', form, currentDeliveryId, currentPaymentId);
+      const formData = new FormData(formRef);
       formData.append("only_body", 1);
       formData.append("hash", HASH);
-      formData.append("form[delivery][id]", currentDeliveryId);
-      formData.append("form[payment][id]", currentPaymentId);
       for (const pair of formData.entries()) {
-        console.log(pair[0] + ", " + pair[1]);
+        // console.log(pair[0] + ", " + pair[1]);
       }
       const { data } = await axios.post(`/cart`, formData, {
         responseType: "text",
@@ -99,9 +129,9 @@ const useCartMutation = () => {
 
       const cardData = JSON.parse(data);
 
-      console.log(cardData);
+      // console.log(cardData);
 
-      // queryClient.setQueryData(['cart'], cardData)
+      queryClient.setQueryData(['cart'], cardData)
     },
   });
 };
@@ -118,16 +148,23 @@ const useCreateOrderMutation = () => {
 };
 
 function Cart() {
+  const [formState] = useFormState('formState1', INITIAL_FORM_DATA);
+  console.log('q',formState);
   const { orderState } = useContext(FormContext);
+  // const { currentDeliveryId, currentPaymentId, couponCode } = {
+  //   currentDeliveryId: orderState?.form?.delivery?.id,
+  //   currentPaymentId: orderState?.form?.payment?.id,
+  // };
   const { currentDeliveryId, currentPaymentId, couponCode } = {
-    currentDeliveryId: orderState?.form?.delivery?.id,
-    currentPaymentId: orderState?.form?.payment?.id,
+    currentDeliveryId: formState?.form?.delivery?.id,
+    currentPaymentId: formState?.form?.payment?.id,
   };
+
+  useEffect(()=>{
+    cartMutation.mutate(formRef.current);
+  }, [currentDeliveryId])
   const formRef = useRef();
   const { data, refetch } = useCart();
-  useEffect(()=>{
-    refetch()
-  }, [currentDeliveryId])
   const cartMutation = useCartMutation();
 
   if (!data) return null;
@@ -145,33 +182,14 @@ function Cart() {
     CART_SUM_NOW_WITH_DELIVERY,
   } = data;
 
-  // const { currentDeliveryId, currentPaymentId, couponCode } = form;
-
-  // const dispatch = useDispatch();
-
-  const debouncedSubmit = Utils.debounce(() => {
-    console.log('subm');
-    const formData = new FormData(formRef.current);
-    for (const pair of formData.entries()) {
-      // console.log(pair[0] + ", " + pair[1]);
-    }
-    cartMutation.mutate({form: formRef.current,currentDeliveryId,  currentPaymentId});
-    refetch()
-    // dispatch(updateCardAction(formData));
-  }, 300);
 
   const handleSubmit = (event) => {
-    console.log('handl-subm');
     event?.preventDefault();
-    debouncedSubmit();
+    
+    Utils.debounce(() => {
+      cartMutation.mutate(formRef.current);
+    }, 300)();
   };
-
-  // useEffect(() => {
-  //   if (currentDeliveryId) {
-  //     handleSubmit();
-  //   }
-  // }, [currentDeliveryId]);
-
 
   return (
     <>
@@ -213,7 +231,8 @@ function Cart() {
       <ul>
         <li>Товаров: {CART_COUNT_TOTAL} шт.</li>
         <li>Сумма товаров: {CART_SUM_NOW}</li>
-        <li>Доставка: {CART_SUM_DELIVERY}</li>
+        <li>Доставка: {CART_SUM_DELIVERY} - {currentDeliveryId}</li>
+        <li>Метод оплаты: {currentPaymentId}</li>
         <li>Скидка: {CART_SUM_DISCOUNT}</li>
         <li>Скидка процент: {CART_SUM_DISCOUNT_PERCENT}</li>
         <li>Итого с доставкой: {CART_SUM_NOW_WITH_DELIVERY}</li>
@@ -235,11 +254,11 @@ function CartItem({ item, handleSubmit }) {
   } = item;
   const [inputValue, setInputValue] = useState(ORDER_LINE_QUANTITY);
 
-  useEffect(() => {
-    if (inputValue > 0) {
-      handleSubmit();
-    }
-  }, [inputValue]);
+  // useEffect(() => {
+  //   if (inputValue > 0) {
+  //     handleSubmit();
+  //   }
+  // }, [inputValue]);
 
   const handleBlur = (event) => {
     const { value } = event.target;
@@ -311,6 +330,23 @@ function CartItem({ item, handleSubmit }) {
 }
 
 function OrderForm() {
+  // const [formState, setFormState] = useFormState('formState1', {
+  //   form: {
+  //     contact: {
+  //       person: "Bob",
+  //       phone: "898739525",
+  //     },
+  //     delivery: {
+  //       id: undefined,
+  //     },
+  //     payment: {
+  //       id: undefined,
+  //     },
+  //     coupon_code: "",
+  //   },
+  // })
+  const [formState, setFormState] = useFormState('formState1', INITIAL_FORM_DATA)
+
   const { data: orderDelivery, isLoading } = useDeliveries();
   const { orderState, setOrderState } = useContext(FormContext);
   // console.log(orderState);
@@ -343,7 +379,7 @@ function OrderForm() {
       payment: { id: paymentId },
       coupon_code: couponCode,
     },
-  } = orderState;
+  } = formState;
   // console.log('formState',formState);
   // useEffect(() => {
   //   if (couponCode) {
@@ -362,7 +398,7 @@ function OrderForm() {
     if (orderDelivery?.length) {
       const [delivery] = orderDelivery;
 
-      setOrderState((prev) => ({
+      setFormState((prev) => ({
         form: {
           ...prev.form,
           delivery: {
@@ -403,6 +439,7 @@ function OrderForm() {
     // const newData = _.mergeWith({ ...formState }, fieldData);
     // console.log(newData);
     setOrderState(newData);
+    setFormState(newData)
   };
 
   return (
@@ -495,7 +532,7 @@ function App() {
   );
 }
 
-const queryClient = new QueryClient();
+
 
 root.render(
   <QueryClientProvider client={queryClient}>
