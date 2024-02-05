@@ -7,7 +7,9 @@
   <script src="{ASSETS_JS_PATH}babel.min.js" defer></script>  
   <!-- <script src="{ASSETS_JS_PATH}react-redux.min.js"></script> -->
   <!-- <script src="{ASSETS_JS_PATH}redux-toolkit.umd.min.js"></script> -->
-  <script src="{ASSETS_JS_PATH}react-query.production.js" defer></script>
+  <!-- <script src="{ASSETS_JS_PATH}react-query.production.js" defer></script> -->
+  <script src="{ASSETS_JS_PATH}react-query.development.js" defer></script>
+  <script src="{ASSETS_JS_PATH}react-query-devtools.js" defer></script>
   <!-- <script src="{ASSETS_JS_PATH}zustand.min.js"></script> -->
   <!-- <script src="{ASSETS_JS_PATH}zustand.vanilla.js"></script> -->
   <!-- <script src="{ASSETS_JS_PATH}zustand.umd.js" defer></script> -->
@@ -559,9 +561,9 @@
       
 
       
-      <script src="/design/goodStore.js" type="text/babel"></script>
-      <script src="/design/goodsCart.js" type="text/babel"></script>
-      <script src="/design/good.js" type="text/babel"></script>
+      <!-- <script src="/design/goodStore.js" type="text/babel"></script> -->
+      <!-- <script src="/design/goodsCart.js" type="text/babel"></script> -->
+      <!-- <script src="/design/good.js" type="text/babel"></script> -->
       <script>
         var indexGoodsEmpty = {% IF index_page_goods_empty=1 && index_page_new_goods_empty=1 && index_page_favorites_goods_empty=1 && index_page_sale_goods_empty=1 %}1{% ELSE%}0{% ENDIF %};
       </script>
@@ -571,11 +573,11 @@
         var index_page_goods = [];
       </script>
       <div id="cartBlock"></div>
-      <script type="text/babel">
+      <!-- <script type="text/babel">
         const cartContainer = document.getElementById("cartBlock");
         const rootCart = ReactDOM.createRoot(cartContainer);
         rootCart.render(React.createElement(GoodsCart));
-      </script>
+      </script> -->
       <section class="section _no-padding pdt-index products-container">
         <div class="container">
             <!-- <h2 class="section-title"><span class="section-title__word">Товары</span> на главной</h2> -->
@@ -586,7 +588,7 @@
                     <form action="{CART_ADD_GOODS_MODIFICATION_URL | url_amp}" method="post" class="product-form-{index_page_goods.MIN_PRICE_NOW_ID} product__form">
 
                       <div id="root-{index_page_goods.ID}"></div>
-                      <script type="text/babel">
+                      <!-- <script type="text/babel">
                         const good = {
                           id: '{index_page_goods.ID}',
                           mods: [
@@ -613,7 +615,7 @@
                         rootGood.render(React.createElement(Good, {
                           item: good
                         }));
-                      </script>
+                      </script> -->
                       <script>
                         index_page_goods.push({
                           id: '{index_page_goods.ID}',
