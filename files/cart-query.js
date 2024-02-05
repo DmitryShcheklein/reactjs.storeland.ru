@@ -8,6 +8,7 @@ const {
   QueryClient,
   QueryClientProvider,
 } = window.ReactQuery;
+const { ReactQueryDevtools } = window.ReactQueryDevtools;
 const queryClient = new QueryClient();
 const container = document.getElementById('root-cart');
 const root = ReactDOM.createRoot(container);
@@ -95,6 +96,9 @@ const useDeliveries = () => {
 const useCart = () => {
   return useQuery({
     queryKey: ['cart'],
+    initialData: () => {
+      return { data: {} };
+    },
     queryFn: async () => {
       const { data } = await axios.get(`/cart`, {
         responseType: 'text',
@@ -166,8 +170,6 @@ function Cart() {
   const formRef = useRef();
   const { data, refetch } = useCart();
   const cartMutation = useCartMutation();
-  console.log(data);
-  if (!data) return null;
 
   const {
     CART_SUM_DISCOUNT,
@@ -181,7 +183,7 @@ function Cart() {
     CART_SUM_DELIVERY,
     CART_SUM_NOW_WITH_DELIVERY,
   } = data;
-
+  // console.log(CART_COUNT_TOTAL);
   if (!CART_COUNT_TOTAL) {
     return null;
   }
@@ -531,9 +533,29 @@ function OrderForm() {
   );
 }
 
+function EmptyCart() {
+  const {
+    data: { CART_COUNT_TOTAL },
+  } = useCart();
+
+  if (CART_COUNT_TOTAL) {
+    return null;
+  }
+
+  return (
+    <>
+      <h1>Ваша корзина пуста</h1>
+      <a className="button" href="/">
+        Перейти на главную
+      </a>
+    </>
+  );
+}
+
 function App() {
   return (
     <>
+      <EmptyCart />
       <Cart />
       {/* <OrderForm /> */}
     </>
@@ -545,5 +567,6 @@ root.render(
     <FormProvider>
       <App />
     </FormProvider>
+    <ReactQueryDevtools initialIsOpen={false} />
   </QueryClientProvider>
 );
