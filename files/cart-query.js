@@ -1,6 +1,4 @@
 const { useState, useEffect, useRef, createContext, useContext } = window.React;
-// const { Provider, useSelector, useDispatch } = window.ReactRedux;
-// const { configureStore, createSlice, createAsyncThunk } = window.RTK;
 const {
   useQuery,
   useMutation,
@@ -38,7 +36,7 @@ const INITIAL_FORM_DATA = {
     coupon_code: '',
   },
 };
-const useFormState = (key, initialData) => {
+const useFormState = (key = 'formstate', initialData = INITIAL_FORM_DATA) => {
   // return [
   //   useQuery([key], ()=>initialData, {enabled: false, initialData}).data,
   //   (value)=>queryClient.setQueryData(key, value)
@@ -70,8 +68,6 @@ const useDeliveries = (options) => {
       return formData.data;
     },
     ...options,
-
-    // enabled: false
   });
 };
 
@@ -149,10 +145,8 @@ function Cart() {
       refetchCart();
     },
   });
-  const [formState, setFormState] = useFormState(
-    'formstate',
-    INITIAL_FORM_DATA
-  );
+  const [formState, setFormState] = useFormState();
+  console.log(formState);
   const { isLoading: isLoadingDeliveries } = useDeliveries({
     onSuccess: (deliveries) => {
       const [delivery] = deliveries;
@@ -351,51 +345,10 @@ function CartItem({ item, handleSubmit }) {
 }
 
 function OrderForm() {
-  // const [formState, setFormState] = useFormState('formstate', {
-  //   form: {
-  //     contact: {
-  //       person: "Bob",
-  //       phone: "898739525",
-  //     },
-  //     delivery: {
-  //       id: undefined,
-  //     },
-  //     payment: {
-  //       id: undefined,
-  //     },
-  //     coupon_code: "",
-  //   },
-  // })
-  const [formState, setFormState] = useFormState(
-    'formstate',
-    INITIAL_FORM_DATA
-  );
-
+  const [formState, setFormState] = useFormState();
   const { data: orderDelivery, isLoading } = useDeliveries();
-
-  // const { orderDelivery } = useSelector((state) => state.form.data);
-  // console.log(data, orderDelivery);
-  // const form = useSelector((state) => state.form.form);
-  // const { currentDeliveryId, currentPaymentId } = form;
-  // const isDataLoading = useSelector((state) => state.form.dataLoading);
   const createOrderMutation = useCreateOrderMutation();
   const isOrderLoading = createOrderMutation.isLoading;
-  // const dispatch = useDispatch();
-  // const [formState, setFormState] = useState({
-  //   form: {
-  //     contact: {
-  //       person: "Bob",
-  //       phone: "898739525",
-  //     },
-  //     delivery: {
-  //       id: undefined,
-  //     },
-  //     payment: {
-  //       id: undefined,
-  //     },
-  //     coupon_code: "",
-  //   },
-  // });
   const {
     form: {
       delivery: { id: deliveryId },
@@ -403,43 +356,13 @@ function OrderForm() {
       coupon_code: couponCode,
     },
   } = formState;
-  // console.log('formState',formState);
-  // useEffect(() => {
-  //   if (couponCode) {
-  //     dispatch(setCouponCode(couponCode));
-  //   }
-  // }, [couponCode]);
-
-  // useEffect(() => {
-  //   if (deliveryId || paymentId) {
-  //     dispatch(setCurrentDeliveryId(deliveryId));
-  //     dispatch(setCurrentPaymentId(paymentId));
-  //   }
-  // }, [deliveryId, paymentId]);
-
-  useEffect(() => {
-    if (orderDelivery?.length) {
-      const [delivery] = orderDelivery;
-
-      setFormState((prev) => ({
-        form: {
-          ...prev.form,
-          delivery: {
-            id: delivery?.id,
-          },
-          payment: {
-            id: delivery?.availablePaymentList[0]?.id,
-          },
-        },
-      }));
-    }
-  }, [orderDelivery?.length]);
-
   const handleSubmit = (event) => {
     event.preventDefault();
 
     const formData = new FormData(event.target);
-
+    for (const pair of formData.entries()) {
+      console.log(pair[0] + ', ' + pair[1]);
+    }
     // createOrderMutation.mutate(formData);
   };
 
@@ -465,6 +388,10 @@ function OrderForm() {
     setFormState(newData);
   };
 
+  if (!orderDelivery?.length) {
+    return null;
+  }
+
   return (
     <>
       {isLoading ? (
@@ -476,7 +403,7 @@ function OrderForm() {
             <input
               className="input"
               name="form[contact][person]"
-              value={orderState.form.contact.person}
+              value={formState.form.contact.person}
               onChange={handleChange}
               maxLength="100"
               type="text"
@@ -486,7 +413,7 @@ function OrderForm() {
             <input
               className="input"
               name="form[contact][phone]"
-              value={orderState.form.contact.phone}
+              value={formState.form.contact.phone}
               onChange={handleChange}
               maxLength="255"
               pattern="\+?\d*"
@@ -572,7 +499,7 @@ function App() {
     <>
       <EmptyCart />
       <Cart />
-      {/* <OrderForm /> */}
+      <OrderForm />
     </>
   );
 }
