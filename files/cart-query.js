@@ -9,7 +9,13 @@ const {
   QueryClientProvider,
 } = window.ReactQuery;
 const { ReactQueryDevtools } = window.ReactQueryDevtools;
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false, // default: true
+    },
+  },
+});
 const container = document.getElementById('root-cart');
 const root = ReactDOM.createRoot(container);
 const { HASH, Utils } = window;
@@ -48,12 +54,9 @@ const useFormState = (key, initialData) => {
   ];
 };
 
-const useDeliveries = () => {
+const useDeliveries = (options) => {
   return useQuery({
-    queryKey: ['form'],
-    initialData: () => {
-      return { data: [] };
-    },
+    queryKey: ['deliveries'],
     queryFn: async () => {
       const { data } = await axios.get(`/cart/add`, {
         responseType: 'text',
@@ -66,6 +69,8 @@ const useDeliveries = () => {
 
       return formData.data;
     },
+    ...options,
+
     // enabled: false
   });
 };
@@ -73,9 +78,6 @@ const useDeliveries = () => {
 const useCart = () => {
   return useQuery({
     queryKey: ['cart'],
-    initialData: () => {
-      return { data: {} };
-    },
     queryFn: async () => {
       const { data } = await axios.get(`/cart`, {
         responseType: 'text',
@@ -89,11 +91,21 @@ const useCart = () => {
 
       return cardData;
     },
-    // enabled: Boolean(currentDeliveryId) && Boolean(currentPaymentId),
   });
 };
 
-const useCartMutation = () => {
+const useClearCartMutation = (options) => {
+  return useMutation({
+    mutationFn: async () => {
+      const response = await axios.get(`/cart/truncate/`);
+
+      return response.status === 200;
+    },
+    ...options,
+  });
+};
+
+const useCartMutation = (options) => {
   return useMutation({
     mutationFn: async (formRef) => {
       // console.log(formRef);
@@ -110,10 +122,9 @@ const useCartMutation = () => {
 
       const cardData = JSON.parse(data);
 
-      // console.log(cardData);
-
       queryClient.setQueryData(['cart'], cardData);
     },
+    ...options,
   });
 };
 
@@ -129,24 +140,47 @@ const useCreateOrderMutation = () => {
 };
 
 function Cart() {
-  const [formState] = useFormState('formState1', INITIAL_FORM_DATA);
-  // console.log('q',formState);
+  const formRef = useRef();
+  const { data: cartData, refetch: refetchCart } = useCart();
+  const cartMutation = useCartMutation();
+  const clearCartMutation = useClearCartMutation({
+    onSuccess: (message) => {
+      console.log(message);
+      refetchCart();
+    },
+  });
+  const [formState, setFormState] = useFormState(
+    'formstate',
+    INITIAL_FORM_DATA
+  );
+  const { isLoading: isLoadingDeliveries } = useDeliveries({
+    onSuccess: (deliveries) => {
+      const [delivery] = deliveries;
 
-  // const { currentDeliveryId, currentPaymentId, couponCode } = {
-  //   currentDeliveryId: orderState?.form?.delivery?.id,
-  //   currentPaymentId: orderState?.form?.payment?.id,
-  // };
+      setFormState((prev) => ({
+        form: {
+          ...prev.form,
+          delivery: {
+            id: delivery?.id,
+          },
+          payment: {
+            id: delivery?.availablePaymentList[0]?.id,
+          },
+        },
+      }));
+
+      cartMutation.mutate(formRef.current);
+    },
+  });
+
   const { currentDeliveryId, currentPaymentId, couponCode } = {
     currentDeliveryId: formState?.form?.delivery?.id,
     currentPaymentId: formState?.form?.payment?.id,
   };
 
-  useEffect(() => {
-    // cartMutation.mutate(formRef.current);
-  }, [currentDeliveryId]);
-  const formRef = useRef();
-  const { data, refetch } = useCart();
-  // const cartMutation = useCartMutation();
+  if (!cartData) {
+    return null;
+  }
 
   const {
     CART_SUM_DISCOUNT,
@@ -159,8 +193,8 @@ function Cart() {
     FORM_NOTICE_STATUS,
     CART_SUM_DELIVERY,
     CART_SUM_NOW_WITH_DELIVERY,
-  } = data;
-  // console.log(CART_COUNT_TOTAL);
+  } = cartData;
+
   if (!CART_COUNT_TOTAL) {
     return null;
   }
@@ -169,24 +203,27 @@ function Cart() {
     event?.preventDefault();
 
     Utils.debounce(() => {
-      // cartMutation.mutate(formRef.current);
+      cartMutation.mutate(formRef.current);
     }, 300)();
   };
 
   return (
     <>
-      {/* <button
-        className="button _transparent"
-        onClick={() => {
-          console.log("clear");
-          dispatch(clearCardAction());
-        }}
-      >
-        Очистить корзину
-      </button> */}
+      <h1>Корзина</h1>
+      <div style={{ display: 'flex' }}>
+        <button
+          className="button _transparent"
+          onClick={() => {
+            console.log('clear');
+            clearCartMutation.mutate();
+          }}
+        >
+          Очистить корзину
+        </button>
 
-      {/* {isUpdating && <>Обновление корзины...</>} */}
-      {/* {FORM_NOTICE && <p>{FORM_NOTICE}</p>} */}
+        {cartMutation.isLoading && <span>(Обновление корзины...)</span>}
+      </div>
+
       <form onSubmit={handleSubmit} ref={formRef} id="card">
         <input
           name="form[delivery][id]"
@@ -314,7 +351,7 @@ function CartItem({ item, handleSubmit }) {
 }
 
 function OrderForm() {
-  // const [formState, setFormState] = useFormState('formState1', {
+  // const [formState, setFormState] = useFormState('formstate', {
   //   form: {
   //     contact: {
   //       person: "Bob",
@@ -330,7 +367,7 @@ function OrderForm() {
   //   },
   // })
   const [formState, setFormState] = useFormState(
-    'formState1',
+    'formstate',
     INITIAL_FORM_DATA
   );
 
@@ -510,16 +547,13 @@ function OrderForm() {
 }
 
 function EmptyCart() {
-  const {
-    data: { CART_COUNT_TOTAL },
-    isLoading,
-  } = useCart();
-  console.log(isLoading);
+  const { data, isLoading } = useCart();
+
   if (isLoading) {
     return <>Загрузка...</>;
   }
 
-  if (CART_COUNT_TOTAL && !isLoading) {
+  if (data?.CART_COUNT_TOTAL && !isLoading) {
     return null;
   }
 
