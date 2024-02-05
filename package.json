@@ -31,7 +31,8 @@
 		"gulp-newer": "^1.4.0",
 		"gulp-rsync": "0.0.8",
 		"gulp-stylus": "^2.7.0",
-		"gulp-uglify-es": "^2.0.0"
+		"gulp-uglify-es": "^2.0.0",
+		"prettier": "3.2.5"
 	},
 	"engines": {
 		"node": "^12.0.0",

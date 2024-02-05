@@ -9,7 +9,7 @@ const {
   QueryClientProvider,
 } = window.ReactQuery;
 const queryClient = new QueryClient();
-const container = document.getElementById("root-cart");
+const container = document.getElementById('root-cart');
 const root = ReactDOM.createRoot(container);
 const { HASH, Utils } = window;
 const axios = window.axios;
@@ -20,8 +20,8 @@ const FormProvider = ({ children }) => {
   const [orderState, setOrderState] = useState({
     form: {
       contact: {
-        person: "Bob",
-        phone: "898739525",
+        person: 'Bob',
+        phone: '898739525',
       },
       delivery: {
         id: undefined,
@@ -29,7 +29,7 @@ const FormProvider = ({ children }) => {
       payment: {
         id: undefined,
       },
-      coupon_code: "",
+      coupon_code: '',
     },
   });
 
@@ -39,11 +39,11 @@ const FormProvider = ({ children }) => {
     </FormContext.Provider>
   );
 };
-const INITIAL_FORM_DATA ={
+const INITIAL_FORM_DATA = {
   form: {
     contact: {
-      person: "Bob",
-      phone: "898739525",
+      person: 'Bob',
+      phone: '898739525',
     },
     delivery: {
       id: undefined,
@@ -51,10 +51,10 @@ const INITIAL_FORM_DATA ={
     payment: {
       id: undefined,
     },
-    coupon_code: "",
+    coupon_code: '',
   },
-}
-const useFormState = (key, initialData)=>{
+};
+const useFormState = (key, initialData) => {
   // return [
   //   useQuery([key], ()=>initialData, {enabled: false, initialData}).data,
   //   (value)=>queryClient.setQueryData(key, value)
@@ -63,22 +63,22 @@ const useFormState = (key, initialData)=>{
     useQuery({
       queryKey: [key],
       initialData,
-      queryFn: ()=>initialData,
+      queryFn: () => initialData,
       enabled: false,
     }).data,
-    (value)=>queryClient.setQueryData([key], value)
-  ]
-}
+    (value) => queryClient.setQueryData([key], value),
+  ];
+};
 
 const useDeliveries = () => {
   return useQuery({
-    queryKey: ["form"],
+    queryKey: ['form'],
     initialData: () => {
       return { data: [] };
     },
     queryFn: async () => {
       const { data } = await axios.get(`/cart/add`, {
-        responseType: "text",
+        responseType: 'text',
         params: {
           ajax_q: 1,
           fast_order: 1,
@@ -94,14 +94,14 @@ const useDeliveries = () => {
 
 const useCart = () => {
   return useQuery({
-    queryKey: ["cart"],
+    queryKey: ['cart'],
     queryFn: async () => {
       const { data } = await axios.get(`/cart`, {
-        responseType: "text",
+        responseType: 'text',
         params: {
           only_body: 1,
-          hash: HASH
-        }
+          hash: HASH,
+        },
       });
 
       const cardData = JSON.parse(data);
@@ -115,23 +115,23 @@ const useCart = () => {
 const useCartMutation = () => {
   return useMutation({
     mutationFn: async (formRef) => {
-      console.log(formRef);
+      // console.log(formRef);
       // console.log('data', form, currentDeliveryId, currentPaymentId);
       const formData = new FormData(formRef);
-      formData.append("only_body", 1);
-      formData.append("hash", HASH);
+      formData.append('only_body', 1);
+      formData.append('hash', HASH);
       for (const pair of formData.entries()) {
         // console.log(pair[0] + ", " + pair[1]);
       }
       const { data } = await axios.post(`/cart`, formData, {
-        responseType: "text",
+        responseType: 'text',
       });
 
       const cardData = JSON.parse(data);
 
       // console.log(cardData);
 
-      queryClient.setQueryData(['cart'], cardData)
+      queryClient.setQueryData(['cart'], cardData);
     },
   });
 };
@@ -139,8 +139,8 @@ const useCartMutation = () => {
 const useCreateOrderMutation = () => {
   return useMutation({
     mutationFn: (formData) => {
-      formData.append("ajax_q", 1);
-      formData.append("hash", HASH);
+      formData.append('ajax_q', 1);
+      formData.append('hash', HASH);
 
       return axios.post(`/order/stage/confirm`, formData);
     },
@@ -149,7 +149,7 @@ const useCreateOrderMutation = () => {
 
 function Cart() {
   const [formState] = useFormState('formState1', INITIAL_FORM_DATA);
-  console.log('q',formState);
+  // console.log('q',formState);
   const { orderState } = useContext(FormContext);
   // const { currentDeliveryId, currentPaymentId, couponCode } = {
   //   currentDeliveryId: orderState?.form?.delivery?.id,
@@ -160,13 +160,13 @@ function Cart() {
     currentPaymentId: formState?.form?.payment?.id,
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     cartMutation.mutate(formRef.current);
-  }, [currentDeliveryId])
+  }, [currentDeliveryId]);
   const formRef = useRef();
   const { data, refetch } = useCart();
   const cartMutation = useCartMutation();
-
+  console.log(data);
   if (!data) return null;
 
   const {
@@ -182,10 +182,13 @@ function Cart() {
     CART_SUM_NOW_WITH_DELIVERY,
   } = data;
 
+  if (!CART_COUNT_TOTAL) {
+    return null;
+  }
 
   const handleSubmit = (event) => {
     event?.preventDefault();
-    
+
     Utils.debounce(() => {
       cartMutation.mutate(formRef.current);
     }, 300)();
@@ -231,7 +234,9 @@ function Cart() {
       <ul>
         <li>Товаров: {CART_COUNT_TOTAL} шт.</li>
         <li>Сумма товаров: {CART_SUM_NOW}</li>
-        <li>Доставка: {CART_SUM_DELIVERY} - {currentDeliveryId}</li>
+        <li>
+          Доставка: {CART_SUM_DELIVERY} - {currentDeliveryId}
+        </li>
         <li>Метод оплаты: {currentPaymentId}</li>
         <li>Скидка: {CART_SUM_DISCOUNT}</li>
         <li>Скидка процент: {CART_SUM_DISCOUNT_PERCENT}</li>
@@ -345,7 +350,10 @@ function OrderForm() {
   //     coupon_code: "",
   //   },
   // })
-  const [formState, setFormState] = useFormState('formState1', INITIAL_FORM_DATA)
+  const [formState, setFormState] = useFormState(
+    'formState1',
+    INITIAL_FORM_DATA
+  );
 
   const { data: orderDelivery, isLoading } = useDeliveries();
   const { orderState, setOrderState } = useContext(FormContext);
@@ -439,7 +447,7 @@ function OrderForm() {
     // const newData = _.mergeWith({ ...formState }, fieldData);
     // console.log(newData);
     setOrderState(newData);
-    setFormState(newData)
+    setFormState(newData);
   };
 
   return (
@@ -514,7 +522,7 @@ function OrderForm() {
             ) : null}
             <hr />
             <button className="button" disabled={isOrderLoading}>
-              {isOrderLoading ? "Оформляется..." : "Оформить"}
+              {isOrderLoading ? 'Оформляется...' : 'Оформить'}
             </button>
           </form>
         </>
@@ -527,12 +535,10 @@ function App() {
   return (
     <>
       <Cart />
-      <OrderForm />
+      {/* <OrderForm /> */}
     </>
   );
 }
-
-
 
 root.render(
   <QueryClientProvider client={queryClient}>
