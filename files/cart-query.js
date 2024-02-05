@@ -142,11 +142,11 @@ function Cart() {
   };
 
   useEffect(() => {
-    cartMutation.mutate(formRef.current);
+    // cartMutation.mutate(formRef.current);
   }, [currentDeliveryId]);
   const formRef = useRef();
   const { data, refetch } = useCart();
-  const cartMutation = useCartMutation();
+  // const cartMutation = useCartMutation();
 
   const {
     CART_SUM_DISCOUNT,
@@ -169,7 +169,7 @@ function Cart() {
     event?.preventDefault();
 
     Utils.debounce(() => {
-      cartMutation.mutate(formRef.current);
+      // cartMutation.mutate(formRef.current);
     }, 300)();
   };
 
@@ -512,9 +512,14 @@ function OrderForm() {
 function EmptyCart() {
   const {
     data: { CART_COUNT_TOTAL },
+    isLoading,
   } = useCart();
+  console.log(isLoading);
+  if (isLoading) {
+    return <>Загрузка...</>;
+  }
 
-  if (CART_COUNT_TOTAL) {
+  if (CART_COUNT_TOTAL && !isLoading) {
     return null;
   }
 
