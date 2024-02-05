@@ -17,29 +17,6 @@ const axios = window.axios;
 
 const FormContext = createContext(null);
 
-const FormProvider = ({ children }) => {
-  const [orderState, setOrderState] = useState({
-    form: {
-      contact: {
-        person: 'Bob',
-        phone: '898739525',
-      },
-      delivery: {
-        id: undefined,
-      },
-      payment: {
-        id: undefined,
-      },
-      coupon_code: '',
-    },
-  });
-
-  return (
-    <FormContext.Provider value={{ orderState, setOrderState }}>
-      {children}
-    </FormContext.Provider>
-  );
-};
 const INITIAL_FORM_DATA = {
   form: {
     contact: {
@@ -154,7 +131,7 @@ const useCreateOrderMutation = () => {
 function Cart() {
   const [formState] = useFormState('formState1', INITIAL_FORM_DATA);
   // console.log('q',formState);
-  const { orderState } = useContext(FormContext);
+
   // const { currentDeliveryId, currentPaymentId, couponCode } = {
   //   currentDeliveryId: orderState?.form?.delivery?.id,
   //   currentPaymentId: orderState?.form?.payment?.id,
@@ -358,8 +335,7 @@ function OrderForm() {
   );
 
   const { data: orderDelivery, isLoading } = useDeliveries();
-  const { orderState, setOrderState } = useContext(FormContext);
-  // console.log(orderState);
+
   // const { orderDelivery } = useSelector((state) => state.form.data);
   // console.log(data, orderDelivery);
   // const form = useSelector((state) => state.form.form);
@@ -442,13 +418,13 @@ function OrderForm() {
     }, {});
     // console.dir(fieldData);
     const newData = Utils.mergeWith(
-      { ...orderState },
+      { ...formState },
       fieldData,
       Utils.customizer
     );
     // const newData = _.mergeWith({ ...formState }, fieldData);
     // console.log(newData);
-    setOrderState(newData);
+
     setFormState(newData);
   };
 
@@ -564,9 +540,7 @@ function App() {
 
 root.render(
   <QueryClientProvider client={queryClient}>
-    <FormProvider>
-      <App />
-    </FormProvider>
+    <App />
     <ReactQueryDevtools initialIsOpen={false} />
   </QueryClientProvider>
 );
