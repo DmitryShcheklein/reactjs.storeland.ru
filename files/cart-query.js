@@ -19,7 +19,12 @@ const root = ReactDOM.createRoot(container);
 const { HASH, Utils } = window;
 const axios = window.axios;
 
-const FormContext = createContext(null);
+
+const QUERY_KEYS = {
+  Cart: 'Cart',
+  FormState: 'FormState',
+  Deliveries: 'Deliveries'
+}
 
 const INITIAL_FORM_DATA = {
   form: {
@@ -39,7 +44,7 @@ const INITIAL_FORM_DATA = {
 const useFormState = (
   options
 ) => {
-  const key = 'formState';
+  const key = QUERY_KEYS.FormState;
   const query = useQuery({
     queryKey: [key],
     initialData: INITIAL_FORM_DATA,
@@ -55,7 +60,7 @@ const useDeliveries = (options) => {
   const [_, setFormState] = useFormState()
 
   return useQuery({
-    queryKey: ['deliveries'],
+    queryKey: [QUERY_KEYS.Deliveries],
     queryFn: async () => {
       const { data } = await axios.get(`/cart/add`, {
         responseType: 'text',
@@ -89,7 +94,7 @@ const useDeliveries = (options) => {
 
 const useCart = () => {
   return useQuery({
-    queryKey: ['cart'],
+    queryKey: [QUERY_KEYS.Cart],
     queryFn: async () => {
       const { data } = await axios.get(`/cart`, {
         responseType: 'text',
@@ -133,7 +138,7 @@ const useCartMutation = (options) => {
 
       const cardData = JSON.parse(data);
 
-      queryClient.setQueryData(['cart'], cardData);
+      queryClient.setQueryData([QUERY_KEYS.Cart], cardData);
     },
     ...options,
   });
@@ -154,7 +159,7 @@ const useCreateOrderMutation = () => {
       return axios.post(`/order/stage/confirm`, formData);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries('cart')
+      queryClient.invalidateQueries(QUERY_KEYS.Cart)
     }
   });
 };
