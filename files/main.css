@@ -2988,6 +2988,11 @@ body.modal-open {overflow: hidden}
     flex-wrap: wrap;
   }
 }
+#orderForm {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
 /**/
 .cart._fast._quickform {
   max-width: 1020px;  

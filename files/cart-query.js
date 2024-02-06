@@ -22,6 +22,7 @@ const axios = window.axios;
 
 const QUERY_KEYS = {
   Cart: 'Cart',
+  SendCart: 'SendCart',
   FormState: 'FormState',
   Deliveries: 'Deliveries'
 }
@@ -140,6 +141,7 @@ const useClearCartItemMutation = (options) => {
 
 const useCartMutation = (options) => {
   return useMutation({
+    mutationKey: [QUERY_KEYS.SendCart],
     mutationFn: async (formRef) => {
       const formData = new FormData(formRef);
       formData.append('only_body', 1);
@@ -459,15 +461,22 @@ function OrderForm() {
           placeholder="Телефон"
           required
         />
-        <input
-          className="input"
-          name="form[coupon_code]"
-          value={couponCode}
-          onChange={handleChange}
-          maxLength="255"
-          type="text"
-          placeholder="Купон"
-        />
+        <div style={{ display: 'flex', gap: 20 }}>
+          <input
+            className="input"
+            name="form[coupon_code]"
+            value={couponCode}
+            onChange={handleChange}
+            maxLength="255"
+            type="text"
+            placeholder="Купон"
+          />
+          <button onClick={() => {
+            queryClient.invalidateQueries(QUERY_KEYS.SendCart)
+          }} className="button _big" type="button" >
+            Применить
+          </button>
+        </div>
         {orderDelivery?.length ? (
           <>
             <select
@@ -501,7 +510,7 @@ function OrderForm() {
           </>
         ) : null}
         <hr />
-        <button className="button" disabled={isOrderLoading}>
+        <button className="button _big" disabled={isOrderLoading}>
           {isOrderLoading ? 'Оформляется...' : 'Оформить'}
         </button>
       </form>
