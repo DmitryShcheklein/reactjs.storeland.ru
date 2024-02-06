@@ -232,8 +232,8 @@ function Cart() {
     <div className="cart" style={{ postition: 'relative' }}>
       {(cartMutation.isLoading || isCartLoading || clearCartMutation.isFetching) && <Preloader />}
 
-      <h1>Корзина</h1>
-      <div style={{ display: 'flex', alignItems: 'center' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 50 }}>
+        <h1>Корзина</h1>
         <button
           className="button"
           onClick={() => {
