@@ -480,7 +480,7 @@ function OrderForm() {
 }
 
 function Preloader() {
-  return <div class="preloader _opacity"><span class="content-loading"></span></div>
+  return <div className="preloader _opacity"><span className="content-loading"></span></div>
 }
 
 function EmptyCart() {
