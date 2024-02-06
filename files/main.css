@@ -2907,15 +2907,17 @@ body.modal-open {overflow: hidden}
     flex-wrap: wrap;
 }
 .cart .cart__table .cart__delete {display:block;}
+.cart .cart__delete-icon,
 .cart .cart__table .cart__delete .cart__delete-icon {display: flex;width: 20px;height: 20px;line-height: 16px;border-radius: 50%;border: 1px solid #cacfd7;  text-align: center; }
+.cart .icon ,
 .cart .cart__table .cart__delete .cart__delete-icon .icon {
   margin: auto;
   width: 8px;
   height: 8px;
   fill: #cacfd7;
 }
-.cart .cart__table .cart__delete:hover .cart__delete-icon .icon {  fill: #6053c7;}
-.cart .cart__table .cart__delete:hover .cart__delete-icon {border-color: #6053c7;}
+.cart button:hover .icon {  fill: #6053c7;}
+.cart button:hover .cart__delete-icon {border-color: #6053c7;}
 .cart .cart__table .cart__delete .cart__delete-title {display:none;}
 .cart .cart__sum {max-width: 50%;padding: 15px 0;margin-left: auto}
 .cart .cart__sum-row {display: -webkit-box;display: -ms-flexbox;display: flex;-webkit-box-align: center;-ms-flex-align: center;align-items: center}

@@ -38,7 +38,7 @@ const INITIAL_FORM_DATA = {
     payment: {
       id: undefined,
     },
-    coupon_code: 'mini',
+    coupon_code: '123456',
   },
 };
 const useFormState = (
@@ -122,6 +122,22 @@ const useClearCartMutation = (options) => {
   });
 };
 
+const useClearCartItemMutation = (options) => {
+  const { refetch } = useCart()
+
+  return useMutation({
+    mutationFn: async (itemId) => {
+      const response = await axios.get(`/cart/delete/${itemId}`);
+
+      return response.status;
+    },
+    onSuccess: () => {
+      refetch()
+    },
+    ...options,
+  });
+};
+
 const useCartMutation = (options) => {
   return useMutation({
     mutationFn: async (formRef) => {
@@ -166,7 +182,7 @@ const useCreateOrderMutation = () => {
 
 function Cart() {
   const formRef = useRef();
-  const { data: cartData, refetch: refetchCart } = useCart();
+  const { data: cartData, refetch: refetchCart, isFetching: isCartLoading } = useCart();
   const {
     CART_SUM_DISCOUNT,
     CART_SUM_DISCOUNT_PERCENT,
@@ -195,7 +211,7 @@ function Cart() {
 
   useEffect(() => {
     if (currentDeliveryId) {
-      console.log(currentDeliveryId);
+      // console.log(currentDeliveryId);
       cartMutation.mutate(formRef.current);
     }
   }, [currentDeliveryId])
@@ -213,8 +229,8 @@ function Cart() {
   }
 
   return (
-    <div style={{ postition: 'relative' }}>
-      {cartMutation.isLoading && <Preloader />}
+    <div className="cart" style={{ postition: 'relative' }}>
+      {(cartMutation.isLoading || isCartLoading || clearCartMutation.isFetching) && <Preloader />}
 
       <h1>Корзина</h1>
       <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -256,14 +272,15 @@ function Cart() {
         <li>Товаров: {CART_COUNT_TOTAL} шт.</li>
         <li>Сумма товаров: {CART_SUM_NOW}</li>
         <li>
-          Доставка: {CART_SUM_DELIVERY} - {currentDeliveryId}
+          Доставка (id: {currentDeliveryId}): <b>{CART_SUM_DELIVERY}</b>
         </li>
-        <li>Метод оплаты: {currentPaymentId}</li>
+        <li>Метод оплаты (id): {currentPaymentId}</li>
+        <li>Купон: {couponCode}</li>
         <li>Скидка: {CART_SUM_DISCOUNT}</li>
         <li>Скидка процент: {CART_SUM_DISCOUNT_PERCENT}</li>
         <li>Итого с доставкой: {CART_SUM_NOW_WITH_DELIVERY}</li>
         <li>
-          Итого с доставкой и скидкой: {CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT}
+          Итого с доставкой и скидкой: <b>{CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT}</b>
         </li>
       </ul>
     </div>
@@ -278,6 +295,7 @@ function CartItem({ item, handleSubmit }) {
     ORDER_LINE_QUANTITY,
     GOODS_IMAGE,
   } = item;
+  const deleteCartItemMutation = useClearCartItemMutation();
   const [inputValue, setInputValue] = useState(ORDER_LINE_QUANTITY);
 
   // useEffect(() => {
@@ -307,7 +325,14 @@ function CartItem({ item, handleSubmit }) {
 
   return (
     <li data-key={GOODS_MOD_ID}>
-      <h3>{GOODS_NAME}</h3>
+      <div style={{ display: 'flex', gap: 20 }}>
+        <h3>{GOODS_NAME}</h3>
+        <button onClick={() => deleteCartItemMutation.mutate(GOODS_MOD_ID)} type="button" title="Удалить из корзины">
+          <span className="cart__delete-icon">
+            <svg className="icon _close"><use xlinkHref="/design/sprite.svg#close"></use></svg>
+          </span>
+        </button>
+      </div>
       <div>
         <strong>Кол-во:{inputValue}</strong>
       </div>
