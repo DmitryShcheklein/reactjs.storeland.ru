@@ -177,7 +177,9 @@ const useCreateOrderMutation = () => {
       return axios.post(`/order/stage/confirm`, formData);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(QUERY_KEYS.Cart)
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.Cart]
+      })
     }
   });
 };
@@ -472,7 +474,9 @@ function OrderForm() {
             placeholder="Купон"
           />
           <button onClick={() => {
-            queryClient.invalidateQueries(QUERY_KEYS.SendCart)
+            queryClient.invalidateQueries(
+              { queryKey: [QUERY_KEYS.SendCart] }
+            )
           }} className="button _big" type="button" >
             Применить
           </button>
