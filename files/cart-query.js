@@ -36,20 +36,24 @@ const INITIAL_FORM_DATA = {
     coupon_code: '',
   },
 };
-const useFormState = (key = 'formstate', initialData = INITIAL_FORM_DATA) => {
+const useFormState = (
+  // key = 'formstate', initialData = INITIAL_FORM_DATA
+  options
+) => {
+  const key = 'formState';
   // return [
   //   useQuery([key], ()=>initialData, {enabled: false, initialData}).data,
   //   (value)=>queryClient.setQueryData(key, value)
   // ]
-  return [
-    useQuery({
-      queryKey: [key],
-      initialData,
-      queryFn: () => initialData,
-      enabled: false,
-    }).data,
-    (value) => queryClient.setQueryData([key], value),
-  ];
+  const query = useQuery({
+    queryKey: [key],
+    initialData: INITIAL_FORM_DATA,
+    queryFn: () => initialData,
+    enabled: false,
+    ...options,
+  });
+
+  return [query.data, (value) => queryClient.setQueryData([key], value)];
 };
 
 const useDeliveries = (options) => {
@@ -103,14 +107,17 @@ const useClearCartMutation = (options) => {
 
 const useCartMutation = (options) => {
   return useMutation({
-    mutationFn: async (formRef) => {
-      // console.log(formRef);
+    mutationFn: async (formState) => {
+      const { form } = formState;
       // console.log('data', form, currentDeliveryId, currentPaymentId);
-      const formData = new FormData(formRef);
+      const formData = new FormData();
       formData.append('only_body', 1);
       formData.append('hash', HASH);
+      formData.append('form[delivery][id]', form.delivery.id);
+      formData.append('form[payment][id]', form.payment.id);
+      formData.append('form[coupon_code]', form.coupon_code);
       for (const pair of formData.entries()) {
-        // console.log(pair[0] + ", " + pair[1]);
+        // console.log(pair[0] + ', ' + pair[1]);
       }
       const { data } = await axios.post(`/cart`, formData, {
         responseType: 'text',
@@ -140,13 +147,16 @@ function Cart() {
   const { data: cartData, refetch: refetchCart } = useCart();
   const cartMutation = useCartMutation();
   const clearCartMutation = useClearCartMutation({
-    onSuccess: (message) => {
-      console.log(message);
+    onSuccess: () => {
       refetchCart();
     },
   });
-  const [formState, setFormState] = useFormState();
-  console.log(formState);
+  const [formState, setFormState] = useFormState({
+    onSuccess: (formData) => {
+      cartMutation.mutate(formData);
+    },
+  });
+
   const { isLoading: isLoadingDeliveries } = useDeliveries({
     onSuccess: (deliveries) => {
       const [delivery] = deliveries;
@@ -162,8 +172,8 @@ function Cart() {
           },
         },
       }));
-
-      cartMutation.mutate(formRef.current);
+      // console.log(formRef.current);
+      // cartMutation.mutate(formRef.current);
     },
   });
 
@@ -195,9 +205,10 @@ function Cart() {
 
   const handleSubmit = (event) => {
     event?.preventDefault();
+    console.log('handle');
 
     Utils.debounce(() => {
-      cartMutation.mutate(formRef.current);
+      cartMutation.mutate(formState);
     }, 300)();
   };
 
@@ -345,6 +356,7 @@ function CartItem({ item, handleSubmit }) {
 }
 
 function OrderForm() {
+  const { data: cartData, refetch: refetchCart } = useCart();
   const [formState, setFormState] = useFormState();
   const { data: orderDelivery, isLoading } = useDeliveries();
   const createOrderMutation = useCreateOrderMutation();
@@ -361,9 +373,9 @@ function OrderForm() {
 
     const formData = new FormData(event.target);
     for (const pair of formData.entries()) {
-      console.log(pair[0] + ', ' + pair[1]);
+      // console.log(pair[0] + ', ' + pair[1]);formData
     }
-    // createOrderMutation.mutate(formData);
+    createOrderMutation.mutate(formData);
   };
 
   const handleChange = (event) => {
@@ -388,87 +400,85 @@ function OrderForm() {
     setFormState(newData);
   };
 
-  if (!orderDelivery?.length) {
+  if (isLoading) {
+    return <div>Загружаю варианты доставки...</div>;
+  }
+
+  if (!orderDelivery?.length || !cartData) {
     return null;
   }
 
   return (
     <>
-      {isLoading ? (
-        <>Загружаю варианты доставки...</>
-      ) : (
-        <>
-          {/* Форма заказа */}
-          <form onSubmit={handleSubmit} id="orderForm">
-            <input
-              className="input"
-              name="form[contact][person]"
-              value={formState.form.contact.person}
+      {/* Форма заказа */}
+      <form onSubmit={handleSubmit} id="orderForm">
+        <input
+          className="input"
+          name="form[contact][person]"
+          value={formState.form.contact.person}
+          onChange={handleChange}
+          maxLength="100"
+          type="text"
+          placeholder="Имя"
+          required
+        />
+        <input
+          className="input"
+          name="form[contact][phone]"
+          value={formState.form.contact.phone}
+          onChange={handleChange}
+          maxLength="255"
+          pattern="\+?\d*"
+          type="tel"
+          placeholder="Телефон"
+          required
+        />
+        <input
+          className="input"
+          name="form[coupon_code]"
+          value={couponCode}
+          onChange={handleChange}
+          maxLength="255"
+          type="text"
+          placeholder="Купон"
+        />
+        {orderDelivery?.length ? (
+          <>
+            <select
               onChange={handleChange}
-              maxLength="100"
-              type="text"
-              placeholder="Имя"
-              required
-            />
-            <input
-              className="input"
-              name="form[contact][phone]"
-              value={formState.form.contact.phone}
+              name="form[delivery][id]"
+              className="quickform__select"
+              value={deliveryId}
+            >
+              {orderDelivery.map(({ id, name }) => (
+                <option value={id} key={id}>
+                  {name}
+                </option>
+              ))}
+            </select>
+            <select
               onChange={handleChange}
-              maxLength="255"
-              pattern="\+?\d*"
-              type="tel"
-              placeholder="Телефон"
-              required
-            />
-            <input
-              className="input"
-              name="form[coupon_code]"
-              value={couponCode}
-              onChange={handleChange}
-              maxLength="255"
-              type="text"
-              placeholder="Купон"
-            />
-            {orderDelivery?.length ? (
-              <>
-                <select
-                  onChange={handleChange}
-                  name="form[delivery][id]"
-                  className="quickform__select"
-                  value={deliveryId}
-                >
-                  {orderDelivery.map(({ id, name }) => (
+              name="form[payment][id]"
+              className="quickform__select"
+              value={paymentId}
+            >
+              {orderDelivery
+                .filter((el) => el.id === deliveryId)
+                .map((el) => {
+                  return el.availablePaymentList.map(({ id, name }) => (
                     <option value={id} key={id}>
                       {name}
                     </option>
-                  ))}
-                </select>
-                <select
-                  onChange={handleChange}
-                  name="form[payment][id]"
-                  className="quickform__select"
-                  value={paymentId}
-                >
-                  {orderDelivery
-                    .filter((el) => el.id === Number(deliveryId))
-                    .map((el) => {
-                      return el.availablePaymentList.map(({ id, name }) => (
-                        <option value={id} key={id}>
-                          {name}
-                        </option>
-                      ));
-                    })}
-                </select>
-              </>
-            ) : null}
-            <hr />
-            <button className="button" disabled={isOrderLoading}>
-              {isOrderLoading ? 'Оформляется...' : 'Оформить'}
-            </button>
-          </form>
-        </>
-      )}
+                  ));
+                })}
+            </select>
+          </>
+        ) : null}
+        <hr />
+        <button className="button" disabled={isOrderLoading}>
+          {isOrderLoading ? 'Оформляется...' : 'Оформить'}
+        </button>
+      </form>
     </>
   );
 }
