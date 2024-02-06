@@ -463,7 +463,7 @@ function OrderForm() {
           placeholder="Телефон"
           required
         />
-        <div style={{ display: 'flex', gap: 20 }}>
+        <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
           <input
             className="input"
             name="form[coupon_code]"
@@ -477,7 +477,7 @@ function OrderForm() {
             queryClient.invalidateQueries(
               { queryKey: [QUERY_KEYS.SendCart] }
             )
-          }} className="button _big" type="button" >
+          }} className="button" type="button" >
             Применить
           </button>
         </div>
