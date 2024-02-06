@@ -24,8 +24,8 @@ const FormContext = createContext(null);
 const INITIAL_FORM_DATA = {
   form: {
     contact: {
-      person: 'Bob',
-      phone: '898739525',
+      person: 'User',
+      phone: '89876543210',
     },
     delivery: {
       id: undefined,
@@ -37,14 +37,9 @@ const INITIAL_FORM_DATA = {
   },
 };
 const useFormState = (
-  // key = 'formstate', initialData = INITIAL_FORM_DATA
   options
 ) => {
   const key = 'formState';
-  // return [
-  //   useQuery([key], ()=>initialData, {enabled: false, initialData}).data,
-  //   (value)=>queryClient.setQueryData(key, value)
-  // ]
   const query = useQuery({
     queryKey: [key],
     initialData: INITIAL_FORM_DATA,
@@ -57,6 +52,8 @@ const useFormState = (
 };
 
 const useDeliveries = (options) => {
+  const [_, setFormState] = useFormState()
+
   return useQuery({
     queryKey: ['deliveries'],
     queryFn: async () => {
@@ -71,7 +68,22 @@ const useDeliveries = (options) => {
 
       return formData.data;
     },
-    ...options,
+    onSuccess: (deliveries) => {
+      const [delivery] = deliveries;
+
+      setFormState((prev) => ({
+        form: {
+          ...prev.form,
+          delivery: {
+            id: delivery?.id,
+          },
+          payment: {
+            id: delivery?.availablePaymentList[0]?.id,
+          },
+        },
+      }));
+    }
+
   });
 };
 
@@ -107,15 +119,11 @@ const useClearCartMutation = (options) => {
 
 const useCartMutation = (options) => {
   return useMutation({
-    mutationFn: async (formState) => {
-      const { form } = formState;
-      // console.log('data', form, currentDeliveryId, currentPaymentId);
-      const formData = new FormData();
+    mutationFn: async (formRef) => {
+      const formData = new FormData(formRef);
       formData.append('only_body', 1);
       formData.append('hash', HASH);
-      formData.append('form[delivery][id]', form.delivery.id);
-      formData.append('form[payment][id]', form.payment.id);
-      formData.append('form[coupon_code]', form.coupon_code);
+
       for (const pair of formData.entries()) {
         // console.log(pair[0] + ', ' + pair[1]);
       }
@@ -151,35 +159,26 @@ function Cart() {
       refetchCart();
     },
   });
-  const [formState, setFormState] = useFormState({
-    onSuccess: (formData) => {
-      cartMutation.mutate(formData);
-    },
-  });
-
-  const { isLoading: isLoadingDeliveries } = useDeliveries({
-    onSuccess: (deliveries) => {
-      const [delivery] = deliveries;
-
-      setFormState((prev) => ({
-        form: {
-          ...prev.form,
-          delivery: {
-            id: delivery?.id,
-          },
-          payment: {
-            id: delivery?.availablePaymentList[0]?.id,
-          },
-        },
-      }));
-      // console.log(formRef.current);
-      // cartMutation.mutate(formRef.current);
-    },
-  });
-
+  const [formState] = useFormState();
   const { currentDeliveryId, currentPaymentId, couponCode } = {
     currentDeliveryId: formState?.form?.delivery?.id,
     currentPaymentId: formState?.form?.payment?.id,
+    couponCode: formState?.form?.coupon_code
+  };
+
+
+  useEffect(() => {
+    if (currentDeliveryId) {
+      cartMutation.mutate(formRef.current);
+    }
+  }, [currentDeliveryId])
+
+  const handleSubmit = (event) => {
+    event?.preventDefault();
+
+    Utils.debounce(() => {
+      cartMutation.mutate(formRef.current);
+    }, 300)();
   };
 
   if (!cartData) {
@@ -202,15 +201,6 @@ function Cart() {
   if (!CART_COUNT_TOTAL) {
     return null;
   }
-
-  const handleSubmit = (event) => {
-    event?.preventDefault();
-    console.log('handle');
-
-    Utils.debounce(() => {
-      cartMutation.mutate(formState);
-    }, 300)();
-  };
 
   return (
     <>
@@ -303,7 +293,7 @@ function CartItem({ item, handleSubmit }) {
     }
   };
 
-  const handlePaste = () => {};
+  const handlePaste = () => { };
 
   return (
     <li data-key={GOODS_MOD_ID}>
