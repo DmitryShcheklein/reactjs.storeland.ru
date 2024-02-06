@@ -400,12 +400,12 @@ function OrderForm() {
     setFormState(newData);
   };
 
-  if (isLoading) {
-    return <div>Загружаю варианты доставки...</div>;
+  if (!cartData?.CART_COUNT_TOTAL) {
+    return null;
   }
 
-  if (!orderDelivery?.length || !cartData) {
-    return null;
+  if (isLoading) {
+    return <div>Загружаю варианты доставки...</div>;
   }
 
   return (
