@@ -141,18 +141,39 @@ const useCartMutation = (options) => {
 
 const useCreateOrderMutation = () => {
   return useMutation({
-    mutationFn: (formData) => {
+    mutationFn: (form) => {
+      const formData = new FormData(form);
+
+      for (const pair of formData.entries()) {
+        // console.log(pair[0] + ', ' + pair[1]);formData
+      }
+
       formData.append('ajax_q', 1);
       formData.append('hash', HASH);
 
       return axios.post(`/order/stage/confirm`, formData);
     },
+    onSuccess: () => {
+      queryClient.invalidateQueries('cart')
+    }
   });
 };
 
 function Cart() {
   const formRef = useRef();
   const { data: cartData, refetch: refetchCart } = useCart();
+  const {
+    CART_SUM_DISCOUNT,
+    CART_SUM_DISCOUNT_PERCENT,
+    CART_COUNT_TOTAL,
+    CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT,
+    cartItems,
+    CART_SUM_NOW,
+    FORM_NOTICE,
+    FORM_NOTICE_STATUS,
+    CART_SUM_DELIVERY,
+    CART_SUM_NOW_WITH_DELIVERY,
+  } = cartData || {};
   const cartMutation = useCartMutation();
   const clearCartMutation = useClearCartMutation({
     onSuccess: () => {
@@ -169,6 +190,7 @@ function Cart() {
 
   useEffect(() => {
     if (currentDeliveryId) {
+      console.log(currentDeliveryId);
       cartMutation.mutate(formRef.current);
     }
   }, [currentDeliveryId])
@@ -181,33 +203,16 @@ function Cart() {
     }, 300)();
   };
 
-  if (!cartData) {
-    return null;
-  }
-
-  const {
-    CART_SUM_DISCOUNT,
-    CART_SUM_DISCOUNT_PERCENT,
-    CART_COUNT_TOTAL,
-    CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT,
-    cartItems,
-    CART_SUM_NOW,
-    FORM_NOTICE,
-    FORM_NOTICE_STATUS,
-    CART_SUM_DELIVERY,
-    CART_SUM_NOW_WITH_DELIVERY,
-  } = cartData;
-
-  if (!CART_COUNT_TOTAL) {
+  if (!cartData || !CART_COUNT_TOTAL) {
     return null;
   }
 
   return (
     <>
       <h1>Корзина</h1>
-      <div style={{ display: 'flex' }}>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
         <button
-          className="button _transparent"
+          className="button"
           onClick={() => {
             console.log('clear');
             clearCartMutation.mutate();
@@ -348,9 +353,9 @@ function CartItem({ item, handleSubmit }) {
 function OrderForm() {
   const { data: cartData, refetch: refetchCart } = useCart();
   const [formState, setFormState] = useFormState();
-  const { data: orderDelivery, isLoading } = useDeliveries();
+  const { data: orderDelivery, isLoading: isLoadingDelivery } = useDeliveries();
   const createOrderMutation = useCreateOrderMutation();
-  const isOrderLoading = createOrderMutation.isLoading;
+  const { isLoading: isOrderLoading, isSuccess: isOrderSuccess } = createOrderMutation;
   const {
     form: {
       delivery: { id: deliveryId },
@@ -360,12 +365,9 @@ function OrderForm() {
   } = formState;
   const handleSubmit = (event) => {
     event.preventDefault();
+    const formElement = event.target
 
-    const formData = new FormData(event.target);
-    for (const pair of formData.entries()) {
-      // console.log(pair[0] + ', ' + pair[1]);formData
-    }
-    createOrderMutation.mutate(formData);
+    createOrderMutation.mutate(formElement);
   };
 
   const handleChange = (event) => {
@@ -394,8 +396,12 @@ function OrderForm() {
     return null;
   }
 
-  if (isLoading) {
+  if (isLoadingDelivery) {
     return <div>Загружаю варианты доставки...</div>;
+  }
+
+  if (isOrderSuccess) {
+    return <h2>Заказ успешно оформлен!</h2>
   }
 
   return (
