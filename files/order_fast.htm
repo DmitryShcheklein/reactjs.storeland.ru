@@ -2,7 +2,7 @@
 "data": [
      {% FOR order_delivery %}
       {
-         "id": {order_delivery.ID},
+         "id": "{order_delivery.ID}",
          "name": "{order_delivery.NAME}",
          "price": {order_delivery.PRICE},
          "endPrice": {order_delivery.END_PRICE},
@@ -40,7 +40,7 @@
         "availablePaymentList": [
                 {% FOR available_payment_list %}
                     { "deliveryId": {order_delivery.ID},
-                        "id": {order_delivery.available_payment_list.ID},
+                        "id": "{order_delivery.available_payment_list.ID}",
                         "name": "{order_delivery.available_payment_list.NAME}"
                     }
                     {% IFNOT order_delivery.available_payment_list.last %},{% ENDIF %}
