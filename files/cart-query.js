@@ -33,7 +33,7 @@ const INITIAL_FORM_DATA = {
     payment: {
       id: undefined,
     },
-    coupon_code: '',
+    coupon_code: 'mini',
   },
 };
 const useFormState = (
@@ -208,7 +208,9 @@ function Cart() {
   }
 
   return (
-    <>
+    <div style={{ postition: 'relative' }}>
+      {cartMutation.isLoading && <Preloader />}
+
       <h1>Корзина</h1>
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <button
@@ -220,8 +222,6 @@ function Cart() {
         >
           Очистить корзину
         </button>
-
-        {cartMutation.isLoading && <span>(Обновление корзины...)</span>}
       </div>
 
       <form onSubmit={handleSubmit} ref={formRef} id="card">
@@ -261,7 +261,7 @@ function Cart() {
           Итого с доставкой и скидкой: {CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT}
         </li>
       </ul>
-    </>
+    </div>
   );
 }
 
@@ -477,6 +477,10 @@ function OrderForm() {
       </form>
     </>
   );
+}
+
+function Preloader() {
+  return <div class="preloader _opacity"><span class="content-loading"></span></div>
 }
 
 function EmptyCart() {
