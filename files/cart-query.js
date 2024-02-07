@@ -19,13 +19,12 @@ const root = ReactDOM.createRoot(container);
 const { HASH, Utils } = window;
 const axios = window.axios;
 
-
 const QUERY_KEYS = {
   Cart: 'Cart',
   SendCart: 'SendCart',
   FormState: 'FormState',
-  Deliveries: 'Deliveries'
-}
+  Deliveries: 'Deliveries',
+};
 
 const INITIAL_FORM_DATA = {
   form: {
@@ -42,9 +41,7 @@ const INITIAL_FORM_DATA = {
     coupon_code: '123456',
   },
 };
-const useFormState = (
-  options
-) => {
+const useFormState = (options) => {
   const key = QUERY_KEYS.FormState;
   const query = useQuery({
     queryKey: [key],
@@ -58,7 +55,7 @@ const useFormState = (
 };
 
 const useDeliveries = (options) => {
-  const [_, setFormState] = useFormState()
+  const [_, setFormState] = useFormState();
 
   return useQuery({
     queryKey: [QUERY_KEYS.Deliveries],
@@ -88,8 +85,7 @@ const useDeliveries = (options) => {
           },
         },
       }));
-    }
-
+    },
   });
 };
 
@@ -124,7 +120,7 @@ const useClearCartMutation = (options) => {
 };
 
 const useClearCartItemMutation = (options) => {
-  const { refetch } = useCart()
+  const { refetch } = useCart();
 
   return useMutation({
     mutationFn: async (itemId) => {
@@ -133,7 +129,7 @@ const useClearCartItemMutation = (options) => {
       return response.status;
     },
     onSuccess: () => {
-      refetch()
+      refetch();
     },
     ...options,
   });
@@ -178,15 +174,19 @@ const useCreateOrderMutation = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.Cart]
-      })
-    }
+        queryKey: [QUERY_KEYS.Cart],
+      });
+    },
   });
 };
 
 function Cart() {
   const formRef = useRef();
-  const { data: cartData, refetch: refetchCart, isFetching: isCartLoading } = useCart();
+  const {
+    data: cartData,
+    refetch: refetchCart,
+    isFetching: isCartLoading,
+  } = useCart();
   const {
     CART_SUM_DISCOUNT,
     CART_SUM_DISCOUNT_PERCENT,
@@ -209,16 +209,14 @@ function Cart() {
   const { currentDeliveryId, currentPaymentId, couponCode } = {
     currentDeliveryId: formState?.form?.delivery?.id,
     currentPaymentId: formState?.form?.payment?.id,
-    couponCode: formState?.form?.coupon_code
+    couponCode: formState?.form?.coupon_code,
   };
 
-
   useEffect(() => {
-    if (currentDeliveryId) {
-      // console.log(currentDeliveryId);
+    if (currentDeliveryId && formRef.current) {
       cartMutation.mutate(formRef.current);
     }
-  }, [currentDeliveryId])
+  }, [currentDeliveryId]);
 
   const handleSubmit = (event) => {
     event?.preventDefault();
@@ -234,7 +232,9 @@ function Cart() {
 
   return (
     <div className="cart" style={{ postition: 'relative' }}>
-      {(cartMutation.isLoading || isCartLoading || clearCartMutation.isFetching) && <Preloader />}
+      {(cartMutation.isLoading ||
+        isCartLoading ||
+        clearCartMutation.isFetching) && <Preloader />}
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 50 }}>
         <h1>Корзина</h1>
@@ -284,7 +284,8 @@ function Cart() {
         <li>Скидка процент: {CART_SUM_DISCOUNT_PERCENT}</li>
         <li>Итого с доставкой: {CART_SUM_NOW_WITH_DELIVERY}</li>
         <li>
-          Итого с доставкой и скидкой: <b>{CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT}</b>
+          Итого с доставкой и скидкой:{' '}
+          <b>{CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT}</b>
         </li>
       </ul>
     </div>
@@ -325,15 +326,21 @@ function CartItem({ item, handleSubmit }) {
     }
   };
 
-  const handlePaste = () => { };
+  const handlePaste = () => {};
 
   return (
     <li data-key={GOODS_MOD_ID}>
       <div style={{ display: 'flex', gap: 20 }}>
         <h3>{GOODS_NAME}</h3>
-        <button onClick={() => deleteCartItemMutation.mutate(GOODS_MOD_ID)} type="button" title="Удалить из корзины">
+        <button
+          onClick={() => deleteCartItemMutation.mutate(GOODS_MOD_ID)}
+          type="button"
+          title="Удалить из корзины"
+        >
           <span className="cart__delete-icon">
-            <svg className="icon _close"><use xlinkHref="/design/sprite.svg#close"></use></svg>
+            <svg className="icon _close">
+              <use xlinkHref="/design/sprite.svg#close"></use>
+            </svg>
           </span>
         </button>
       </div>
@@ -389,7 +396,8 @@ function OrderForm() {
   const [formState, setFormState] = useFormState();
   const { data: orderDelivery, isLoading: isLoadingDelivery } = useDeliveries();
   const createOrderMutation = useCreateOrderMutation();
-  const { isLoading: isOrderLoading, isSuccess: isOrderSuccess } = createOrderMutation;
+  const { isLoading: isOrderLoading, isSuccess: isOrderSuccess } =
+    createOrderMutation;
   const {
     form: {
       delivery: { id: deliveryId },
@@ -399,7 +407,7 @@ function OrderForm() {
   } = formState;
   const handleSubmit = (event) => {
     event.preventDefault();
-    const formElement = event.target
+    const formElement = event.target;
 
     createOrderMutation.mutate(formElement);
   };
@@ -435,7 +443,7 @@ function OrderForm() {
   }
 
   if (isOrderSuccess) {
-    return <h2>Заказ успешно оформлен!</h2>
+    return <h2>Заказ успешно оформлен!</h2>;
   }
 
   return (
@@ -473,11 +481,7 @@ function OrderForm() {
             type="text"
             placeholder="Купон"
           />
-          <button onClick={() => {
-            queryClient.invalidateQueries(
-              { queryKey: [QUERY_KEYS.SendCart] }
-            )
-          }} className="button" type="button" >
+          <button onClick={() => {}} className="button" type="button">
             Применить
           </button>
         </div>
@@ -523,7 +527,11 @@ function OrderForm() {
 }
 
 function Preloader() {
-  return <div className="preloader _opacity"><span className="content-loading"></span></div>
+  return (
+    <div className="preloader _opacity">
+      <span className="content-loading"></span>
+    </div>
+  );
 }
 
 function EmptyCart() {
