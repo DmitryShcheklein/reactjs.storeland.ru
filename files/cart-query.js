@@ -39,7 +39,8 @@ const INITIAL_FORM_DATA = {
     payment: {
       id: undefined,
     },
-    coupon_code: '123456',
+    coupon_code: '',
+    isCouponSend: false,
   },
 };
 const useFormState = (options) => {
@@ -146,8 +147,8 @@ const useCartMutation = (options) => {
   return useMutation({
     mutationKey: [QUERY_KEYS.SendCart],
     mutationFn: async (formRef) => {
-      const emptyForm = document.createElement('form');
-      const formData = new FormData(formRef) || emptyForm;
+      const formData = new FormData(formRef);
+
       formData.append('only_body', 1);
       formData.append('hash', HASH);
 
@@ -189,6 +190,7 @@ const useCreateOrderMutation = () => {
 };
 
 function Cart() {
+  const [formState, setFormState] = useFormState();
   const formRef = useRef();
   const { data: cartData } = useCart();
   const {
@@ -204,17 +206,28 @@ function Cart() {
     CART_SUM_NOW_WITH_DELIVERY,
   } = cartData;
 
-  const cartMutation = useCartMutation();
+  const cartMutation = useCartMutation({
+    onSuccess: () => {
+      setFormState({
+        ...formState,
+        form: {
+          ...formState.form,
+          isCouponSend: false,
+        },
+      });
+    },
+  });
   const clearCartMutation = useClearCartMutation({
     onSuccess: () => {
       refetchCart();
     },
   });
-  const [formState] = useFormState();
-  const { currentDeliveryId, currentPaymentId, couponCode } = {
+
+  const { currentDeliveryId, currentPaymentId, couponCode, isCouponSend } = {
     currentDeliveryId: formState?.form?.delivery?.id,
     currentPaymentId: formState?.form?.payment?.id,
     couponCode: formState?.form?.coupon_code,
+    isCouponSend: formState?.form?.isCouponSend,
   };
 
   useEffect(() => {
@@ -222,6 +235,12 @@ function Cart() {
       cartMutation.mutate(formRef.current);
     }
   }, [currentDeliveryId]);
+
+  useEffect(() => {
+    if (isCouponSend) {
+      cartMutation.mutate(formRef.current);
+    }
+  }, [isCouponSend]);
 
   const handleSubmit = (event) => {
     event?.preventDefault();
@@ -288,7 +307,7 @@ function Cart() {
               Доставка (id: {currentDeliveryId}): <b>{CART_SUM_DELIVERY}</b>
             </li>
             <li>Метод оплаты (id): {currentPaymentId}</li>
-            <li>Купон: {couponCode}</li>
+            <li>Купон : {couponCode}</li>
             <li>Скидка: {CART_SUM_DISCOUNT}</li>
             <li>Скидка процент: {CART_SUM_DISCOUNT_PERCENT}</li>
             <li>Итого с доставкой: {CART_SUM_NOW_WITH_DELIVERY}</li>
@@ -404,6 +423,7 @@ function CartItem({ item, handleSubmit }) {
 
 function OrderForm() {
   const { data: cartData } = useCart({ refetchOnMount: false });
+  const cartMutation = useCartMutation();
   const [formState, setFormState] = useFormState();
   const { data: orderDelivery, isLoading: isLoadingDelivery } = useDeliveries();
   const createOrderMutation = useCreateOrderMutation();
@@ -490,9 +510,22 @@ function OrderForm() {
             onChange={handleChange}
             maxLength="255"
             type="text"
-            placeholder="Купон"
+            placeholder="Купон (123456)"
           />
-          <button onClick={() => {}} className="button" type="button">
+          <button
+            onClick={() => {
+              setFormState({
+                ...formState,
+                form: {
+                  ...formState.form,
+                  isCouponSend: true,
+                },
+              });
+              console.log('reset');
+            }}
+            className="button"
+            type="button"
+          >
             Применить
           </button>
         </div>
