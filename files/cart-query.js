@@ -146,7 +146,7 @@ const useClearCartItemMutation = (options) => {
 const useCartMutation = (options) => {
   return useMutation({
     mutationKey: [QUERY_KEYS.SendCart],
-    mutationFn: async (formRef) => {
+    mutationFn: async ({ formRef }) => {
       const formData = new FormData(formRef);
 
       for (const pair of formData.entries()) {
@@ -235,13 +235,13 @@ function Cart() {
 
   useEffect(() => {
     if (currentDeliveryId && formRef.current) {
-      cartMutation.mutate(formRef.current);
+      cartMutation.mutate({ formRef: formRef.current });
     }
   }, [currentDeliveryId]);
 
   useEffect(() => {
     if (isCouponSend) {
-      cartMutation.mutate(formRef.current);
+      cartMutation.mutate({ formRef: formRef.current });
     }
   }, [isCouponSend]);
 
@@ -288,7 +288,7 @@ function Cart() {
             defaultValue={currentPaymentId}
             hidden
           />
-          {isCouponSend && (
+          {isCouponSend && couponCode && (
             <input name="form[coupon_code]" defaultValue={couponCode} hidden />
           )}
 
