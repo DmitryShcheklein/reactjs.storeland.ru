@@ -11,6 +11,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false, // default: true
+      // refetchOnMount: false,
     },
   },
 });
@@ -89,9 +90,10 @@ const useDeliveries = (options) => {
   });
 };
 
-const useCart = () => {
+const useCart = (option) => {
   return useQuery({
     queryKey: [QUERY_KEYS.Cart],
+    initialData: { data: {} },
     queryFn: async () => {
       const { data } = await axios.get(`/cart`, {
         responseType: 'text',
@@ -105,6 +107,7 @@ const useCart = () => {
 
       return cardData;
     },
+    ...option,
   });
 };
 
@@ -120,7 +123,7 @@ const useClearCartMutation = (options) => {
 };
 
 const useClearCartItemMutation = (options) => {
-  const { refetch } = useCart();
+  const { refetch } = useCart({ refetchOnMount: false });
 
   return useMutation({
     mutationFn: async (itemId) => {
@@ -152,7 +155,7 @@ const useCartMutation = (options) => {
 
       const cardData = JSON.parse(data);
 
-      queryClient.setQueryData([QUERY_KEYS.Cart], cardData);
+      // queryClient.setQueryData([QUERY_KEYS.Cart], cardData);
     },
     ...options,
   });
@@ -198,7 +201,7 @@ function Cart() {
     FORM_NOTICE_STATUS,
     CART_SUM_DELIVERY,
     CART_SUM_NOW_WITH_DELIVERY,
-  } = cartData || {};
+  } = cartData;
   const cartMutation = useCartMutation();
   const clearCartMutation = useClearCartMutation({
     onSuccess: () => {
@@ -392,7 +395,7 @@ function CartItem({ item, handleSubmit }) {
 }
 
 function OrderForm() {
-  const { data: cartData, refetch: refetchCart } = useCart();
+  const { data: cartData } = useCart({ refetchOnMount: false });
   const [formState, setFormState] = useFormState();
   const { data: orderDelivery, isLoading: isLoadingDelivery } = useDeliveries();
   const createOrderMutation = useCreateOrderMutation();
@@ -535,7 +538,7 @@ function Preloader() {
 }
 
 function EmptyCart() {
-  const { data, isLoading } = useCart();
+  const { data, isLoading } = useCart({ refetchOnMount: false });
 
   if (isLoading) {
     return <>Загрузка...</>;
@@ -544,7 +547,6 @@ function EmptyCart() {
   if (data?.CART_COUNT_TOTAL && !isLoading) {
     return null;
   }
-
   return (
     <>
       <h1>Ваша корзина пуста</h1>
