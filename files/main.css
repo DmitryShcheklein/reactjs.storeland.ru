@@ -384,6 +384,7 @@ a, button {-webkit-transition: all 0.3s ease;-moz-transition: all 0.3s ease;-o-t
     font-size: 14px;
   }
 }
+.button:disabled,
 .button._disabled {
     cursor: default;
     pointer-events: none;

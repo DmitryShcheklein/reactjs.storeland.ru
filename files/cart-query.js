@@ -513,6 +513,7 @@ function OrderForm() {
             placeholder="Купон (123456)"
           />
           <button
+            disabled={!couponCode}
             onClick={() => {
               setFormState({
                 ...formState,
