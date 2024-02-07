@@ -149,14 +149,15 @@ const useCartMutation = (options) => {
     mutationFn: async (formRef) => {
       const formData = new FormData(formRef);
 
-      formData.append('only_body', 1);
-      formData.append('hash', HASH);
-
       for (const pair of formData.entries()) {
         // console.log(pair[0] + ', ' + pair[1]);
       }
       const { data } = await axios.post(`/cart`, formData, {
         responseType: 'text',
+        params: {
+          only_body: 1,
+          hash: HASH,
+        },
       });
 
       const cardData = JSON.parse(data);
@@ -176,10 +177,12 @@ const useCreateOrderMutation = () => {
         // console.log(pair[0] + ', ' + pair[1]);formData
       }
 
-      formData.append('ajax_q', 1);
-      formData.append('hash', HASH);
-
-      return axios.post(`/order/stage/confirm`, formData);
+      return axios.post(`/order/stage/confirm`, formData, {
+        params: {
+          ajax_q: 1,
+          hash: HASH,
+        },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -285,7 +288,9 @@ function Cart() {
             defaultValue={currentPaymentId}
             hidden
           />
-          <input name="form[coupon_code]" defaultValue={couponCode} hidden />
+          {isCouponSend && (
+            <input name="form[coupon_code]" defaultValue={couponCode} hidden />
+          )}
 
           {cartItems?.length ? (
             <ul>
