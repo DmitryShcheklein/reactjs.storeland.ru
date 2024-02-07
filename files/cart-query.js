@@ -94,19 +94,20 @@ const useCart = (option) => {
   return useQuery({
     queryKey: [QUERY_KEYS.Cart],
     initialData: { data: {} },
-    queryFn: async () => {
-      const { data } = await axios.get(`/cart`, {
-        responseType: 'text',
-        params: {
-          only_body: 1,
-          hash: HASH,
-        },
-      });
+    // queryFn: async () => {
+    //   const { data } = await axios.get(`/cart`, {
+    //     responseType: 'text',
+    //     params: {
+    //       only_body: 1,
+    //       hash: HASH,
+    //     },
+    //   });
 
-      const cardData = JSON.parse(data);
+    //   const cardData = JSON.parse(data);
 
-      return cardData;
-    },
+    //   return cardData;
+    // },
+    enabled: false,
     ...option,
   });
 };
@@ -123,7 +124,7 @@ const useClearCartMutation = (options) => {
 };
 
 const useClearCartItemMutation = (options) => {
-  const { refetch } = useCart({ refetchOnMount: false });
+  // const { refetch } = useCart({ refetchOnMount: false });
 
   return useMutation({
     mutationFn: async (itemId) => {
@@ -132,7 +133,10 @@ const useClearCartItemMutation = (options) => {
       return response.status;
     },
     onSuccess: () => {
-      refetch();
+      // refetch();
+      // queryClient.invalidateQueries({
+      //   queryKey: [QUERY_KEYS.SendCart],
+      // });
     },
     ...options,
   });
@@ -142,7 +146,8 @@ const useCartMutation = (options) => {
   return useMutation({
     mutationKey: [QUERY_KEYS.SendCart],
     mutationFn: async (formRef) => {
-      const formData = new FormData(formRef);
+      const emptyForm = document.createElement('form');
+      const formData = new FormData(formRef) || emptyForm;
       formData.append('only_body', 1);
       formData.append('hash', HASH);
 
@@ -155,7 +160,7 @@ const useCartMutation = (options) => {
 
       const cardData = JSON.parse(data);
 
-      // queryClient.setQueryData([QUERY_KEYS.Cart], cardData);
+      queryClient.setQueryData([QUERY_KEYS.Cart], cardData);
     },
     ...options,
   });
@@ -185,11 +190,7 @@ const useCreateOrderMutation = () => {
 
 function Cart() {
   const formRef = useRef();
-  const {
-    data: cartData,
-    refetch: refetchCart,
-    isFetching: isCartLoading,
-  } = useCart();
+  const { data: cartData } = useCart();
   const {
     CART_SUM_DISCOUNT,
     CART_SUM_DISCOUNT_PERCENT,
@@ -202,6 +203,7 @@ function Cart() {
     CART_SUM_DELIVERY,
     CART_SUM_NOW_WITH_DELIVERY,
   } = cartData;
+
   const cartMutation = useCartMutation();
   const clearCartMutation = useClearCartMutation({
     onSuccess: () => {
@@ -228,69 +230,75 @@ function Cart() {
       cartMutation.mutate(formRef.current);
     }, 300)();
   };
-
-  if (!cartData || !CART_COUNT_TOTAL) {
-    return null;
-  }
+  const isCartEmpty = !CART_COUNT_TOTAL && cartMutation.isSuccess;
 
   return (
-    <div className="cart" style={{ postition: 'relative' }}>
-      {(cartMutation.isLoading ||
-        isCartLoading ||
-        clearCartMutation.isFetching) && <Preloader />}
-
+    <div className="cart" style={{ position: 'relative' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 50 }}>
         <h1>Корзина</h1>
-        <button
-          className="button"
-          onClick={() => {
-            console.log('clear');
-            clearCartMutation.mutate();
-          }}
-        >
-          Очистить корзину
-        </button>
+        {CART_COUNT_TOTAL ? (
+          <button
+            className="button"
+            onClick={() => {
+              console.log('clear');
+              clearCartMutation.mutate();
+            }}
+          >
+            Очистить корзину
+          </button>
+        ) : null}
       </div>
+      {(cartMutation.isLoading ||
+        // isCartLoading ||
+        clearCartMutation.isFetching) && <Preloader />}
 
-      <form onSubmit={handleSubmit} ref={formRef} id="card">
-        <input
-          name="form[delivery][id]"
-          defaultValue={currentDeliveryId}
-          hidden
-        />
-        <input
-          name="form[payment][id]"
-          defaultValue={currentPaymentId}
-          hidden
-        />
-        <input name="form[coupon_code]" defaultValue={couponCode} hidden />
-        <ul>
-          {cartItems.map((item) => (
-            <CartItem
-              item={item}
-              key={item.GOODS_MOD_ID}
-              handleSubmit={handleSubmit}
-            />
-          ))}
-        </ul>
-      </form>
+      {isCartEmpty ? <EmptyCart /> : null}
 
-      <ul>
-        <li>Товаров: {CART_COUNT_TOTAL} шт.</li>
-        <li>Сумма товаров: {CART_SUM_NOW}</li>
-        <li>
-          Доставка (id: {currentDeliveryId}): <b>{CART_SUM_DELIVERY}</b>
-        </li>
-        <li>Метод оплаты (id): {currentPaymentId}</li>
-        <li>Купон: {couponCode}</li>
-        <li>Скидка: {CART_SUM_DISCOUNT}</li>
-        <li>Скидка процент: {CART_SUM_DISCOUNT_PERCENT}</li>
-        <li>Итого с доставкой: {CART_SUM_NOW_WITH_DELIVERY}</li>
-        <li>
-          Итого с доставкой и скидкой:{' '}
-          <b>{CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT}</b>
-        </li>
-      </ul>
+      <div>
+        <form onSubmit={handleSubmit} ref={formRef} id="card">
+          <input
+            name="form[delivery][id]"
+            defaultValue={currentDeliveryId}
+            hidden
+          />
+          <input
+            name="form[payment][id]"
+            defaultValue={currentPaymentId}
+            hidden
+          />
+          <input name="form[coupon_code]" defaultValue={couponCode} hidden />
+
+          {cartItems?.length ? (
+            <ul>
+              {cartItems.map((item) => (
+                <CartItem
+                  item={item}
+                  key={item.GOODS_MOD_ID}
+                  handleSubmit={handleSubmit}
+                />
+              ))}
+            </ul>
+          ) : null}
+        </form>
+        {cartItems?.length ? (
+          <ul>
+            <li>Товаров: {CART_COUNT_TOTAL} шт.</li>
+            <li>Сумма товаров: {CART_SUM_NOW}</li>
+            <li>
+              Доставка (id: {currentDeliveryId}): <b>{CART_SUM_DELIVERY}</b>
+            </li>
+            <li>Метод оплаты (id): {currentPaymentId}</li>
+            <li>Купон: {couponCode}</li>
+            <li>Скидка: {CART_SUM_DISCOUNT}</li>
+            <li>Скидка процент: {CART_SUM_DISCOUNT_PERCENT}</li>
+            <li>Итого с доставкой: {CART_SUM_NOW_WITH_DELIVERY}</li>
+            <li>
+              Итого с доставкой и скидкой:{' '}
+              <b>{CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT}</b>
+            </li>
+          </ul>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -538,29 +546,19 @@ function Preloader() {
 }
 
 function EmptyCart() {
-  const { data, isLoading } = useCart({ refetchOnMount: false });
-
-  if (isLoading) {
-    return <>Загрузка...</>;
-  }
-
-  if (data?.CART_COUNT_TOTAL && !isLoading) {
-    return null;
-  }
   return (
-    <>
-      <h1>Ваша корзина пуста</h1>
+    <div class="empty-cart">
+      <h3>Ваша корзина пуста</h3>
       <a className="button" href="/">
         Перейти на главную
       </a>
-    </>
+    </div>
   );
 }
 
 function App() {
   return (
     <>
-      <EmptyCart />
       <Cart />
       <OrderForm />
     </>

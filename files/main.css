@@ -2834,6 +2834,13 @@ body.modal-open {overflow: hidden}
   .cart-tab:last-child {margin-bottom: 0;}
 }
 /*** Корзина ***/
+.empty-cart{
+  margin:  0 auto;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap:15px
+}
 .cart {position: relative}
 .cart .cart__products {position: relative;padding: 0 5%}
 .cart._cart-page .cart__products {padding: 0}
