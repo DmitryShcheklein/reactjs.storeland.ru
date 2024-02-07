@@ -249,7 +249,7 @@ function Cart() {
     event?.preventDefault();
 
     Utils.debounce(() => {
-      cartMutation.mutate(formRef.current);
+      cartMutation.mutate({ formRef: formRef.current });
     }, 300)();
   };
   const isCartEmpty = !CART_COUNT_TOTAL && cartMutation.isSuccess;
