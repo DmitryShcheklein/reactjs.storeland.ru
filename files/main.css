@@ -1862,7 +1862,22 @@ body.modal-open {overflow: hidden}
 /* Количество */
 .qty {display: inline-block;position: relative;margin: 0;vertical-align: middle;background: #fff;text-align: center;-webkit-animation: all .3s ease;animation: all .3s ease}
 .qty__wrap {display: -webkit-box;display: -ms-flexbox;display: flex}
-.qty__input {display: inline-block;vertical-align: middle;width: 25px;height: auto;padding: 0;border-radius: 0;text-align: center;background: 0 0;border: none;font-size: 16px;font-weight: 400}
+.qty__input {
+  display: inline-block;
+  vertical-align: middle;
+  min-width: 25px;
+  width: fit-content;
+  max-width: 50px;
+  height: auto;
+  padding: 0;
+  border-radius: 0;
+  text-align: center;
+  background: 0 0;
+  border: none;
+  font-size: 16px;
+  font-weight: 400;
+  flex-grow: 0;
+}
 .qty__btn {display: -webkit-box;display: -ms-flexbox;display: flex;width: 25px;height: 25px;line-height: 25px;flex-shrink: 0;font-size: 11px;border-radius: 0;margin: 0;opacity: 1;visibility: visible;text-align: center;border-radius: 5px;border: 1px solid #c9ced6;background-color: #fff;}
 .qty__btn:hover {border: 1px solid #6053c7}
 .qty__btn:hover .icon {fill: #6053c7}
