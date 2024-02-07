@@ -32,6 +32,7 @@ const INITIAL_FORM_DATA = {
     contact: {
       person: 'User',
       phone: '89876543210',
+      email: '',
     },
     delivery: {
       id: undefined,
@@ -506,6 +507,15 @@ function OrderForm() {
           type="tel"
           placeholder="Телефон"
           required
+        />
+        <input
+          className="input"
+          name="form[contact][email]"
+          value={formState.form.contact.email}
+          onChange={handleChange}
+          maxLength="255"
+          type="email"
+          placeholder="Email"
         />
         <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
           <input
