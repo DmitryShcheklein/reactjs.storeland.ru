@@ -1,6 +1,14 @@
 html {font-size:100%;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;-webkit-font-smoothing:antialiased;}
 body {position: relative;display: flex;flex-direction: column; font-family: 'Gilroy', Arial, sans-serif;font-size: 16px;line-height: 1.2;font-weight: 400;background-color: #fff;color: #052f38;overflow-x: hidden;margin:0;padding:0;}
-
+body {
+  display: flex;flex-direction: column;
+}
+main {
+  flex-grow: 1;
+}
+html, body {
+  height: 100%;
+}
 *, *:before, *:after {-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;}
 .wrapper {overflow: hidden;}
 @media(min-width: 769px){

@@ -257,9 +257,9 @@ function Cart() {
 
   return (
     <div className="cart" style={{ position: 'relative' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 50 }}>
-        <h1>Корзина</h1>
-        {CART_COUNT_TOTAL ? (
+      {cartItems?.length ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 50 }}>
+          <h1>Корзина</h1>
           <button
             className="button"
             onClick={() => {
@@ -269,8 +269,8 @@ function Cart() {
           >
             Очистить корзину
           </button>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
       {(cartMutation.isLoading ||
         // isCartLoading ||
         clearCartMutation.isFetching) && <Preloader />}
@@ -598,6 +598,7 @@ function EmptyCart() {
   return (
     <div class="empty-cart">
       <h3>Ваша корзина пуста</h3>
+      <p>Вернитесь на главную и выберите интересующий товар.</p>
       <a className="button" href="/">
         Перейти на главную
       </a>

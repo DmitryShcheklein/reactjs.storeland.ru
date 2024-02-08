@@ -583,7 +583,7 @@
             <!-- <h2 class="section-title"><span class="section-title__word">Товары</span> на главной</h2> -->
             <div class="products-grid owl-carousel">
                 {% FOR index_page_goods %}
-                <div class="product {% IF index_page_goods.MAX_REST_VALUE=0 && SETTINGS_GOODS_DONT_PUT_TO_CART_MORE_THAN_AVAILABLE %}_empty{% ENDIF %}">
+                <div class="product _carousel {% IF index_page_goods.MAX_REST_VALUE=0 && SETTINGS_GOODS_DONT_PUT_TO_CART_MORE_THAN_AVAILABLE %}_empty{% ENDIF %}">
                   <div class="product__inner" itemscope itemtype="https://schema.org/Product">
                     <form action="{CART_ADD_GOODS_MODIFICATION_URL | url_amp}" method="post" class="product-form-{index_page_goods.MIN_PRICE_NOW_ID} product__form">
 
