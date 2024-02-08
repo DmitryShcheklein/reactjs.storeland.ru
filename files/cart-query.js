@@ -62,9 +62,11 @@ const useQuickFormData = (options) => {
 
   return useQuery({
     queryKey: [QUERY_KEYS.QuickFormData],
-    initialData: { data: {} },
+    initialData: {
+      data: {},
+    },
     queryFn: async () => {
-      const { data } = await axios.get(`/cart/add`, {
+      const { data: dataString } = await axios.get(`/cart/add`, {
         responseType: 'text',
         params: {
           ajax_q: 1,
@@ -72,7 +74,7 @@ const useQuickFormData = (options) => {
         },
       });
 
-      return JSON.parse(data);
+      return JSON.parse(dataString).data;
     },
     onSuccess: (data) => {
       const {
@@ -81,7 +83,7 @@ const useQuickFormData = (options) => {
         ORDER_FORM_CONTACT_EMAIL,
       } = data;
 
-      const [firstDelivery] = data.deliveries;
+      const [firstDelivery] = data?.deliveries;
 
       setFormState((prev) => ({
         form: {
