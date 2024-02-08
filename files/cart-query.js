@@ -30,8 +30,8 @@ const QUERY_KEYS = {
 const INITIAL_FORM_DATA = {
   form: {
     contact: {
-      person: 'User',
-      phone: '89876543210',
+      person: '',
+      phone: '',
       email: '',
     },
     delivery: {
