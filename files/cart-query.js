@@ -88,9 +88,9 @@ const useQuickFormData = (options) => {
         form: {
           ...prev.form,
           contact: {
-            person: ORDER_FORM_CONTACT_PERSON,
-            phone: ORDER_FORM_CONTACT_PHONE,
-            email: ORDER_FORM_CONTACT_EMAIL,
+            person: ORDER_FORM_CONTACT_PERSON || 'User',
+            phone: ORDER_FORM_CONTACT_PHONE || '89876543210',
+            email: ORDER_FORM_CONTACT_EMAIL || 'user@test.ru',
           },
           delivery: {
             id: firstDelivery?.id,
