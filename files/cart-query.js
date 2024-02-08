@@ -24,7 +24,7 @@ const QUERY_KEYS = {
   Cart: 'Cart',
   SendCart: 'SendCart',
   FormState: 'FormState',
-  Deliveries: 'Deliveries',
+  QuickFormData: 'QuickFormData',
 };
 
 const INITIAL_FORM_DATA = {
@@ -57,11 +57,12 @@ const useFormState = (options) => {
   return [query.data, (value) => queryClient.setQueryData([key], value)];
 };
 
-const useDeliveries = (options) => {
+const useQuickFormData = (options) => {
   const [_, setFormState] = useFormState();
 
   return useQuery({
-    queryKey: [QUERY_KEYS.Deliveries],
+    queryKey: [QUERY_KEYS.QuickFormData],
+    initialData: { data: {} },
     queryFn: async () => {
       const { data } = await axios.get(`/cart/add`, {
         responseType: 'text',
@@ -71,20 +72,31 @@ const useDeliveries = (options) => {
         },
       });
       const formData = JSON.parse(data);
-
+      console.log(formData);
       return formData.data;
     },
-    onSuccess: (deliveries) => {
-      const [delivery] = deliveries;
+    onSuccess: (data) => {
+      const {
+        ORDER_FORM_CONTACT_PERSON,
+        ORDER_FORM_CONTACT_PHONE,
+        ORDER_FORM_CONTACT_EMAIL,
+      } = data;
+
+      const [firstDelivery] = data.deliveries;
 
       setFormState((prev) => ({
         form: {
           ...prev.form,
+          contact: {
+            person: ORDER_FORM_CONTACT_PERSON,
+            phone: ORDER_FORM_CONTACT_PHONE,
+            email: ORDER_FORM_CONTACT_EMAIL,
+          },
           delivery: {
-            id: delivery?.id,
+            id: firstDelivery?.id,
           },
           payment: {
-            id: delivery?.availablePaymentList[0]?.id,
+            id: firstDelivery?.availablePaymentList[0]?.id,
           },
         },
       }));
@@ -431,7 +443,9 @@ function OrderForm() {
   const { data: cartData } = useCart({ refetchOnMount: false });
   const cartMutation = useCartMutation();
   const [formState, setFormState] = useFormState();
-  const { data: orderDelivery, isLoading: isLoadingDelivery } = useDeliveries();
+  const { data: quickFormData, isLoading: isLoadingDelivery } =
+    useQuickFormData();
+  const { deliveries } = quickFormData;
   const createOrderMutation = useCreateOrderMutation();
   const { isLoading: isOrderLoading, isSuccess: isOrderSuccess } =
     createOrderMutation;
@@ -545,7 +559,7 @@ function OrderForm() {
             Применить
           </button>
         </div>
-        {orderDelivery?.length ? (
+        {deliveries?.length ? (
           <>
             <select
               onChange={handleChange}
@@ -553,7 +567,7 @@ function OrderForm() {
               className="quickform__select"
               value={deliveryId}
             >
-              {orderDelivery.map(({ id, name }) => (
+              {deliveries.map(({ id, name }) => (
                 <option value={id} key={id}>
                   {name}
                 </option>
@@ -565,7 +579,7 @@ function OrderForm() {
               className="quickform__select"
               value={paymentId}
             >
-              {orderDelivery
+              {deliveries
                 .filter((el) => el.id === deliveryId)
                 .map((el) => {
                   return el.availablePaymentList.map(({ id, name }) => (
