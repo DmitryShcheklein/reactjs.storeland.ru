@@ -71,9 +71,8 @@ const useQuickFormData = (options) => {
           fast_order: 1,
         },
       });
-      const formData = JSON.parse(data);
-      console.log(formData);
-      return formData.data;
+
+      return JSON.parse(data);
     },
     onSuccess: (data) => {
       const {
@@ -235,7 +234,8 @@ function Cart() {
   });
   const clearCartMutation = useClearCartMutation({
     onSuccess: () => {
-      refetchCart();
+      // refetchCart();
+      location.reload();
     },
   });
 
@@ -279,7 +279,7 @@ function Cart() {
               clearCartMutation.mutate();
             }}
           >
-            Очистить корзину
+            {clearCartMutation.isLoading ? '(Очищается..)' : 'Очистить корзину'}
           </button>
         </div>
       ) : null}
@@ -381,6 +381,7 @@ function CartItem({ item, handleSubmit }) {
       <div style={{ display: 'flex', gap: 20 }}>
         <h3>{GOODS_NAME}</h3>
         <button
+          hidden
           onClick={() => deleteCartItemMutation.mutate(GOODS_MOD_ID)}
           type="button"
           title="Удалить из корзины"
@@ -610,7 +611,7 @@ function Preloader() {
 
 function EmptyCart() {
   return (
-    <div class="empty-cart">
+    <div className="empty-cart">
       <h3>Ваша корзина пуста</h3>
       <p>Вернитесь на главную и выберите интересующий товар.</p>
       <a className="button" href="/">
