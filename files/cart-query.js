@@ -11,18 +11,15 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false, // default: true
-      // refetchOnMount: false,
     },
   },
 });
 const container = document.getElementById('root-cart');
 const root = ReactDOM.createRoot(container);
-const { HASH, Utils } = window;
 const axios = window.axios;
 
 const QUERY_KEYS = {
   Cart: 'Cart',
-  SendCart: 'SendCart',
   FormState: 'FormState',
   QuickFormData: 'QuickFormData',
 };
@@ -40,7 +37,7 @@ const INITIAL_FORM_DATA = {
     payment: {
       id: undefined,
     },
-    coupon_code: '123456',
+    coupon_code: '',
     isCouponSend: false,
   },
 };
@@ -57,14 +54,12 @@ const useFormState = (options) => {
   return [query.data, (value) => queryClient.setQueryData([key], value)];
 };
 
-const useQuickFormData = (options) => {
+const useQuickFormData = (option) => {
   const [_, setFormState] = useFormState();
 
   return useQuery({
     queryKey: [QUERY_KEYS.QuickFormData],
-    initialData: {
-      data: {},
-    },
+    initialData: {},
     queryFn: async () => {
       const { data: dataString } = await axios.get(`/cart/add`, {
         responseType: 'text',
@@ -102,99 +97,16 @@ const useQuickFormData = (options) => {
         },
       }));
     },
-  });
-};
-
-const useCart = (option) => {
-  return useQuery({
-    queryKey: [QUERY_KEYS.Cart],
-    initialData: { data: {} },
-    // queryFn: async () => {
-    //   const { data } = await axios.get(`/cart`, {
-    //     responseType: 'text',
-    //     params: {
-    //       only_body: 1,
-    //       hash: HASH,
-    //     },
-    //   });
-
-    //   const cardData = JSON.parse(data);
-
-    //   return cardData;
-    // },
-    enabled: false,
     ...option,
   });
 };
 
-const useClearCartMutation = (options) => {
-  return useMutation({
-    mutationFn: async () => {
-      const response = await axios.get(`/cart/truncate/`);
-
-      return response.status === 200;
-    },
-    ...options,
-  });
-};
-
-const useClearCartItemMutation = (options) => {
-  // const { refetch } = useCart({ refetchOnMount: false });
-
-  return useMutation({
-    mutationFn: async (itemId) => {
-      const response = await axios.get(`/cart/delete/${itemId}`);
-
-      return response.status;
-    },
-    onSuccess: () => {
-      // refetch();
-      // queryClient.invalidateQueries({
-      //   queryKey: [QUERY_KEYS.SendCart],
-      // });
-    },
-    ...options,
-  });
-};
-// const useUpdateCouponMutation = () => {
-//   return useMutation({
-//     mutationFn: async () => {
-//       await axios.post(`/order/update/coupon`, formData, {
-//         responseType: 'text',
-//         params: {
-//           only_body: 1,
-//           hash: HASH,
-//         },
-//       });
-//     },
-//   });
-// };
-
-const useUpdateCouponMutation = (options) => {
-  return useMutation({
-    mutationKey: [QUERY_KEYS.SendCart],
-    mutationFn: async ({ formRef }) => {
-      const formData = new FormData(formRef);
-      formData.append('ajax_q', 1);
-      formData.append('only_body', 1);
-      formData.append('hash', HASH);
-
-      const { data } = await axios.post(`/order/update/coupon`, formData, {
-        responseType: 'text',
-      });
-
-      // const cardData = JSON.parse(data);
-
-      // queryClient.setQueryData([QUERY_KEYS.Cart], cardData);
-    },
-    ...options,
-  });
-};
-const useCartMutation = (options) => {
-  return useMutation({
-    mutationKey: [QUERY_KEYS.SendCart],
-    mutationFn: async ({ formRef }) => {
-      const formData = new FormData(formRef);
+const useCart = (option, formElement) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.Cart],
+    queryFn: async () => {
+      if (!formElement) return;
+      const formData = new FormData(formElement);
       // formData.append('ajax_q', 1);
       // formData.append('only_body', 1);
 
@@ -206,13 +118,38 @@ const useCartMutation = (options) => {
         responseType: 'text',
         params: {
           only_body: 1,
-          hash: HASH,
+          hash: window.HASH,
         },
       });
 
       const cardData = JSON.parse(data);
 
-      queryClient.setQueryData([QUERY_KEYS.Cart], cardData);
+      return cardData;
+    },
+    enabled: Boolean(formElement),
+    ...option,
+  });
+};
+
+const useClearCartMutation = (options) => {
+  return useMutation({
+    mutationFn: async () => {
+      const response = await axios.get(`/cart/truncate/`);
+      const isOk = response.status === 200;
+      if (isOk) {
+        queryClient.setQueryData([QUERY_KEYS.Cart], null);
+      }
+      return isOk;
+    },
+    ...options,
+  });
+};
+const useClearCartItemMutation = (options) => {
+  return useMutation({
+    mutationFn: async (itemId) => {
+      const response = await axios.get(`/cart/delete/${itemId}`);
+
+      return response.status;
     },
     ...options,
   });
@@ -230,22 +167,56 @@ const useCreateOrderMutation = () => {
       return axios.post(`/order/stage/confirm`, formData, {
         params: {
           ajax_q: 1,
-          hash: HASH,
+          hash: window.HASH,
         },
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.Cart],
-      });
+    onSuccess: ({ data }) => {
+      location.href = data.location;
     },
   });
 };
 
 function Cart() {
+  const formRef = useRef(null);
+  const formElement = formRef?.current;
   const [formState, setFormState] = useFormState();
-  const formRef = useRef();
-  const { data: cartData } = useCart();
+  const {
+    form: {
+      delivery: { id: currentDeliveryId },
+      payment: { id: currentPaymentId },
+      coupon_code: couponCode,
+      isCouponSend,
+    },
+  } = formState;
+
+  const {
+    data: cartData,
+    refetch: refetchCart,
+    isSuccess: isSuccessCart,
+    isLoading: isLoadingCart,
+    isFetching: isFetchingCart,
+  } = useCart(
+    {
+      onSuccess: () => {
+        setFormState({
+          ...formState,
+          form: {
+            ...formState.form,
+            isCouponSend: false,
+          },
+        });
+      },
+    },
+    formElement
+  );
+
+  useEffect(() => {
+    if (isCouponSend || currentDeliveryId) {
+      refetchCart();
+    }
+  }, [isCouponSend, currentDeliveryId]);
+
   const {
     CART_SUM_DISCOUNT,
     CART_SUM_DISCOUNT_PERCENT,
@@ -253,89 +224,45 @@ function Cart() {
     CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT,
     cartItems,
     CART_SUM_NOW,
-    FORM_NOTICE,
-    FORM_NOTICE_STATUS,
     CART_SUM_DELIVERY,
     CART_SUM_NOW_WITH_DELIVERY,
-  } = cartData;
-
-  const cartMutation = useCartMutation({
-    onSuccess: () => {
-      setFormState({
-        ...formState,
-        form: {
-          ...formState.form,
-          isCouponSend: false,
-        },
-      });
-    },
-  });
-  const clearCartMutation = useClearCartMutation({
-    onSuccess: () => {
-      // refetchCart();
-      location.reload();
-    },
-  });
-
-  const { currentDeliveryId, currentPaymentId, couponCode, isCouponSend } = {
-    currentDeliveryId: formState?.form?.delivery?.id,
-    currentPaymentId: formState?.form?.payment?.id,
-    couponCode: formState?.form?.coupon_code,
-    isCouponSend: formState?.form?.isCouponSend,
-  };
-
-  useEffect(() => {
-    if (currentDeliveryId && formRef.current) {
-      cartMutation.mutate({ formRef: formRef.current });
-    }
-  }, [currentDeliveryId]);
-
-  useEffect(() => {
-    if (isCouponSend) {
-      cartMutation.mutate({ formRef: formRef.current });
-    }
-  }, [isCouponSend]);
+  } = cartData || {};
+  const isCartItemsLength = cartItems?.length;
+  const clearCartMutation = useClearCartMutation();
 
   const handleSubmit = (event) => {
     event?.preventDefault();
 
-    Utils.debounce(() => {
-      cartMutation.mutate({ formRef: formRef.current });
+    window.Utils.debounce(() => {
+      refetchCart();
     }, 300)();
   };
-  const isCartEmpty = !CART_COUNT_TOTAL && cartMutation.isSuccess;
-  const couponUpdate = useUpdateCouponMutation();
+
+  if (window.CART_IS_EMPTY) {
+    return null;
+  }
+
   return (
-    <div className="cart" style={{ position: 'relative' }}>
-      <button
-        className="button"
-        onClick={() => {
-          couponUpdate.mutate({ formRef: formRef.current });
-        }}
-      >
-        Обновить купон
-      </button>
-      {cartItems?.length ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 50 }}>
-          <h1>Корзина</h1>
-          <button
-            className="button"
-            onClick={() => {
-              console.log('clear');
-              clearCartMutation.mutate();
-            }}
-          >
-            {clearCartMutation.isLoading ? '(Очищается..)' : 'Очистить корзину'}
-          </button>
-        </div>
-      ) : null}
-      {(cartMutation.isLoading ||
-        // isCartLoading ||
-        clearCartMutation.isFetching) && <Preloader />}
+    <>
+      <div className="cart" style={{ position: 'relative' }}>
+        {(isFetchingCart || clearCartMutation.isLoading) && <Preloader />}
 
-      {isCartEmpty ? <EmptyCart /> : null}
+        {isCartItemsLength ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 50 }}>
+            <h1>Корзина</h1>
+            <button
+              className="button"
+              onClick={() => {
+                clearCartMutation.mutate();
+              }}
+            >
+              {clearCartMutation.isLoading
+                ? '(Очищается..)'
+                : 'Очистить корзину'}
+            </button>
+          </div>
+        ) : null}
 
-      <div>
         <form onSubmit={handleSubmit} ref={formRef} id="card">
           <input
             name="form[delivery][id]"
@@ -347,22 +274,24 @@ function Cart() {
             defaultValue={currentPaymentId}
             hidden
           />
+          {isCouponSend && couponCode && (
+            <input name="form[coupon_code]" defaultValue={couponCode} hidden />
+          )}
 
-          <input name="form[coupon_code]" defaultValue={couponCode} hidden />
-
-          {cartItems?.length ? (
+          {isCartItemsLength ? (
             <ul>
               {cartItems.map((item) => (
                 <CartItem
                   item={item}
                   key={item.GOODS_MOD_ID}
                   handleSubmit={handleSubmit}
+                  refetchCart={refetchCart}
                 />
               ))}
             </ul>
           ) : null}
         </form>
-        {cartItems?.length ? (
+        {isCartItemsLength ? (
           <ul>
             <li>Товаров: {CART_COUNT_TOTAL} шт.</li>
             <li>Сумма товаров: {CART_SUM_NOW}</li>
@@ -381,11 +310,11 @@ function Cart() {
           </ul>
         ) : null}
       </div>
-    </div>
+    </>
   );
 }
 
-function CartItem({ item, handleSubmit }) {
+function CartItem({ item, handleSubmit, refetchCart }) {
   const {
     GOODS_MOD_ID,
     GOODS_NAME,
@@ -393,7 +322,11 @@ function CartItem({ item, handleSubmit }) {
     ORDER_LINE_QUANTITY,
     GOODS_IMAGE,
   } = item;
-  const deleteCartItemMutation = useClearCartItemMutation();
+  const deleteCartItemMutation = useClearCartItemMutation({
+    onSuccess: () => {
+      refetchCart();
+    },
+  });
   const [inputValue, setInputValue] = useState(ORDER_LINE_QUANTITY);
 
   // useEffect(() => {
@@ -415,19 +348,26 @@ function CartItem({ item, handleSubmit }) {
     setInputValue(Number(value));
 
     if (value > 0) {
-      handleSubmit();
+      // handleSubmit();
     }
   };
-
+  const handleRemoveItem = () => {
+    deleteCartItemMutation.mutate(GOODS_MOD_ID);
+  };
   const handlePaste = () => {};
 
+  if (deleteCartItemMutation.isSuccess) {
+    return null;
+  }
+
   return (
-    <li data-key={GOODS_MOD_ID}>
+    <li data-key={GOODS_MOD_ID} style={{ position: 'relative' }}>
+      {deleteCartItemMutation.isLoading && <Preloader />}
       <div style={{ display: 'flex', gap: 20 }}>
         <h3>{GOODS_NAME}</h3>
         <button
-          hidden
-          onClick={() => deleteCartItemMutation.mutate(GOODS_MOD_ID)}
+          // hidden
+          onClick={handleRemoveItem}
           type="button"
           title="Удалить из корзины"
         >
@@ -486,15 +426,15 @@ function CartItem({ item, handleSubmit }) {
 }
 
 function OrderForm() {
-  const { data: cartData } = useCart({ refetchOnMount: false });
-  const cartMutation = useCartMutation();
+  const { data: cartData } = useCart();
   const [formState, setFormState] = useFormState();
   const { data: quickFormData, isLoading: isLoadingDelivery } =
-    useQuickFormData();
+    useQuickFormData({
+      enabled: !Boolean(window.CART_IS_EMPTY),
+    });
   const { deliveries } = quickFormData;
   const createOrderMutation = useCreateOrderMutation();
-  const { isLoading: isOrderLoading, isSuccess: isOrderSuccess } =
-    createOrderMutation;
+  const { isLoading: isOrderLoading } = createOrderMutation;
   const {
     form: {
       delivery: { id: deliveryId },
@@ -525,22 +465,26 @@ function OrderForm() {
       fieldData,
       Utils.customizer
     );
-    // const newData = _.mergeWith({ ...formState }, fieldData);
-    // console.log(newData);
 
     setFormState(newData);
   };
+  const handleCouponBtn = () => {
+    setFormState({
+      ...formState,
+      form: {
+        ...formState.form,
+        isCouponSend: true,
+      },
+    });
+    console.log('reset');
+  };
 
-  if (!cartData?.CART_COUNT_TOTAL) {
+  if (window.CART_IS_EMPTY || !cartData?.CART_COUNT_TOTAL) {
     return null;
   }
 
   if (isLoadingDelivery) {
     return <div>Загружаю варианты доставки...</div>;
-  }
-
-  if (isOrderSuccess) {
-    return <h2>Заказ успешно оформлен!</h2>;
   }
 
   return (
@@ -589,16 +533,7 @@ function OrderForm() {
           />
           <button
             disabled={!couponCode}
-            onClick={() => {
-              setFormState({
-                ...formState,
-                form: {
-                  ...formState.form,
-                  isCouponSend: true,
-                },
-              });
-              console.log('reset');
-            }}
+            onClick={handleCouponBtn}
             className="button"
             type="button"
           >
@@ -615,7 +550,7 @@ function OrderForm() {
             >
               {deliveries.map(({ id, name }) => (
                 <option value={id} key={id}>
-                  {name}
+                  {name} - (id:{id})
                 </option>
               ))}
             </select>
@@ -630,7 +565,7 @@ function OrderForm() {
                 .map((el) => {
                   return el.availablePaymentList.map(({ id, name }) => (
                     <option value={id} key={id}>
-                      {name}
+                      {name} -(id:{id})
                     </option>
                   ));
                 })}
@@ -655,6 +590,14 @@ function Preloader() {
 }
 
 function EmptyCart() {
+  const { data: cartData, isSuccess } = useCart();
+  const isCartEmpty =
+    window.CART_IS_EMPTY || (!cartData?.CART_COUNT_TOTAL && isSuccess);
+
+  if (!isCartEmpty) {
+    return null;
+  }
+
   return (
     <div className="empty-cart">
       <h3>Ваша корзина пуста</h3>
@@ -665,16 +608,15 @@ function EmptyCart() {
     </div>
   );
 }
-
 function App() {
   return (
     <>
+      <EmptyCart />
       <Cart />
       <OrderForm />
     </>
   );
 }
-
 root.render(
   <QueryClientProvider client={queryClient}>
     <App />
