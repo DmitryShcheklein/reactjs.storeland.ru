@@ -1,5 +1,3 @@
-'use strict';
-
 (() => {
   const { useState, useEffect, useRef, createContext, useContext } =
     window.React;
@@ -20,7 +18,6 @@
   });
   const container = document.getElementById('root-cart');
   const root = ReactDOM.createRoot(container);
-  const axios = window.axios;
 
   const QUERY_KEYS = {
     Cart: 'Cart',
