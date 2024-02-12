@@ -328,13 +328,6 @@ function CartItem({ item, handleSubmit, refetchCart }) {
     },
   });
   const [inputValue, setInputValue] = useState(ORDER_LINE_QUANTITY);
-
-  // useEffect(() => {
-  //   if (inputValue > 0) {
-  //     handleSubmit();
-  //   }
-  // }, [inputValue]);
-
   const handleBlur = (event) => {
     const { value } = event.target;
 
@@ -347,8 +340,8 @@ function CartItem({ item, handleSubmit, refetchCart }) {
     const { value } = event.target;
     setInputValue(Number(value));
 
-    if (value > 0) {
-      // handleSubmit();
+    if (Number(value) > 0) {
+      handleSubmit();
     }
   };
   const handleRemoveItem = () => {
