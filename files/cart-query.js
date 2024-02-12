@@ -40,7 +40,7 @@ const INITIAL_FORM_DATA = {
     payment: {
       id: undefined,
     },
-    coupon_code: '',
+    coupon_code: '123456',
     isCouponSend: false,
   },
 };
@@ -156,17 +156,53 @@ const useClearCartItemMutation = (options) => {
     ...options,
   });
 };
+// const useUpdateCouponMutation = () => {
+//   return useMutation({
+//     mutationFn: async () => {
+//       await axios.post(`/order/update/coupon`, formData, {
+//         responseType: 'text',
+//         params: {
+//           only_body: 1,
+//           hash: HASH,
+//         },
+//       });
+//     },
+//   });
+// };
 
+const useUpdateCouponMutation = (options) => {
+  return useMutation({
+    mutationKey: [QUERY_KEYS.SendCart],
+    mutationFn: async ({ formRef }) => {
+      const formData = new FormData(formRef);
+      formData.append('ajax_q', 1);
+      formData.append('only_body', 1);
+      formData.append('hash', HASH);
+
+      const { data } = await axios.post(`/order/update/coupon`, formData, {
+        responseType: 'text',
+      });
+
+      // const cardData = JSON.parse(data);
+
+      // queryClient.setQueryData([QUERY_KEYS.Cart], cardData);
+    },
+    ...options,
+  });
+};
 const useCartMutation = (options) => {
   return useMutation({
     mutationKey: [QUERY_KEYS.SendCart],
     mutationFn: async ({ formRef }) => {
       const formData = new FormData(formRef);
+      // formData.append('ajax_q', 1);
+      // formData.append('only_body', 1);
 
       for (const pair of formData.entries()) {
         // console.log(pair[0] + ', ' + pair[1]);
       }
       const { data } = await axios.post(`/cart`, formData, {
+        // const { data } = await axios.post(`/order/stage/confirm`, formData, {
         responseType: 'text',
         params: {
           only_body: 1,
@@ -268,9 +304,17 @@ function Cart() {
     }, 300)();
   };
   const isCartEmpty = !CART_COUNT_TOTAL && cartMutation.isSuccess;
-
+  const couponUpdate = useUpdateCouponMutation();
   return (
     <div className="cart" style={{ position: 'relative' }}>
+      <button
+        className="button"
+        onClick={() => {
+          couponUpdate.mutate({ formRef: formRef.current });
+        }}
+      >
+        Обновить купон
+      </button>
       {cartItems?.length ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: 50 }}>
           <h1>Корзина</h1>
@@ -303,9 +347,8 @@ function Cart() {
             defaultValue={currentPaymentId}
             hidden
           />
-          {isCouponSend && couponCode && (
-            <input name="form[coupon_code]" defaultValue={couponCode} hidden />
-          )}
+
+          <input name="form[coupon_code]" defaultValue={couponCode} hidden />
 
           {cartItems?.length ? (
             <ul>
