@@ -85,7 +85,7 @@ function browsersync() {
 		},
 		online,
 		injectChanges: true,
-		
+    open: false,
 		port: 8088
 	})
 }
