@@ -6,8 +6,11 @@ body {
 main {
   flex-grow: 1;
 }
-html, body {
-  height: 100%;
+html {
+  height:100%;
+}
+body {
+  min-height:100%; position:relative;
 }
 *, *:before, *:after {-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;}
 .wrapper {overflow: hidden;}
