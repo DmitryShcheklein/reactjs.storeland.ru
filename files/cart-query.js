@@ -34,6 +34,7 @@
       },
       delivery: {
         id: undefined,
+        zone_id: undefined,
       },
       payment: {
         id: undefined,
@@ -184,7 +185,7 @@
     const [formState, setFormState] = useFormState();
     const {
       form: {
-        delivery: { id: currentDeliveryId },
+        delivery: { id: currentDeliveryId, zone_id: zoneId },
         payment: { id: currentPaymentId },
         coupon_code: couponCode,
         isCouponSend,
@@ -271,6 +272,11 @@
               hidden
             />
             <input
+              name="form[delivery][zone_id]"
+              defaultValue={zoneId}
+              hidden
+            />
+            <input
               name="form[payment][id]"
               defaultValue={currentPaymentId}
               hidden
@@ -303,6 +309,11 @@
               <li>
                 Доставка (id: {currentDeliveryId}): <b>{CART_SUM_DELIVERY}</b>
               </li>
+              {zoneId && (
+                <li>
+                  Зона доставки (zoneId: {zoneId}): <b></b>
+                </li>
+              )}
               <li>Метод оплаты (id): {currentPaymentId}</li>
               <li>Купон : {couponCode}</li>
               <li>Скидка: {CART_SUM_DISCOUNT}</li>
@@ -435,11 +446,13 @@
     const { isLoading: isOrderLoading } = createOrderMutation;
     const {
       form: {
-        delivery: { id: deliveryId },
+        delivery: { id: deliveryId, zone_id: zoneId },
         payment: { id: paymentId },
         coupon_code: couponCode,
       },
     } = formState;
+    const zoneList = deliveries?.find(({ id }) => id === deliveryId)?.zoneList;
+
     const handleSubmit = (event) => {
       event.preventDefault();
       const formElement = event.target;
@@ -484,7 +497,7 @@
     if (isLoadingDelivery) {
       return <div>Загружаю варианты доставки...</div>;
     }
-
+    console.log(zoneList);
     return (
       <>
         {/* Форма заказа */}
@@ -552,6 +565,21 @@
                   </option>
                 ))}
               </select>
+              {zoneList?.length ? (
+                <select
+                  onChange={handleChange}
+                  name="form[delivery][zone_id]"
+                  className="quickform__select"
+                  value={zoneId}
+                >
+                  {zoneList.map(({ zoneId, name }) => (
+                    <option value={zoneId} key={zoneId}>
+                      {name} - (zoneId:{zoneId})
+                    </option>
+                  ))}
+                </select>
+              ) : null}
+
               <select
                 onChange={handleChange}
                 name="form[payment][id]"
