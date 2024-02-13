@@ -214,10 +214,10 @@
     );
 
     useEffect(() => {
-      if (isCouponSend || currentDeliveryId) {
+      if (isCouponSend || currentDeliveryId || zoneId) {
         refetchCart();
       }
-    }, [isCouponSend, currentDeliveryId]);
+    }, [isCouponSend, currentDeliveryId, zoneId]);
 
     const {
       CART_SUM_DISCOUNT,
