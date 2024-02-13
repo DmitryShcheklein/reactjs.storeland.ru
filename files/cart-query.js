@@ -1,5 +1,5 @@
 (() => {
-  const { useState, useEffect, useRef, createContext, useContext } =
+  const { useState, useEffect, useRef } =
     window.React;
   const {
     useQuery,
@@ -363,7 +363,7 @@
     const handleRemoveItem = () => {
       deleteCartItemMutation.mutate(GOODS_MOD_ID);
     };
-    const handlePaste = () => {};
+    const handlePaste = () => { };
 
     if (deleteCartItemMutation.isSuccess) {
       return null;
