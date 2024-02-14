@@ -1,6 +1,5 @@
 (() => {
-  const { useState, useEffect, useRef } =
-    window.React;
+  const { useState, useEffect, useRef } = window.React;
   const {
     useQuery,
     useMutation,
@@ -92,7 +91,7 @@
             },
             delivery: {
               id: firstDelivery?.id,
-              zone_id: firstDelivery?.zoneList[0]?.id
+              zone_id: firstDelivery?.zoneList[0]?.zoneId,
             },
             payment: {
               id: firstDelivery?.availablePaymentList[0]?.id,
@@ -366,7 +365,7 @@
     const handleRemoveItem = () => {
       deleteCartItemMutation.mutate(GOODS_MOD_ID);
     };
-    const handlePaste = () => { };
+    const handlePaste = () => {};
 
     if (deleteCartItemMutation.isSuccess) {
       return null;
