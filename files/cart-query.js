@@ -16,7 +16,8 @@
     },
   });
   const container = document.getElementById('root-cart');
-  const root = ReactDOM.createRoot(container);
+  const { createRoot } = window.ReactDOM;
+  const root = createRoot(container);
 
   const QUERY_KEYS = {
     Cart: 'Cart',
