@@ -114,7 +114,7 @@
         // formData.append('only_body', 1);
 
         for (const pair of formData.entries()) {
-          // console.log(pair[0] + ', ' + pair[1]);
+          console.log(pair[0] + ', ' + pair[1]);
         }
         const { data } = await axios.post(`/cart`, formData, {
           // const { data } = await axios.post(`/order/stage/confirm`, formData, {
@@ -215,6 +215,7 @@
     );
 
     useEffect(() => {
+      console.log(isCouponSend, currentDeliveryId, zoneId);
       if (isCouponSend || currentDeliveryId || zoneId) {
         refetchCart();
       }
@@ -274,11 +275,13 @@
               defaultValue={currentDeliveryId}
               hidden
             />
-            <input
-              name="form[delivery][zone_id]"
-              defaultValue={zoneId}
-              hidden
-            />
+            {zoneId && (
+              <input
+                name="form[delivery][zone_id]"
+                defaultValue={zoneId}
+                hidden
+              />
+            )}
             <input
               name="form[payment][id]"
               defaultValue={currentPaymentId}
@@ -466,7 +469,7 @@
     };
 
     const handleChange = (event) => {
-      const { name, value } = event.target;
+      const { name, value, id } = event.target;
       // Разбиваем строку "form[contact][person]" на массив ключей ["form", "contact", "person"]
       const keys = name.split(/\[|\]/).filter(Boolean);
 
@@ -475,7 +478,14 @@
 
         return { [key]: isLast ? value : acc };
       }, {});
-      // console.dir(fieldData);
+
+      if (id === 'delivery-select') {
+        const zL = deliveries?.find(({ id }) => id === value)?.zoneList;
+
+        fieldData.form.delivery.zone_id = zL[0]?.zoneId;
+        console.log(keys, zL, fieldData);
+      }
+      console.log(fieldData);
       const newData = Utils.mergeWith(
         { ...formState },
         fieldData,
@@ -502,7 +512,7 @@
     if (isLoadingDelivery) {
       return <div>Загружаю варианты доставки...</div>;
     }
-    console.log(zoneList);
+    // console.log(zoneList);
     return (
       <>
         {/* Форма заказа */}
@@ -563,6 +573,7 @@
                 name="form[delivery][id]"
                 className="quickform__select"
                 value={deliveryId}
+                id="delivery-select"
               >
                 {deliveries.map(({ id, name }) => (
                   <option value={id} key={id}>
