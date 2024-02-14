@@ -228,6 +228,7 @@
       CART_SUM_NOW,
       CART_SUM_DELIVERY,
       CART_SUM_OLD_WITH_DELIVERY,
+      CART_SUM_SUPPLIER_WITH_DELIVERY,
       CART_SUM_NOW_WITH_DELIVERY,
     } = cartData || {};
     const isCartItemsLength = cartItems?.length;
@@ -308,7 +309,8 @@
               <li>Товаров: {CART_COUNT_TOTAL} шт.</li>
               <li>Сумма товаров: {CART_SUM_NOW}</li>
               <li>
-                Доставка (id: {currentDeliveryId}): <b>{CART_SUM_DELIVERY}</b>
+                Доставка (id: {currentDeliveryId}):{' '}
+                <b>{zoneId ? CART_SUM_OLD_WITH_DELIVERY : CART_SUM_DELIVERY}</b>
               </li>
               {zoneId && (
                 <li>
@@ -320,7 +322,7 @@
               <li>Скидка: {CART_SUM_DISCOUNT}</li>
               <li>Скидка процент: {CART_SUM_DISCOUNT_PERCENT}</li>
               <li>Итого с доставкой: {CART_SUM_NOW_WITH_DELIVERY}</li>
-              <li>Итого old с доставкой: {CART_SUM_OLD_WITH_DELIVERY}</li>
+              {/* <li>Итого old с доставкой: {CART_SUM_OLD_WITH_DELIVERY}</li> */}
               <li>
                 Итого с доставкой и скидкой:{' '}
                 <b>{CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT}</b>
