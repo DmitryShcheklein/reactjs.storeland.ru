@@ -371,7 +371,7 @@
     const handleRemoveItem = () => {
       deleteCartItemMutation.mutate(GOODS_MOD_ID);
     };
-    const handlePaste = () => {};
+    const handlePaste = () => { };
 
     if (deleteCartItemMutation.isSuccess) {
       return null;
@@ -449,7 +449,7 @@
       useQuickFormData({
         enabled: !Boolean(window.CART_IS_EMPTY),
       });
-    const { deliveries } = quickFormData;
+    const { deliveries, CLIENT_IS_LOGIN } = quickFormData;
     const createOrderMutation = useCreateOrderMutation();
     const { isLoading: isOrderLoading } = createOrderMutation;
     const {
@@ -460,7 +460,10 @@
       },
     } = formState;
     const zoneList = deliveries?.find(({ id }) => id === deliveryId)?.zoneList;
-
+    const [localFormState, setLocalFormState] = useState({
+      wantRegister: false
+    })
+    const { wantRegister } = localFormState;
     const handleSubmit = (event) => {
       event.preventDefault();
       const formElement = event.target;
@@ -547,6 +550,20 @@
             type="email"
             placeholder="Email"
           />
+          {!CLIENT_IS_LOGIN && (
+            <>
+              <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
+                <input type="checkbox" id="contactWantRegister" name="form[contact][want_register]" value="1" onChange={() => setLocalFormState({
+                  ...localFormState,
+                  wantRegister: !wantRegister
+                })} />
+                <label htmlFor="contactWantRegister">Я хочу зарегистрироваться</label>
+              </div>
+              {wantRegister && (
+                <input className="input" type="password" name="form[contact][pass]" maxLength="50" minLength="6" placeholder="Придумайте пароль" />
+              )}
+            </>
+          )}
           <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
             <input
               className="input"

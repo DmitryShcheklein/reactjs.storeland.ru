@@ -3027,6 +3027,10 @@ body.modal-open {overflow: hidden}
   flex-direction: column;
   gap: 15px;
 }
+#orderForm label {
+  cursor: pointer;
+  user-select: none;
+}
 /**/
 .cart._fast._quickform {
   max-width: 1020px;  
