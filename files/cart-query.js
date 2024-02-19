@@ -42,6 +42,7 @@
       coupon_code: '',
       isCouponSend: false,
     },
+    cartRelatedGoods: [],
   };
   const useFormState = (options) => {
     const key = QUERY_KEYS.FormState;
@@ -83,6 +84,7 @@
         const [firstDelivery] = data?.deliveries;
 
         setFormState((prev) => ({
+          ...prev,
           form: {
             ...prev.form,
             contact: {
@@ -114,7 +116,7 @@
         // formData.append('only_body', 1);
 
         for (const pair of formData.entries()) {
-          console.log(pair[0] + ', ' + pair[1]);
+          // console.log(pair[0] + ', ' + pair[1]);
         }
         const { data } = await axios.post(`/cart`, formData, {
           // const { data } = await axios.post(`/order/stage/confirm`, formData, {
@@ -191,6 +193,7 @@
         coupon_code: couponCode,
         isCouponSend,
       },
+      cartRelatedGoods,
     } = formState;
 
     const {
@@ -214,13 +217,6 @@
       formElement
     );
 
-    useEffect(() => {
-      console.log(isCouponSend, currentDeliveryId, zoneId);
-      if (isCouponSend || currentDeliveryId || zoneId) {
-        refetchCart();
-      }
-    }, [isCouponSend, currentDeliveryId, zoneId]);
-
     const {
       CART_SUM_DISCOUNT,
       CART_SUM_DISCOUNT_PERCENT,
@@ -234,6 +230,24 @@
       CART_SUM_NOW_WITH_DELIVERY,
     } = cartData || {};
     const isCartItemsLength = cartItems?.length;
+    const isCartRelatedGoodsLength = cartRelatedGoods?.length;
+
+    useEffect(() => {
+      console.log(
+        isCouponSend,
+        currentDeliveryId,
+        zoneId,
+        isCartRelatedGoodsLength
+      );
+      if (
+        isCouponSend ||
+        currentDeliveryId ||
+        zoneId ||
+        isCartRelatedGoodsLength
+      ) {
+        refetchCart();
+      }
+    }, [isCouponSend, currentDeliveryId, zoneId, isCartRelatedGoodsLength]);
     const clearCartMutation = useClearCartMutation();
 
     const handleSubmit = (event) => {
@@ -297,7 +311,7 @@
 
             {isCartItemsLength ? (
               <ul>
-                {cartItems.map((item) => (
+                {[...cartItems, ...cartRelatedGoods].map((item) => (
                   <CartItem
                     item={item}
                     key={item.GOODS_MOD_ID}
@@ -343,7 +357,7 @@
       GOODS_MOD_ID,
       GOODS_NAME,
       GOODS_MOD_PRICE_NOW,
-      ORDER_LINE_QUANTITY,
+      ORDER_LINE_QUANTITY = 1,
       GOODS_IMAGE,
     } = item;
     const deleteCartItemMutation = useClearCartItemMutation({
@@ -1056,12 +1070,19 @@
     );
   }
   function RelatedGoods() {
-    const { data: cartData, isSuccess, isFetching } = useCart();
+    const { data: cartData, isSuccess, isFetching, refetch } = useCart();
     const { cartRelatedGoods } = cartData || {};
-    console.log(cartRelatedGoods);
+    const [formState, setFormState] = useFormState();
+    // console.log(cartRelatedGoods);
 
     const isCartEmpty =
       window.CART_IS_EMPTY || (!cartData?.CART_COUNT_TOTAL && isSuccess);
+    const addCartHandler = (item) => {
+      setFormState({
+        ...formState,
+        cartRelatedGoods: [...formState.cartRelatedGoods, item],
+      });
+    };
     if (!isSuccess) {
       return null;
     }
@@ -1094,6 +1115,14 @@
                     <strong>Цена:{GOODS_MOD_PRICE_NOW}</strong>
                   </div>
                   <img width="80" src={GOODS_IMAGE} />
+                  <div>
+                    <button
+                      className="button"
+                      onClick={() => addCartHandler(item)}
+                    >
+                      В корзину
+                    </button>
+                  </div>
                 </li>
               );
             })}
