@@ -657,13 +657,6 @@
             quickFormData={quickFormData}
           />
           <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
-            {extraDontCall && (
-              <input
-                type="hidden"
-                name="form[extra][Дозвон]"
-                value="НЕ ПЕРЕЗВАНИВАТЬ"
-              />
-            )}
             <input
               type="checkbox"
               id="contactWantRegister"
@@ -674,6 +667,8 @@
                 })
               }
               checked={extraDontCall}
+              name="form[extra][Дозвон]"
+              value="НЕ ПЕРЕЗВАНИВАТЬ"
             />
             <label htmlFor="contactWantRegister">Не перезванивать</label>
           </div>
