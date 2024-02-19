@@ -378,7 +378,7 @@
     }
 
     return (
-      <li data-key={GOODS_MOD_ID} style={{ position: 'relative' }}>
+      <li style={{ position: 'relative' }}>
         {deleteCartItemMutation.isLoading && <Preloader />}
         <div style={{ display: 'flex', gap: 20 }}>
           <h3>{GOODS_NAME}</h3>
@@ -713,6 +713,7 @@
         <EmptyCart />
         <Cart />
         <OrderForm />
+        <RelatedGoods />
       </>
     );
   }
@@ -1051,6 +1052,53 @@
             )}
           </div>
         </section>
+      </>
+    );
+  }
+  function RelatedGoods() {
+    const { data: cartData, isSuccess, isFetching } = useCart();
+    const { cartRelatedGoods } = cartData || {};
+    console.log(cartRelatedGoods);
+
+    const isCartEmpty =
+      window.CART_IS_EMPTY || (!cartData?.CART_COUNT_TOTAL && isSuccess);
+    if (!isSuccess) {
+      return null;
+    }
+    if (isCartEmpty) {
+      return null;
+    }
+    return (
+      <>
+        <h2 className="section-title">С этим товаром покупают</h2>
+        {cartRelatedGoods?.length ? (
+          <ul>
+            {cartRelatedGoods.map((item) => {
+              const {
+                GOODS_MOD_ID,
+                GOODS_NAME,
+                GOODS_MOD_PRICE_NOW,
+                ORDER_LINE_QUANTITY,
+                GOODS_IMAGE,
+              } = item;
+
+              return (
+                <li key={GOODS_MOD_ID} style={{ position: 'relative' }}>
+                  <div style={{ display: 'flex', gap: 20 }}>
+                    <h3>{GOODS_NAME}</h3>
+                  </div>
+                  <div>
+                    <strong>Кол-во:{ORDER_LINE_QUANTITY}</strong>
+                  </div>
+                  <div>
+                    <strong>Цена:{GOODS_MOD_PRICE_NOW}</strong>
+                  </div>
+                  <img width="80" src={GOODS_IMAGE} />
+                </li>
+              );
+            })}
+          </ul>
+        ) : null}
       </>
     );
   }
