@@ -68,7 +68,7 @@
           <td class="cell2">{ORDER_DELIVERY_ADDRESS | nl2br}</td>
         </tr>
       {% ENDIF %}
-      {% IF ORDER_DELIVERY_CONVENIENT_DATE %}
+      {% IF ORDER_DELIVERY_CONVENIENT_DATE || ORDER_DELIVERY_CONVENIENT_HOUR_FROM || ORDER_DELIVERY_CONVENIENT_HOUR_TO %}
         <tr>
           <td class="cell1"><span>Удобное время доставки:</span></td>
           <td class="cell2">
@@ -183,3 +183,4 @@
   </div>
 {% ENDIF %}
 </div>
+
