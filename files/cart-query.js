@@ -788,8 +788,7 @@
                     name="form[delivery][region]"
                     value={ORDER_FORM_CONTACT_REGION}
                     maxLength="255"
-                    className="input"
-                    required
+                    className="input"                    
                   />
                 </div>
               </div>
@@ -807,8 +806,7 @@
                     name="form[delivery][city]"
                     value={ORDER_FORM_CONTACT_CITY}
                     className="input"
-                    maxLength="255"
-                    required
+                    maxLength="255"                    
                   />
                 </div>
               </div>
@@ -829,7 +827,7 @@
                       value=""
                       maxLength="500"
                       className="input"
-                      required
+                      
                     />
                   </div>
                 </div>
@@ -845,7 +843,7 @@
                       value=""
                       maxLength="50"
                       className="input"
-                      required
+                      
                     />
                   </div>
                 </div>
@@ -861,7 +859,7 @@
                       value=""
                       maxLength="50"
                       className="input"
-                      required
+                      
                     />
                   </div>
                 </div>
@@ -873,8 +871,7 @@
                   name="form[delivery][address]"
                   value={ORDER_FORM_CONTACT_ADDR}
                   maxLength="500"
-                  className="input"
-                  required
+                  className="input"                  
                 />
               </>
             )}
@@ -893,7 +890,7 @@
                     minLength="5"
                     maxLength="6"
                     className="input"
-                    required
+                    
                   />
                 </div>
               </div>
@@ -916,8 +913,7 @@
                       className="input quickform__input-deliveryConvenientDate"
                       maxLength="10"
                       minLength="10"
-                      autoComplete="off"
-                      required
+                      autoComplete="off"                      
                     />
                   </div>
                 </div>
