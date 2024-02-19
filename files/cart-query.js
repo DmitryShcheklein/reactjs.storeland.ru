@@ -717,6 +717,7 @@
       ORDER_FORM_CONTACT_COUNTRY,
       ORDER_FORM_DELIVERY_REGION,
       ORDER_FORM_DELIVERY_CITY,
+      ORDER_FORM_DELIVERY_COUNTRY_ID,
       countryList,
       SETTINGS_ORDER_FIELDS,
     } = quickFormData;
@@ -763,6 +764,7 @@
                         <option
                           key={id}
                           defaultValue={id}
+                          selected={id === ORDER_FORM_DELIVERY_COUNTRY_ID}
                           //  {% IF country_list.ID=ORDER_FORM_DELIVERY_COUNTRY_ID %}selected="selected"{% ENDIF %}
                         >
                           {name}
@@ -958,7 +960,6 @@
             {/* <!-- Если поле комментарии запрашивается --> */}
             {Comment.isVisible && (
               <section className="quickform__row -comment">
-                <h3 className="quickform__title">Дополнительная информация</h3>
                 <div className="quickform__list">
                   <div className="quickform__item">
                     <label className="quickform__label">
