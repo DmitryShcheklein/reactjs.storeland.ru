@@ -25,26 +25,26 @@
     QuickFormData: 'QuickFormData',
   };
 
-  const INITIAL_FORM_DATA = {
-    form: {
-      contact: {
-        person: '',
-        phone: '',
-        email: '',
+  function useFormState(options) {
+    const INITIAL_FORM_DATA = {
+      form: {
+        contact: {
+          person: '',
+          phone: '',
+          email: '',
+        },
+        delivery: {
+          id: undefined,
+          zone_id: undefined,
+        },
+        payment: {
+          id: undefined,
+        },
+        coupon_code: '',
+        isCouponSend: false,
       },
-      delivery: {
-        id: undefined,
-        zone_id: undefined,
-      },
-      payment: {
-        id: undefined,
-      },
-      coupon_code: '',
-      isCouponSend: false,
-    },
-    cartRelatedGoods: [],
-  };
-  const useFormState = (options) => {
+      cartRelatedGoods: [],
+    };
     const key = QUERY_KEYS.FormState;
     const query = useQuery({
       queryKey: [key],
@@ -55,9 +55,9 @@
     });
 
     return [query.data, (value) => queryClient.setQueryData([key], value)];
-  };
+  }
 
-  const useQuickFormData = (option) => {
+  function useQuickFormData(option) {
     const [_, setFormState] = useFormState();
 
     return useQuery({
@@ -104,9 +104,9 @@
       },
       ...option,
     });
-  };
+  }
 
-  const useCart = (option, formElement) => {
+  function useCart(option, formElement) {
     return useQuery({
       queryKey: [QUERY_KEYS.Cart],
       queryFn: async () => {
@@ -134,9 +134,9 @@
       enabled: Boolean(formElement),
       ...option,
     });
-  };
+  }
 
-  const useClearCartMutation = (options) => {
+  function useClearCartMutation(options) {
     return useMutation({
       mutationFn: async () => {
         const response = await axios.get(`/cart/truncate/`);
@@ -148,8 +148,8 @@
       },
       ...options,
     });
-  };
-  const useClearCartItemMutation = (options) => {
+  }
+  function useClearCartItemMutation(options) {
     return useMutation({
       mutationFn: async (itemId) => {
         const response = await axios.get(`/cart/delete/${itemId}`);
@@ -158,9 +158,9 @@
       },
       ...options,
     });
-  };
+  }
 
-  const useCreateOrderMutation = () => {
+  function useCreateOrderMutation() {
     return useMutation({
       mutationFn: (form) => {
         const formData = new FormData(form);
@@ -180,7 +180,7 @@
         location.href = data.location;
       },
     });
-  };
+  }
 
   function Cart() {
     const formRef = useRef(null);
