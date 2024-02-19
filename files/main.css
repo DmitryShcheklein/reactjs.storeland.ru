@@ -1422,6 +1422,44 @@ body.modal-open {overflow: hidden}
 @media all and (max-width:576px) {
   .copyright {text-align: left}
 }
+/* Аккордеон в form */
+.form-callapse .form-callapse__list {margin: 0;padding: 0;list-style: none}
+.form-callapse .form-callapse__list-item {line-height: 1; margin-bottom: 15px}
+.form-callapse .form-callapse__list-item :last-child {
+  margin-bottom: 0;
+}
+.form-callapse .form-callapse__list-link:hover {color: #6053c7}
+
+
+  .form-callapse .form-callapse__list {display:none;    padding:15px 20px 0;}
+  .form-callapse .form-callapse__list._active {display: block;}
+  .form-callapse .form-callapse__title  {
+    width: 100%;
+    position: relative;
+    padding: 0px 20px;
+    border-radius: 3px;
+    background-color: #6053c7;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 400;
+    margin-bottom: 0;
+    height: 35px;
+    line-height: 35px;
+  }
+  .form-callapse .form-callapse__title:before {
+    content: '';
+    display:block;
+    width: 15px;
+    height: 15px;
+    position: absolute;
+    right: 10px;
+    top: 10px;    
+    background-image: url("data:image/svg+xml,%0A%3Csvg fill='%23fff' viewBox='0 0 448 448' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='m408 184h-136c-4.417969 0-8-3.582031-8-8v-136c0-22.089844-17.910156-40-40-40s-40 17.910156-40 40v136c0 4.417969-3.582031 8-8 8h-136c-22.089844 0-40 17.910156-40 40s17.910156 40 40 40h136c4.417969 0 8 3.582031 8 8v136c0 22.089844 17.910156 40 40 40s40-17.910156 40-40v-136c0-4.417969 3.582031-8 8-8h136c22.089844 0 40-17.910156 40-40s-17.910156-40-40-40zm0 0'/%3E%3C/svg%3E");
+  } 
+  .form-callapse .form-callapse__title._active:before {
+    background-image: url("data:image/svg+xml,%3Csvg fill='%23fff' viewBox='0 0 459.313 459.314' xmlns='http://www.w3.org/2000/svg' %3E%3Cpath d='M459.313 229.648c0 22.201-17.992 40.199-40.205 40.199H40.181c-11.094 0-21.14-4.498-28.416-11.774C4.495 250.808 0 240.76 0 229.66c-.006-22.204 17.992-40.199 40.202-40.193h378.936c22.195.005 40.17 17.989 40.175 40.181z'/%3E%3C/svg%3E");
+  }
+
 /* Аккордеон в подвале */
 .footer-collapse .footer-collapse__list {margin: 0;padding: 0;list-style: none}
 .footer-collapse .footer-collapse__list-item {line-height: 1; margin-bottom: 15px}
@@ -3211,7 +3249,12 @@ body.modal-open {overflow: hidden}
     width: 50%;
     padding: 0 10px;
 }
+.quickform__select-box._full{
+  display: flex;
+  flex-direction: column;
+}
 .quickform__list.-deliveryConvenient {
+  display: flex;
   width: auto;
   justify-content: space-between;
   margin: 0 -10px;

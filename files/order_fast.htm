@@ -9,6 +9,15 @@
   "ORDER_FORM_CONTACT_REGION" : "{ORDER_FORM_CONTACT_REGION}",
   "ORDER_FORM_CONTACT_ZIP_CODE":"{ORDER_FORM_CONTACT_ZIP_CODE}",
   "ORDER_FORM_CONTACT_COUNTRY":"{ORDER_FORM_CONTACT_COUNTRY}",
+  "countryList": [
+{% FOR country_list %}
+{
+  "id": "{country_list.ID}",
+  "name": "{country_list.NAME}"
+}
+{% IFNOT country_list.last %},{% ENDIF %}
+{% ENDFOR %}
+],
   "deliveries": [
   {% FOR order_delivery %}
    {
