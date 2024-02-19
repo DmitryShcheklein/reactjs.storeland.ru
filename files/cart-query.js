@@ -463,9 +463,10 @@
     const localFormState = useState({
       wantRegister: false,
       addressCollapsed: false,
+      extraDontCall: false,
     });
     const [localForm, setLocalFormState] = localFormState;
-    const { wantRegister } = localForm;
+    const { wantRegister, extraDontCall } = localForm;
     const handleSubmit = (event) => {
       event.preventDefault();
       const formElement = event.target;
@@ -655,6 +656,27 @@
             localFormState={localFormState}
             quickFormData={quickFormData}
           />
+          <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
+            {extraDontCall && (
+              <input
+                type="hidden"
+                name="form[extra][Дозвон]"
+                value="НЕ ПЕРЕЗВАНИВАТЬ"
+              />
+            )}
+            <input
+              type="checkbox"
+              id="contactWantRegister"
+              onChange={() =>
+                setLocalFormState({
+                  ...localForm,
+                  extraDontCall: !extraDontCall,
+                })
+              }
+              checked={extraDontCall}
+            />
+            <label htmlFor="contactWantRegister">Не перезванивать</label>
+          </div>
           <button className="button _big" disabled={isOrderLoading}>
             {isOrderLoading ? 'Оформляется...' : 'Оформить'}
           </button>
