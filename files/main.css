@@ -3421,6 +3421,9 @@ body.modal-open {overflow: hidden}
 }
 .quickform .quickform__item.-deliveryConvenientTime .quickform__input-wrap {display: -webkit-box;display: -ms-flexbox;display: flex;    height: 100%;    justify-content: space-between;}
 .quickform .quickform__item.-deliveryConvenientTime .input.error ~ .quickform__label {border-color: #607d8b!important}
+.quickform__select {
+  display: block;
+}
 .quickform .quickform__select-box {
     width: calc(50% - 7.5px);
 }

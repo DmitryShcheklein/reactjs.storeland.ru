@@ -738,10 +738,12 @@
       ORDER_FORM_DELIVERY_COUNTRY_ID,
       countryList,
       SETTINGS_ORDER_FIELDS,
+      convenient_time_from_list,
+      convenient_time_to_list,
     } = quickFormData;
     const { Country, ConvenientTime, ZipCode, Region, City, Address, Comment } =
       SETTINGS_ORDER_FIELDS;
-    const [{ from, to }, setConvenentState] = useState({
+    const [{ from, to }, setConvenientState] = useState({
       from: 0,
       to: 24,
     });
@@ -780,22 +782,19 @@
                       className="quickform__select"
                       id="quickDeliveryCountry"
                       name="form[delivery][country_id]"
-                      className="quickform__country-select"
-                      required
+                      defaultValue={ORDER_FORM_DELIVERY_COUNTRY_ID}
                     >
-                      <option></option>
-                      {countryList?.map(({ id, name }) => {
-                        return (
-                          <option
-                            key={id}
-                            defaultValue={id}
-                            selected={id === ORDER_FORM_DELIVERY_COUNTRY_ID}
-                            //  {% IF country_list.ID=ORDER_FORM_DELIVERY_COUNTRY_ID %}selected="selected"{% ENDIF %}
-                          >
-                            {name}
-                          </option>
-                        );
-                      })}
+                      <option value=""></option>
+                      {countryList?.map(({ id, name }) => (
+                        <option
+                          key={id}
+                          value={id}
+                          // selected={id === ORDER_FORM_DELIVERY_COUNTRY_ID}
+                          //  {% IF country_list.ID=ORDER_FORM_DELIVERY_COUNTRY_ID %}selected="selected"{% ENDIF %}
+                        >
+                          {name}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -811,7 +810,7 @@
                       type="text"
                       id="quickDeliveryRegion"
                       name="form[delivery][region]"
-                      value={ORDER_FORM_CONTACT_REGION}
+                      defaultValue={ORDER_FORM_CONTACT_REGION}
                       maxLength="255"
                       className="input"
                     />
@@ -829,7 +828,7 @@
                       type="text"
                       id="quickDeliveryCity"
                       name="form[delivery][city]"
-                      value={ORDER_FORM_CONTACT_CITY}
+                      defaultValue={ORDER_FORM_CONTACT_CITY}
                       className="input"
                       maxLength="255"
                     />
@@ -849,7 +848,7 @@
                         type="text"
                         id="quickDeliveryAddressStreet"
                         name="form[delivery][address_street]"
-                        value=""
+                        defaultValue=""
                         maxLength="500"
                         className="input"
                       />
@@ -864,7 +863,7 @@
                         type="text"
                         id="quickDeliveryAddressHome"
                         name="form[delivery][address_home]"
-                        value=""
+                        defaultValue=""
                         maxLength="50"
                         className="input"
                       />
@@ -879,7 +878,7 @@
                         type="text"
                         id="quickDeliveryAddressFlat"
                         name="form[delivery][address_flat]"
-                        value=""
+                        defaultValue=""
                         maxLength="50"
                         className="input"
                       />
@@ -891,7 +890,7 @@
                     type="hidden"
                     id="quickDeliveryAddress"
                     name="form[delivery][address]"
-                    value={ORDER_FORM_CONTACT_ADDR}
+                    defaultValue={ORDER_FORM_CONTACT_ADDR}
                     maxLength="500"
                     className="input"
                   />
@@ -908,7 +907,7 @@
                       type="number"
                       id="quickDeliveryZipCode"
                       name="form[delivery][zip_code]"
-                      value={ORDER_FORM_CONTACT_ZIP_CODE}
+                      defaultValue={ORDER_FORM_CONTACT_ZIP_CODE}
                       minLength="5"
                       maxLength="6"
                       className="input"
@@ -944,7 +943,7 @@
                 </div>
                 <div className="quickform__item -deliveryConvenientTime">
                   <div className="quickform__select-box _full">
-                    <input
+                    {/* <input
                       type="hidden"
                       name="form[delivery][convenient_time_from]"
                       defaultValue={from}
@@ -953,28 +952,77 @@
                       type="hidden"
                       name="form[delivery][convenient_time_to]"
                       defaultValue={to}
-                    />
+                    /> */}
 
                     <label className="quickform__label">
                       Удобное время доставки
                     </label>
-                    <Nouislider
-                      id="convenient-time"
-                      style={{ marginTop: 6 }}
-                      range={{ min: 0, max: 24 }}
-                      start={[0, 24]}
-                      step={1}
-                      connect
-                      tooltips
-                      pips={{ mode: 'steps' }}
-                      onSlide={(render, handle, value, un, percent) => {
-                        const [firstValue, secondValue] = value;
-                        setConvenentState({
-                          from: firstValue,
-                          to: secondValue,
-                        });
-                      }}
-                    />
+                    <div
+                      style={{ display: 'flex', gap: 5, alignItems: 'center' }}
+                    >
+                      <div className="quickform__select-box -from">
+                        <label className="quickform__label">С</label>
+                        <select
+                          className="quickform__select-convenient _from"
+                          name="form[delivery][convenient_time_from]"
+                          defaultValue=""
+                        >
+                          <option value=""></option>
+                          {convenient_time_from_list?.map(
+                            ({ HOUR, HOUR_INT, SELECTED }) => (
+                              <option
+                                key={HOUR_INT}
+                                value={HOUR_INT}
+                                // selected={SELECTED ? 'selected' : ''}
+                              >
+                                {HOUR}
+                              </option>
+                            )
+                          )}
+                        </select>
+                      </div>
+                      <div className="quickform__select-box -to">
+                        <label className="quickform__label">До</label>
+                        <select
+                          className="quickform__select-convenient _to"
+                          name="form[delivery][convenient_time_to]"
+                          defaultValue=""
+                        >
+                          <option value=""></option>
+                          {convenient_time_to_list?.map(
+                            ({ HOUR, HOUR_INT, SELECTED }) => (
+                              <option
+                                key={HOUR_INT}
+                                value={HOUR_INT}
+                                // selected={SELECTED ? 'selected' : ''}
+                              >
+                                {HOUR}
+                              </option>
+                            )
+                          )}
+                        </select>
+                      </div>
+                    </div>
+
+                    {false && (
+                      <Nouislider
+                        id="convenient-time"
+                        style={{ marginTop: 6 }}
+                        range={{ min: 0, max: 24 }}
+                        start={[0, 24]}
+                        step={1}
+                        connect
+                        tooltips
+                        pips={{ mode: 'steps' }}
+                        onSlide={(render, handle, value, un, percent) => {
+                          const [firstValue, secondValue] = value;
+                          setConvenentState({
+                            from: firstValue,
+                            to: secondValue,
+                          });
+                        }}
+                      />
+                    )}
                   </div>
                 </div>
               </div>

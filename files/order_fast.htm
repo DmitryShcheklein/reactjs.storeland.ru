@@ -49,6 +49,28 @@
 {% IFNOT country_list.last %},{% ENDIF %}
 {% ENDFOR %}
 ],
+  "convenient_time_from_list": [
+{% FOR convenient_time_from_list %}
+{
+  "ID": "{convenient_time_from_list.ID}",
+  "SELECTED": "{convenient_time_from_list.SELECTED}",
+  "HOUR": "{convenient_time_from_list.HOUR}",
+  "HOUR_INT": "{convenient_time_from_list.HOUR_INT}"
+}
+{% IFNOT convenient_time_from_list.last %},{% ENDIF %}
+{% ENDFOR %}
+],
+  "convenient_time_to_list": [
+{% FOR convenient_time_to_list %}
+{
+  "ID": "{convenient_time_to_list.ID}",
+  "SELECTED": "{convenient_time_to_list.SELECTED}",
+  "HOUR": "{convenient_time_to_list.HOUR}",
+  "HOUR_INT": "{convenient_time_to_list.HOUR_INT}"
+}
+{% IFNOT convenient_time_to_list.last %},{% ENDIF %}
+{% ENDFOR %}
+],
   "deliveries": [
   {% FOR order_delivery %}
    {
