@@ -9,6 +9,36 @@
   "ORDER_FORM_CONTACT_REGION" : "{ORDER_FORM_CONTACT_REGION}",
   "ORDER_FORM_CONTACT_ZIP_CODE":"{ORDER_FORM_CONTACT_ZIP_CODE}",
   "ORDER_FORM_CONTACT_COUNTRY":"{ORDER_FORM_CONTACT_COUNTRY}",
+  "SETTINGS_ORDER_FIELDS" :{
+    "ConvenientTime": {
+      "isVisible": {% IF SETTINGS_ORDER_FIELDS_CONVENIENT_TIME < 3 %}true{% ELSE %}false{% ENDIF %},
+      "isRequired": {% IF SETTINGS_ORDER_FIELDS_CONVENIENT_TIME = 1 %}true{% ELSE %}false{% ENDIF %}
+    },
+    "Country": {
+      "isVisible": {% IF SETTINGS_ORDER_FIELDS_COUNTRY < 3 %}true{% ELSE %}false{% ENDIF %},
+      "isRequired": {% IF SETTINGS_ORDER_FIELDS_COUNTRY = 1 %}true{% ELSE %}false{% ENDIF %}
+    },
+    "ZipCode": {
+      "isVisible": {% IF SETTINGS_ORDER_FIELDS_ZIP_CODE < 3 %}true{% ELSE %}false{% ENDIF %},
+      "isRequired": {% IF SETTINGS_ORDER_FIELDS_ZIP_CODE = 1 %}true{% ELSE %}false{% ENDIF %}
+    },
+    "Region": {
+      "isVisible": {% IF SETTINGS_ORDER_FIELDS_REGION < 3 %}true{% ELSE %}false{% ENDIF %},
+      "isRequired": {% IF SETTINGS_ORDER_FIELDS_REGION = 1 %}true{% ELSE %}false{% ENDIF %}
+    },
+    "City": {
+      "isVisible": {% IF SETTINGS_ORDER_FIELDS_CITY < 3 %}true{% ELSE %}false{% ENDIF %},
+      "isRequired": {% IF SETTINGS_ORDER_FIELDS_CITY = 1 %}true{% ELSE %}false{% ENDIF %}
+    },
+    "Address": {
+      "isVisible": {% IF SETTINGS_ORDER_FIELDS_ADDRESS < 3 %}true{% ELSE %}false{% ENDIF %},
+      "isRequired": {% IF SETTINGS_ORDER_FIELDS_ADDRESS = 1 %}true{% ELSE %}false{% ENDIF %}
+    },
+    "Comment": {
+      "isVisible": {% IF SETTINGS_ORDER_FIELDS_COMMENT < 3 %}true{% ELSE %}false{% ENDIF %},
+      "isRequired": {% IF SETTINGS_ORDER_FIELDS_COMMENT = 1 %}true{% ELSE %}false{% ENDIF %}
+    }
+  },
   "countryList": [
 {% FOR country_list %}
 {
