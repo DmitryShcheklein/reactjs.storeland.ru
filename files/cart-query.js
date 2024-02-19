@@ -707,6 +707,7 @@
   );
 
   function Adresses({ localFormState, quickFormData }) {
+    const Nouislider = window.ReactNouislider;
     const [localForm, setLocalFormState] = localFormState;
     const { addressCollapsed } = localForm;
     const {
@@ -723,12 +724,17 @@
     } = quickFormData;
     const { Country, ConvenientTime, ZipCode, Region, City, Address, Comment } =
       SETTINGS_ORDER_FIELDS;
+    const [{ from, to }, setConvenentState] = useState({
+      from: 0,
+      to: 24,
+    });
 
     return (
       <>
         {/* <!-- Адрес доставки--> */}
         <section className="quickform__row -adress form-callapse">
           <button
+            type="button"
             className="form-callapse__title"
             onClick={() => {
               setLocalFormState({
@@ -745,156 +751,154 @@
               (addressCollapsed ? '' : ' _active')
             }
           >
-            {/* <!-- Если поле страны доставки запрашивается --> */}
-            {Country.isVisible && (
-              <div className="quickform__item">
-                <div className="quickform__input-wrap">
-                  <label className="quickform__label">Выберите страну</label>
-                  <select
-                    placeholder="Выберите страну"
-                    className="quickform__select"
-                    id="quickDeliveryCountry"
-                    name="form[delivery][country_id]"
-                    className="quickform__country-select"
-                    required
-                  >
-                    <option></option>
-                    {countryList?.map(({ id, name }) => {
-                      return (
-                        <option
-                          key={id}
-                          defaultValue={id}
-                          selected={id === ORDER_FORM_DELIVERY_COUNTRY_ID}
-                          //  {% IF country_list.ID=ORDER_FORM_DELIVERY_COUNTRY_ID %}selected="selected"{% ENDIF %}
-                        >
-                          {name}
-                        </option>
-                      );
-                    })}
-                  </select>
-                </div>
-              </div>
-            )}
-
-            {/* <!-- Если поле области запрашивается --> */}
-            {Region.isVisible && (
-              <div className="quickform__item">
-                <div className="quickform__input-wrap">
-                  <label className="quickform__label">Область</label>
-                  <input
-                    placeholder=""
-                    type="text"
-                    id="quickDeliveryRegion"
-                    name="form[delivery][region]"
-                    value={ORDER_FORM_CONTACT_REGION}
-                    maxLength="255"
-                    className="input"                    
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* <!-- Если поле города запрашивается --> */}
-            {City.isVisible && (
-              <div className="quickform__item">
-                <div className="quickform__input-wrap">
-                  <label className="quickform__label">Город</label>
-                  <input
-                    placeholder=""
-                    type="text"
-                    id="quickDeliveryCity"
-                    name="form[delivery][city]"
-                    value={ORDER_FORM_CONTACT_CITY}
-                    className="input"
-                    maxLength="255"                    
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* <!-- Если поле адреса доставки запрашивается --> */}
-            {Address.isVisible && (
-              <>
-                {/* <!-- Улица --> */}
+            <div>
+              {/* <!-- Если поле страны доставки запрашивается --> */}
+              {Country.isVisible && (
                 <div className="quickform__item">
                   <div className="quickform__input-wrap">
-                    <label className="quickform__label">Улица</label>
-                    <input
-                      placeholder=""
-                      type="text"
-                      id="quickDeliveryAddressStreet"
-                      name="form[delivery][address_street]"
-                      value=""
-                      maxLength="500"
-                      className="input"
-                      
-                    />
+                    <label className="quickform__label">Выберите страну</label>
+                    <select
+                      placeholder="Выберите страну"
+                      className="quickform__select"
+                      id="quickDeliveryCountry"
+                      name="form[delivery][country_id]"
+                      className="quickform__country-select"
+                      required
+                    >
+                      <option></option>
+                      {countryList?.map(({ id, name }) => {
+                        return (
+                          <option
+                            key={id}
+                            defaultValue={id}
+                            selected={id === ORDER_FORM_DELIVERY_COUNTRY_ID}
+                            //  {% IF country_list.ID=ORDER_FORM_DELIVERY_COUNTRY_ID %}selected="selected"{% ENDIF %}
+                          >
+                            {name}
+                          </option>
+                        );
+                      })}
+                    </select>
                   </div>
                 </div>
-                {/* <!-- Поле Дом/Корпус --> */}
-                <div className="quickform__item -small -first">
-                  <div className="quickform__input-wrap">
-                    <label className="quickform__label">Дом</label>
-                    <input
-                      placeholder=""
-                      type="text"
-                      id="quickDeliveryAddressHome"
-                      name="form[delivery][address_home]"
-                      value=""
-                      maxLength="50"
-                      className="input"
-                      
-                    />
-                  </div>
-                </div>
-                {/* <!-- Поле Квартира --> */}
-                <div className="quickform__item -small -second">
-                  <div className="quickform__input-wrap">
-                    <label className="quickform__label">Квартира</label>
-                    <input
-                      placeholder=""
-                      type="text"
-                      id="quickDeliveryAddressFlat"
-                      name="form[delivery][address_flat]"
-                      value=""
-                      maxLength="50"
-                      className="input"
-                      
-                    />
-                  </div>
-                </div>
+              )}
 
-                <input
-                  placeholder=""
-                  type="hidden"
-                  id="quickDeliveryAddress"
-                  name="form[delivery][address]"
-                  value={ORDER_FORM_CONTACT_ADDR}
-                  maxLength="500"
-                  className="input"                  
-                />
-              </>
-            )}
+              {/* <!-- Если поле области запрашивается --> */}
+              {Region.isVisible && (
+                <div className="quickform__item">
+                  <div className="quickform__input-wrap">
+                    <label className="quickform__label">Область</label>
+                    <input
+                      placeholder=""
+                      type="text"
+                      id="quickDeliveryRegion"
+                      name="form[delivery][region]"
+                      value={ORDER_FORM_CONTACT_REGION}
+                      maxLength="255"
+                      className="input"
+                    />
+                  </div>
+                </div>
+              )}
 
-            {/* <!-- Если поле почтового индекса запрашивается --> */}
-            {ZipCode.isVisible && (
-              <div className="quickform__item -small -third">
-                <div className="quickform__input-wrap">
-                  <label className="quickform__label">Индекс</label>
+              {/* <!-- Если поле города запрашивается --> */}
+              {City.isVisible && (
+                <div className="quickform__item">
+                  <div className="quickform__input-wrap">
+                    <label className="quickform__label">Город</label>
+                    <input
+                      placeholder=""
+                      type="text"
+                      id="quickDeliveryCity"
+                      name="form[delivery][city]"
+                      value={ORDER_FORM_CONTACT_CITY}
+                      className="input"
+                      maxLength="255"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* <!-- Если поле адреса доставки запрашивается --> */}
+              {Address.isVisible && (
+                <>
+                  {/* <!-- Улица --> */}
+                  <div className="quickform__item">
+                    <div className="quickform__input-wrap">
+                      <label className="quickform__label">Улица</label>
+                      <input
+                        placeholder=""
+                        type="text"
+                        id="quickDeliveryAddressStreet"
+                        name="form[delivery][address_street]"
+                        value=""
+                        maxLength="500"
+                        className="input"
+                      />
+                    </div>
+                  </div>
+                  {/* <!-- Поле Дом/Корпус --> */}
+                  <div className="quickform__item -small -first">
+                    <div className="quickform__input-wrap">
+                      <label className="quickform__label">Дом</label>
+                      <input
+                        placeholder=""
+                        type="text"
+                        id="quickDeliveryAddressHome"
+                        name="form[delivery][address_home]"
+                        value=""
+                        maxLength="50"
+                        className="input"
+                      />
+                    </div>
+                  </div>
+                  {/* <!-- Поле Квартира --> */}
+                  <div className="quickform__item -small -second">
+                    <div className="quickform__input-wrap">
+                      <label className="quickform__label">Квартира</label>
+                      <input
+                        placeholder=""
+                        type="text"
+                        id="quickDeliveryAddressFlat"
+                        name="form[delivery][address_flat]"
+                        value=""
+                        maxLength="50"
+                        className="input"
+                      />
+                    </div>
+                  </div>
+
                   <input
                     placeholder=""
-                    type="number"
-                    id="quickDeliveryZipCode"
-                    name="form[delivery][zip_code]"
-                    value={ORDER_FORM_CONTACT_ZIP_CODE}
-                    minLength="5"
-                    maxLength="6"
+                    type="hidden"
+                    id="quickDeliveryAddress"
+                    name="form[delivery][address]"
+                    value={ORDER_FORM_CONTACT_ADDR}
+                    maxLength="500"
                     className="input"
-                    
                   />
+                </>
+              )}
+
+              {/* <!-- Если поле почтового индекса запрашивается --> */}
+              {ZipCode.isVisible && (
+                <div className="quickform__item -small -third">
+                  <div className="quickform__input-wrap">
+                    <label className="quickform__label">Индекс</label>
+                    <input
+                      placeholder=""
+                      type="number"
+                      id="quickDeliveryZipCode"
+                      name="form[delivery][zip_code]"
+                      value={ORDER_FORM_CONTACT_ZIP_CODE}
+                      minLength="5"
+                      maxLength="6"
+                      className="input"
+                    />
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
             {/* <!-- Если поле даты доставки запрашивается --> */}
             {ConvenientTime.isVisible && (
@@ -913,7 +917,7 @@
                       className="input quickform__input-deliveryConvenientDate"
                       maxLength="10"
                       minLength="10"
-                      autoComplete="off"                      
+                      autoComplete="off"
                     />
                   </div>
                 </div>
@@ -922,32 +926,34 @@
                     <input
                       type="hidden"
                       name="form[delivery][convenient_time_from]"
-                      value="0"
+                      defaultValue={from}
                     />
                     <input
                       type="hidden"
                       name="form[delivery][convenient_time_to]"
-                      value="0"
+                      defaultValue={to}
                     />
 
                     <label className="quickform__label">
                       Удобное время доставки
                     </label>
-                    <select className="quickform__select-convenient _period">
-                      <option value="">Выбрать</option>
-                      <option value="0-2">00:00 - 02:00</option>
-                      <option value="2-4">02:00 - 04:00</option>
-                      <option value="4-6">04:00 - 06:00</option>
-                      <option value="6-8">06:00 - 08:00</option>
-                      <option value="8-10">08:00 - 10:00</option>
-                      <option value="10-12">10:00 - 12:00</option>
-                      <option value="12-14">12:00 - 14:00</option>
-                      <option value="14-16">14:00 - 16:00</option>
-                      <option value="16-18">16:00 - 18:00</option>
-                      <option value="18-20">18:00 - 20:00</option>
-                      <option value="20-22">20:00 - 22:00</option>
-                      <option value="22-24">22:00 - 24:00</option>
-                    </select>
+                    <Nouislider
+                      id="convenient-time"
+                      style={{ marginTop: 6 }}
+                      range={{ min: 0, max: 24 }}
+                      start={[0, 24]}
+                      step={1}
+                      connect
+                      tooltips
+                      pips={{ mode: 'steps' }}
+                      onSlide={(render, handle, value, un, percent) => {
+                        const [firstValue, secondValue] = value;
+                        setConvenentState({
+                          from: firstValue,
+                          to: secondValue,
+                        });
+                      }}
+                    />
                   </div>
                 </div>
               </div>

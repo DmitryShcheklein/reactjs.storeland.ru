@@ -1422,6 +1422,16 @@ body.modal-open {overflow: hidden}
 @media all and (max-width:576px) {
   .copyright {text-align: left}
 }
+#convenient-time .noUi-horizontal .noUi-tooltip {
+  top: 120%!important;
+}
+#convenient-time .noUi-tooltip {
+  display: none;
+}
+#convenient-time .noUi-active .noUi-tooltip {
+  display: block;
+}
+
 /* Аккордеон в form */
 .form-callapse .form-callapse__list {margin: 0;padding: 0;list-style: none}
 .form-callapse .form-callapse__list-item {line-height: 1; margin-bottom: 15px}
