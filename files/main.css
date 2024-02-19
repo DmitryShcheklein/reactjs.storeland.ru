@@ -3274,10 +3274,13 @@ body.modal-open {overflow: hidden}
   padding: 0 10px;
 }
 @media (max-width: 576px){
+  .quickform__list.-deliveryConvenient {
+    flex-direction: column;
+  }
   .quickform__list.-deliveryConvenient .quickform__item {
     width: 100%;
   }
-  .quickform__list.-deliveryConvenient .quickform__item.-deliveryConvenientTime {margin-bottom: 0;}
+  .quickform__list.-deliveryConvenient .quickform__item.-deliveryConvenientTime {margin-bottom: 0;    height: 100px;}
 }
 
 @media(max-width: 576px){
