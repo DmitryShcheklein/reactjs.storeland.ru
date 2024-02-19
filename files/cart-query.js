@@ -745,6 +745,7 @@
       from: 0,
       to: 24,
     });
+    const [date, setDate] = useState('');
 
     return (
       <>
@@ -927,14 +928,17 @@
                     </label>
                     <input
                       placeholder="01.01.2021"
-                      type="text"
+                      type="date"
                       id="deliveryConvenientDate"
                       name="form[delivery][convenient_date]"
-                      value=""
+                      value={date}
                       className="input quickform__input-deliveryConvenientDate"
-                      maxLength="10"
-                      minLength="10"
                       autoComplete="off"
+                      onChange={(evt) => {
+                        const { value } = evt.target;
+
+                        setDate(value);
+                      }}
                     />
                   </div>
                 </div>
