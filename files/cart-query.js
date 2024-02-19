@@ -359,6 +359,9 @@
       GOODS_MOD_PRICE_NOW,
       ORDER_LINE_QUANTITY = 1,
       GOODS_IMAGE,
+      GOODS_URL,
+      GOODS_MOD_ART_NUMBER,
+      distinctiveProperties,
     } = item;
     const deleteCartItemMutation = useClearCartItemMutation({
       onSuccess: () => {
@@ -410,12 +413,28 @@
           </button>
         </div>
         <div>
+          <strong>Артикул:{GOODS_MOD_ART_NUMBER}</strong>
+        </div>
+        {distinctiveProperties.length ? (
+          <>
+            {distinctiveProperties.map(({ NAME, VALUE }, idx) => (
+              <div key={idx}>
+                <strong>
+                  {NAME}: {VALUE}
+                </strong>
+              </div>
+            ))}
+          </>
+        ) : null}
+        <div>
           <strong>Кол-во:{inputValue}</strong>
         </div>
         <div>
           <strong>Цена:{GOODS_MOD_PRICE_NOW}</strong>
         </div>
-        <img width="80" src={GOODS_IMAGE} />
+        <a href={GOODS_URL}>
+          <img width="80" src={GOODS_IMAGE} />
+        </a>
         <div className="qty">
           <div className="qty__wrap">
             <button
