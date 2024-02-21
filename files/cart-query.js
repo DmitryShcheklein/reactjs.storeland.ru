@@ -339,7 +339,8 @@
             <div style={{ display: 'flex', alignItems: 'center', gap: 50 }}>
               <h1>Корзина</h1>
 
-              {deletedItemsArray.length ? (
+              {deletedItemsArray.length &&
+              !(deletedItemsArray.length === cartItems.length) ? (
                 <button
                   className="button"
                   onClick={() => {
