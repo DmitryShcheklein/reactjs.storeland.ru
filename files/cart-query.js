@@ -415,7 +415,7 @@
         <div>
           <strong>Артикул:{GOODS_MOD_ART_NUMBER}</strong>
         </div>
-        {distinctiveProperties.length ? (
+        {distinctiveProperties?.length ? (
           <>
             {distinctiveProperties.map(({ NAME, VALUE }, idx) => (
               <div key={idx}>
