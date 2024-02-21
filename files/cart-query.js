@@ -15,15 +15,33 @@
       },
     },
   });
-  const container = document.getElementById('root-cart');
-  const { createRoot } = window.ReactDOM;
-  const root = createRoot(container);
-
   const QUERY_KEYS = {
     Cart: 'Cart',
     FormState: 'FormState',
     QuickFormData: 'QuickFormData',
   };
+  const container = document.getElementById('root-cart');
+  const { createRoot } = window.ReactDOM;
+  const root = createRoot(container);
+
+  root.render(
+    <QueryClientProvider client={queryClient}>
+      <App />
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
+  );
+
+  function App() {
+    return (
+      <>
+        <EmptyCart />
+        <Cart />
+        <OrderForm />
+        <RelatedGoods />
+      </>
+    );
+  }
+
 
   function useFormState(options) {
     const INITIAL_FORM_DATA = {
@@ -495,7 +513,7 @@
     const zoneList = deliveries?.find(({ id }) => id === deliveryId)?.zoneList;
     const localFormState = useState({
       wantRegister: false,
-      addressCollapsed: false,
+      addressCollapsed: true,
       extraDontCall: false,
     });
     const [localForm, setLocalFormState] = localFormState;
@@ -740,22 +758,6 @@
       </div>
     );
   }
-  function App() {
-    return (
-      <>
-        <EmptyCart />
-        <Cart />
-        <OrderForm />
-        <RelatedGoods />
-      </>
-    );
-  }
-  root.render(
-    <QueryClientProvider client={queryClient}>
-      <App />
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
-  );
 
   function Adresses({ localFormState, quickFormData }) {
     const Nouislider = window.ReactNouislider;
