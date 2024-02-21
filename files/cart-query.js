@@ -42,7 +42,6 @@
     );
   }
 
-
   function useFormState(options) {
     const INITIAL_FORM_DATA = {
       form: {
@@ -180,22 +179,28 @@
 
   function useCreateOrderMutation() {
     return useMutation({
-      mutationFn: (form) => {
+      mutationFn: async (form) => {
         const formData = new FormData(form);
 
         for (const pair of formData.entries()) {
           // console.log(pair[0] + ', ' + pair[1]);formData
         }
-
-        return axios.post(`/order/stage/confirm`, formData, {
+        const response = await axios.post(`/order/stage/confirm`, formData, {
           params: {
             ajax_q: 1,
             hash: window.HASH,
           },
         });
+
+        return response;
       },
-      onSuccess: ({ data }) => {
-        location.href = data.location;
+      onSuccess: ({ data: { status, location, message } }) => {
+        if (status === 'error') {
+          console.error(message);
+        }
+        if (location) {
+          location.href = location;
+        }
       },
     });
   }
@@ -246,6 +251,8 @@
       CART_SUM_OLD_WITH_DELIVERY,
       CART_SUM_SUPPLIER_WITH_DELIVERY,
       CART_SUM_NOW_WITH_DELIVERY,
+      SETTINGS_STORE_ORDER_MIN_ORDER_PRICE,
+      SETTINGS_STORE_ORDER_MIN_PRICE_WITHOUT_DELIVERY,
     } = cartData || {};
     const isCartItemsLength = cartItems?.length;
     const isCartRelatedGoodsLength = cartRelatedGoods?.length;
@@ -275,7 +282,18 @@
         refetchCart();
       }, 300)();
     };
+    const getCurrentMinOrderPrice = () => {
+      let result;
 
+      if (SETTINGS_STORE_ORDER_MIN_PRICE_WITHOUT_DELIVERY) {
+        result = SETTINGS_STORE_ORDER_MIN_ORDER_PRICE - CART_SUM_NOW;
+      } else {
+        result =
+          SETTINGS_STORE_ORDER_MIN_ORDER_PRICE - CART_SUM_NOW_WITH_DELIVERY;
+      }
+
+      return Math.max(result, 0);
+    };
     if (window.CART_IS_EMPTY) {
       return null;
     }
@@ -358,6 +376,16 @@
               <li>Скидка: {CART_SUM_DISCOUNT}</li>
               <li>Скидка процент: {CART_SUM_DISCOUNT_PERCENT}</li>
               <li>Итого с доставкой: {CART_SUM_NOW_WITH_DELIVERY}</li>
+              {SETTINGS_STORE_ORDER_MIN_ORDER_PRICE ? (
+                <li>
+                  Минимальная сумма заказа (
+                  {SETTINGS_STORE_ORDER_MIN_PRICE_WITHOUT_DELIVERY
+                    ? 'Без учёта стоимости доставки'
+                    : 'с доставкой'}
+                  ): {SETTINGS_STORE_ORDER_MIN_ORDER_PRICE}, Осталось:{' '}
+                  {getCurrentMinOrderPrice()}
+                </li>
+              ) : null}
               {/* <li>Итого old с доставкой: {CART_SUM_OLD_WITH_DELIVERY}</li> */}
               <li>
                 Итого с доставкой и скидкой:{' '}
@@ -416,77 +444,83 @@
       <li style={{ position: 'relative' }}>
         {deleteCartItemMutation.isLoading && <Preloader />}
         <div style={{ display: 'flex', gap: 20 }}>
-          <h3>{GOODS_NAME}</h3>
-          <button
-            // hidden
-            onClick={handleRemoveItem}
-            type="button"
-            title="Удалить из корзины"
-          >
-            <span className="cart__delete-icon">
-              <svg className="icon _close">
-                <use xlinkHref="/design/sprite.svg#close"></use>
-              </svg>
-            </span>
-          </button>
-        </div>
-        <div>
-          <strong>Артикул:{GOODS_MOD_ART_NUMBER}</strong>
-        </div>
-        {distinctiveProperties?.length ? (
-          <>
-            {distinctiveProperties.map(({ NAME, VALUE }, idx) => (
-              <div key={idx}>
-                <strong>
-                  {NAME}: {VALUE}
-                </strong>
+          <div>
+            <div style={{ display: 'flex', gap: 20 }}>
+              <h3>{GOODS_NAME}</h3>
+              <button
+                // hidden
+                onClick={handleRemoveItem}
+                type="button"
+                title="Удалить из корзины"
+              >
+                <span className="cart__delete-icon">
+                  <svg className="icon _close">
+                    <use xlinkHref="/design/sprite.svg#close"></use>
+                  </svg>
+                </span>
+              </button>
+            </div>
+            <div>
+              <strong>Артикул:{GOODS_MOD_ART_NUMBER}</strong>
+            </div>
+            {distinctiveProperties?.length ? (
+              <>
+                {distinctiveProperties.map(({ NAME, VALUE }, idx) => (
+                  <div key={idx}>
+                    <strong>
+                      {NAME}: {VALUE}
+                    </strong>
+                  </div>
+                ))}
+              </>
+            ) : null}
+            <div>
+              <strong>Кол-во:{inputValue}</strong>
+            </div>
+            <div>
+              <strong>Цена:{GOODS_MOD_PRICE_NOW}</strong>
+            </div>
+          </div>
+          <div>
+            <a href={GOODS_URL}>
+              <img width="80" src={GOODS_IMAGE} />
+            </a>
+            <div className="qty">
+              <div className="qty__wrap">
+                <button
+                  type="submit"
+                  className="qty__btn"
+                  onClick={() => {
+                    setInputValue(inputValue - 1);
+                  }}
+                >
+                  <svg className="icon">
+                    <use xlinkHref="/design/sprite.svg#minus-icon"></use>
+                  </svg>
+                </button>
+                <input
+                  name={`form[quantity][${GOODS_MOD_ID}]`}
+                  min="1"
+                  type="number"
+                  value={inputValue}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  onPaste={handlePaste}
+                  className="input qty__input"
+                />
+                <button
+                  type="submit"
+                  className="qty__btn"
+                  onClick={() => {
+                    setInputValue(inputValue + 1);
+                  }}
+                >
+                  <svg className="icon">
+                    <use xlinkHref="/design/sprite.svg#plus-icon"></use>
+                  </svg>
+                </button>
               </div>
-            ))}
-          </>
-        ) : null}
-        <div>
-          <strong>Кол-во:{inputValue}</strong>
-        </div>
-        <div>
-          <strong>Цена:{GOODS_MOD_PRICE_NOW}</strong>
-        </div>
-        <a href={GOODS_URL}>
-          <img width="80" src={GOODS_IMAGE} />
-        </a>
-        <div className="qty">
-          <div className="qty__wrap">
-            <button
-              type="submit"
-              className="qty__btn"
-              onClick={() => {
-                setInputValue(inputValue - 1);
-              }}
-            >
-              <svg className="icon">
-                <use xlinkHref="/design/sprite.svg#minus-icon"></use>
-              </svg>
-            </button>
-            <input
-              name={`form[quantity][${GOODS_MOD_ID}]`}
-              min="1"
-              type="number"
-              value={inputValue}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              onPaste={handlePaste}
-              className="input qty__input"
-            />
-            <button
-              type="submit"
-              className="qty__btn"
-              onClick={() => {
-                setInputValue(inputValue + 1);
-              }}
-            >
-              <svg className="icon">
-                <use xlinkHref="/design/sprite.svg#plus-icon"></use>
-              </svg>
-            </button>
+            </div>
           </div>
         </div>
       </li>
