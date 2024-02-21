@@ -3075,7 +3075,7 @@ body.modal-open {overflow: hidden}
   flex-direction: column;
   gap: 15px;
 }
-#orderForm label {
+#root-cart label {
   cursor: pointer;
   user-select: none;
 }

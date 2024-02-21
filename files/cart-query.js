@@ -176,6 +176,20 @@
       ...options,
     });
   }
+  function useClearCartItemsMutation(options) {
+    return useMutation({
+      mutationFn: async (itemsIdArray) => {
+        const formData = new FormData();
+        formData.append('ajax_q', 1);
+        itemsIdArray.forEach((id) => formData.append('id[]', id));
+
+        const response = await axios.post(`/cart/delete/`, formData);
+
+        return response.status;
+      },
+      ...options,
+    });
+  }
 
   function useCreateOrderMutation() {
     return useMutation({
@@ -294,6 +308,24 @@
 
       return Math.max(result, 0);
     };
+    const [deletedItemsArray, setDeletedItemsArray] = useState([]);
+    const clearCartItemsMutation = useClearCartItemsMutation({
+      onSuccess: () => {
+        refetchCart();
+        setDeletedItemsArray([]);
+      },
+    });
+    const changeDeletedItemHandler = (goodsId) => {
+      setDeletedItemsArray((prev) => {
+        const isInDeletedArray = prev.includes(goodsId);
+
+        if (isInDeletedArray) {
+          return prev.filter((id) => id !== goodsId);
+        } else {
+          return [...prev, goodsId];
+        }
+      });
+    };
     if (window.CART_IS_EMPTY) {
       return null;
     }
@@ -306,16 +338,47 @@
           {isCartItemsLength ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 50 }}>
               <h1>Корзина</h1>
-              <button
-                className="button"
-                onClick={() => {
-                  clearCartMutation.mutate();
-                }}
-              >
-                {clearCartMutation.isLoading
-                  ? '(Очищается..)'
-                  : 'Очистить корзину'}
-              </button>
+
+              {deletedItemsArray.length ? (
+                <button
+                  className="button"
+                  onClick={() => {
+                    clearCartItemsMutation.mutate(deletedItemsArray);
+                  }}
+                >
+                  {clearCartMutation.isLoading
+                    ? '(Очищается..)'
+                    : `Удалить выбранные (${deletedItemsArray.length})`}
+                </button>
+              ) : (
+                <button
+                  className="button"
+                  onClick={() => {
+                    clearCartMutation.mutate();
+                  }}
+                >
+                  {clearCartMutation.isLoading
+                    ? '(Очищается..)'
+                    : 'Очистить корзину'}
+                </button>
+              )}
+
+              <div>
+                <label>
+                  <input
+                    type="checkbox"
+                    onChange={(evt) => {
+                      const { checked } = evt.target;
+
+                      setDeletedItemsArray(
+                        checked ? cartItems.map((el) => el.GOODS_MOD_ID) : []
+                      );
+                    }}
+                    checked={cartItems.length === deletedItemsArray.length}
+                  />
+                  Выбрать всё
+                </label>
+              </div>
             </div>
           ) : null}
 
@@ -353,6 +416,8 @@
                     key={item.GOODS_MOD_ID}
                     handleSubmit={handleSubmit}
                     refetchCart={refetchCart}
+                    checked={deletedItemsArray.includes(item.GOODS_MOD_ID)}
+                    changeDeletedItemHandler={changeDeletedItemHandler}
                   />
                 ))}
               </ul>
@@ -398,7 +463,13 @@
     );
   }
 
-  function CartItem({ item, handleSubmit, refetchCart }) {
+  function CartItem({
+    item,
+    handleSubmit,
+    refetchCart,
+    checked,
+    changeDeletedItemHandler,
+  }) {
     const {
       GOODS_MOD_ID,
       GOODS_NAME,
@@ -444,6 +515,16 @@
       <li style={{ position: 'relative' }}>
         {deleteCartItemMutation.isLoading && <Preloader />}
         <div style={{ display: 'flex', gap: 20 }}>
+          <div>
+            <input
+              type="checkbox"
+              title="Удалить выбранный"
+              checked={checked}
+              onChange={() => {
+                changeDeletedItemHandler(GOODS_MOD_ID);
+              }}
+            />
+          </div>
           <div>
             <div style={{ display: 'flex', gap: 20 }}>
               <h3>{GOODS_NAME}</h3>
