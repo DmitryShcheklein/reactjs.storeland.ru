@@ -901,6 +901,19 @@
     });
     const [date, setDate] = useState('');
 
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const formattedTomorrow = tomorrow
+      .toLocaleDateString('ru', {
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+      })
+      .split('.')
+      .reverse()
+      .join('-');
+
     return (
       <>
         {/* <!-- Адрес доставки--> */}
@@ -1090,6 +1103,7 @@
 
                         setDate(value);
                       }}
+                      min={formattedTomorrow}
                     />
                   </div>
                 </div>
