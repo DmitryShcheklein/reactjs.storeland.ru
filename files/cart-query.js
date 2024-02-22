@@ -8,6 +8,7 @@
     QueryClientProvider,
   } = window.ReactQuery;
   const { ReactQueryDevtools } = window.ReactQueryDevtools;
+  const Pristine = window.Pristine;
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -645,8 +646,12 @@
     const handleSubmit = (event) => {
       event.preventDefault();
       const formElement = event.target;
+      const pristine = new Pristine(formElement);
 
-      createOrderMutation.mutate(formElement);
+      const valid = pristine.validate();
+      console.log(valid);
+
+      // createOrderMutation.mutate(formElement);
     };
 
     const handleChange = (event) => {
@@ -697,7 +702,7 @@
     return (
       <>
         {/* Форма заказа */}
-        <form onSubmit={handleSubmit} id="orderForm">
+        <form onSubmit={handleSubmit} id="orderForm" noValidate="novalidate">
           <input
             className="input"
             name="form[contact][person]"
@@ -707,6 +712,7 @@
             type="text"
             placeholder="Имя"
             required
+            pristine-required-message="Please choose a username"
           />
           <input
             className="input"
@@ -714,7 +720,6 @@
             value={formState.form.contact.phone}
             onChange={handleChange}
             maxLength="255"
-            pattern="\+?\d*"
             type="tel"
             placeholder="Телефон"
             required
