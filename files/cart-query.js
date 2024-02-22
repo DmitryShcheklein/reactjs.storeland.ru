@@ -336,8 +336,15 @@
           {(isFetchingCart || clearCartMutation.isLoading) && <Preloader />}
 
           {isCartItemsLength ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 50 }}>
-              <h1>Корзина</h1>
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                gap: 10,
+              }}
+            >
+              <h1 style={{ width: '100%' }}>Корзина</h1>
 
               {deletedItemsArray.length &&
               !(deletedItemsArray.length === cartItems.length) ? (
