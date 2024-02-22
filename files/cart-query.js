@@ -636,11 +636,12 @@
     const zoneList = deliveries?.find(({ id }) => id === deliveryId)?.zoneList;
     const localFormState = useState({
       wantRegister: false,
+      showPassword: false,
       addressCollapsed: true,
       extraDontCall: false,
     });
     const [localForm, setLocalFormState] = localFormState;
-    const { wantRegister, extraDontCall } = localForm;
+    const { wantRegister, extraDontCall, showPassword } = localForm;
     const handleSubmit = (event) => {
       event.preventDefault();
       const formElement = event.target;
@@ -692,7 +693,7 @@
     if (isLoadingDelivery) {
       return <div>Загружаю варианты доставки...</div>;
     }
-    // console.log(zoneList);
+
     return (
       <>
         {/* Форма заказа */}
@@ -728,11 +729,10 @@
             placeholder="Email"
           />
           {!CLIENT_IS_LOGIN && (
-            <>
-              <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
+            <div className="quickform">
+              <label style={{ display: 'flex', gap: 15, alignItems: 'center' }}>
                 <input
                   type="checkbox"
-                  id="contactWantRegister"
                   name="form[contact][want_register]"
                   value="1"
                   onChange={() =>
@@ -742,21 +742,36 @@
                     })
                   }
                 />
-                <label htmlFor="contactWantRegister">
-                  Я хочу зарегистрироваться
-                </label>
-              </div>
+                Я хочу зарегистрироваться
+              </label>
+
               {wantRegister && (
-                <input
-                  className="input"
-                  type="password"
-                  name="form[contact][pass]"
-                  maxLength="50"
-                  minLength="6"
-                  placeholder="Придумайте пароль"
-                />
+                <div className="quickform__input-wrap">
+                  <input
+                    className="input"
+                    type={showPassword ? 'text' : 'password'}
+                    name="form[contact][pass]"
+                    maxLength="50"
+                    minLength="6"
+                    placeholder="Придумайте пароль"
+                  />
+                  <button
+                    type="button"
+                    className="show-password"
+                    onClick={() => {
+                      setLocalFormState({
+                        ...localForm,
+                        showPassword: !showPassword,
+                      });
+                    }}
+                  >
+                    <svg className={`icon ${showPassword ? '_active' : ''}`}>
+                      <use xlinkHref={'/design/sprite.svg#hide-icon'}></use>
+                    </svg>
+                  </button>
+                </div>
               )}
-            </>
+            </div>
           )}
           <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
             <input
