@@ -483,6 +483,7 @@
     changeDeletedItemHandler,
   }) {
     const {
+      GOODS_ID,
       GOODS_MOD_ID,
       GOODS_NAME,
       GOODS_MOD_PRICE_NOW,
@@ -524,7 +525,11 @@
     }
 
     return (
-      <li style={{ position: 'relative' }} data-mod-id={GOODS_MOD_ID}>
+      <li
+        style={{ position: 'relative' }}
+        data-product-id={GOODS_ID}
+        data-mod-id={GOODS_MOD_ID}
+      >
         {deleteCartItemMutation.isLoading && <Preloader />}
         <div style={{ display: 'flex', gap: 20 }}>
           <div>

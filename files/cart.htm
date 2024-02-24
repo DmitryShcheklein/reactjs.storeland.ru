@@ -18,6 +18,7 @@
   "cartItems": [
   {% FOR cart_items %}
     {
+      "GOODS_ID": "{cart_items.GOODS_ID}",
       "GOODS_NAME": "{cart_items.GOODS_NAME}",
       "GOODS_MOD_ID": {cart_items.GOODS_MOD_ID},
       "ORDER_LINE_QUANTITY": {cart_items.ORDER_LINE_QUANTITY},
