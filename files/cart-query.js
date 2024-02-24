@@ -7,6 +7,7 @@
     QueryClient,
     QueryClientProvider,
   } = window.ReactQuery;
+  const { IMaskInput } = window.ReactIMask;
   const { ReactQueryDevtools } = window.ReactQueryDevtools;
   const Pristine = window.Pristine;
   const queryClient = new QueryClient({
@@ -209,12 +210,14 @@
 
         return response;
       },
-      onSuccess: ({ data: { status, location, message } }) => {
+      onSuccess: ({ data }) => {
+        const { status, location: redirectLink, message } = data;
+
         if (status === 'error') {
           console.error(message);
         }
-        if (location) {
-          location.href = location;
+        if (redirectLink) {
+          location.href = redirectLink;
         }
       },
     });
@@ -651,7 +654,7 @@
       const valid = pristine.validate();
       console.log(valid);
 
-      // createOrderMutation.mutate(formElement);
+      createOrderMutation.mutate(formElement);
     };
 
     const handleChange = (event) => {
@@ -671,7 +674,7 @@
         fieldData.form.delivery.zone_id = zL[0]?.zoneId;
         console.log(keys, zL, fieldData);
       }
-      console.log(fieldData);
+      // console.log(fieldData);
       const newData = Utils.mergeWith(
         { ...formState },
         fieldData,
@@ -714,15 +717,17 @@
             required
             pristine-required-message="Please choose a username"
           />
-          <input
+          <IMaskInput
             className="input"
+            placeholder="+7 999 999-99-99"
+            type="tel"
+            mask="+{7} {#00} 000-00-00"
+            definitions={{ '#': /[01234569]/ }}
+            id={`phoneInput`}
             name="form[contact][phone]"
             value={formState.form.contact.phone}
+            unmask
             onChange={handleChange}
-            maxLength="255"
-            type="tel"
-            placeholder="Телефон"
-            required
           />
           <input
             className="input"
