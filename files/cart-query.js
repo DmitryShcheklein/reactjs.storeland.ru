@@ -620,6 +620,46 @@
     );
   }
 
+  function useFormValidation() {
+    const [formErrors, setFormErrors] = useState({
+      person: '',
+      email: '',
+      password: '',
+      phone: '',
+    });
+
+    const handleInputChange = ({ name, value }) => {
+      // Perform validation checks and update the error state
+      if (name === 'person' && value.length < 3) {
+        setFormErrors((prevState) => ({
+          ...prevState,
+          person: 'Name must be at least 3 characters long.',
+        }));
+      } else if (name === 'email' && !isValidEmail(value)) {
+        setFormErrors((prevState) => ({
+          ...prevState,
+          email: 'Please enter a valid email address.',
+        }));
+      } else if (name === 'password' && value.length < 8) {
+        setFormErrors((prevState) => ({
+          ...prevState,
+          password: 'Password must be at least 8 characters long.',
+        }));
+      } else if (name === 'phone' && value.length < 11) {
+        setFormErrors((prevState) => ({
+          ...prevState,
+          phone: 'Phone must be at least 11 characters long.',
+        }));
+      } else {
+        setFormErrors((prevState) => ({
+          ...prevState,
+          [name]: '', // Reset error message
+        }));
+      }
+    };
+
+    return { formErrors, setFormErrors, handleInputChange };
+  }
   function OrderForm() {
     const { data: cartData } = useCart();
     const [formState, setFormState] = useFormState();
@@ -656,7 +696,8 @@
 
       createOrderMutation.mutate(formElement);
     };
-
+    const { formErrors, handleInputChange } = useFormValidation();
+    console.log(formErrors);
     const handleChange = (event) => {
       const { name, value, id } = event.target;
       // Разбиваем строку "form[contact][person]" на массив ключей ["form", "contact", "person"]
@@ -682,6 +723,10 @@
       );
 
       setFormState(newData);
+      handleInputChange({
+        name: keys[keys.length - 1],
+        value,
+      });
     };
     const handleCouponBtn = () => {
       setFormState({
@@ -706,38 +751,54 @@
       <>
         {/* Форма заказа */}
         <form onSubmit={handleSubmit} id="orderForm" noValidate="novalidate">
-          <input
-            className="input"
-            name="form[contact][person]"
-            value={formState.form.contact.person}
-            onChange={handleChange}
-            maxLength="100"
-            type="text"
-            placeholder="Имя"
-            required
-            pristine-required-message="Please choose a username"
-          />
-          <IMaskInput
-            className="input"
-            placeholder="+7 999 999-99-99"
-            type="tel"
-            mask="+{7} {#00} 000-00-00"
-            definitions={{ '#': /[01234569]/ }}
-            id={`phoneInput`}
-            name="form[contact][phone]"
-            value={formState.form.contact.phone}
-            unmask
-            onChange={handleChange}
-          />
-          <input
-            className="input"
-            name="form[contact][email]"
-            value={formState.form.contact.email}
-            onChange={handleChange}
-            maxLength="255"
-            type="email"
-            placeholder="Email"
-          />
+          <div className="quickform">
+            <div className="quickform__input-wrap">
+              <input
+                className={`input ${formErrors.person ? 'error' : ''}`}
+                name="form[contact][person]"
+                value={formState.form.contact.person}
+                onChange={handleChange}
+                maxLength="100"
+                type="text"
+                placeholder="Имя"
+                required
+                pristine-required-message="Please choose a username"
+              />
+              {formErrors.person && (
+                <label className="error">{formErrors.person}</label>
+              )}
+            </div>
+            <div className="quickform__input-wrap">
+              <IMaskInput
+                className={`input ${formErrors.phone ? 'error' : ''}`}
+                placeholder="+7 999 999-99-99"
+                type="tel"
+                mask="+{7} {#00} 000-00-00"
+                definitions={{ '#': /[01234569]/ }}
+                id={`phoneInput`}
+                name="form[contact][phone]"
+                value={formState.form.contact.phone}
+                unmask={false}
+                onChange={handleChange}
+              />
+              {formErrors.phone && (
+                <label className="error">{formErrors.phone}</label>
+              )}
+            </div>
+            <div className="quickform__input-wrap">
+              <input
+                className={`input ${formErrors.email ? 'error' : ''}`}
+                name="form[contact][email]"
+                value={formState.form.contact.email}
+                onChange={handleChange}
+                maxLength="255"
+                type="email"
+                placeholder="Email"
+              />
+              {formErrors.email && <p className="error">{formErrors.email}</p>}
+            </div>
+          </div>
+
           {!CLIENT_IS_LOGIN && (
             <div className="quickform">
               <label style={{ display: 'flex', gap: 15, alignItems: 'center' }}>
@@ -1288,24 +1349,33 @@
 
               return (
                 <li key={GOODS_MOD_ID} style={{ position: 'relative' }}>
-                  <div style={{ display: 'flex', gap: 20 }}>
-                    <h3>{GOODS_NAME}</h3>
-                  </div>
-                  <div>
-                    <strong>Кол-во:{ORDER_LINE_QUANTITY}</strong>
-                  </div>
-                  <div>
-                    <strong>Цена:{GOODS_MOD_PRICE_NOW}</strong>
-                  </div>
-                  <img width="80" src={GOODS_IMAGE} />
-                  <div>
-                    <button
-                      className="button"
-                      onClick={() => addCartHandler(item)}
-                    >
-                      В корзину
-                    </button>
-                  </div>
+                  <form action="/cart/add/" method="post">
+                    <input type="hidden" name="hash" value="804a579e" />
+                    <input
+                      type="hidden"
+                      name="form[goods_mod_id]"
+                      value={GOODS_MOD_ID}
+                    />
+
+                    <div style={{ display: 'flex', gap: 20 }}>
+                      <h3>{GOODS_NAME}</h3>
+                    </div>
+                    <div>
+                      <strong>Кол-во:{ORDER_LINE_QUANTITY}</strong>
+                    </div>
+                    <div>
+                      <strong>Цена:{GOODS_MOD_PRICE_NOW}</strong>
+                    </div>
+                    <img width="80" src={GOODS_IMAGE} />
+                    <div>
+                      <button
+                        className="button  _cart-page"
+                        // onClick={() => addCartHandler(item)}
+                      >
+                        В корзину
+                      </button>
+                    </div>
+                  </form>
                 </li>
               );
             })}

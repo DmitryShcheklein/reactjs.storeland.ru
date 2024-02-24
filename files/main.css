@@ -3075,6 +3075,12 @@ body.modal-open {overflow: hidden}
   flex-direction: column;
   gap: 15px;
 }
+
+#orderForm .quickform {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
 #root-cart label {
   cursor: pointer;
   user-select: none;
