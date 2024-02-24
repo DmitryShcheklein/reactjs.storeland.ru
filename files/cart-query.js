@@ -524,7 +524,7 @@
     }
 
     return (
-      <li style={{ position: 'relative' }}>
+      <li style={{ position: 'relative' }} data-mod-id={GOODS_MOD_ID}>
         {deleteCartItemMutation.isLoading && <Preloader />}
         <div style={{ display: 'flex', gap: 20 }}>
           <div>
