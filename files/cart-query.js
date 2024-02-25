@@ -9,7 +9,6 @@
   } = window.ReactQuery;
   const { IMaskInput } = window.ReactIMask;
   const { ReactQueryDevtools } = window.ReactQueryDevtools;
-  const Pristine = window.Pristine;
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -81,7 +80,7 @@
 
     return useQuery({
       queryKey: [QUERY_KEYS.QuickFormData],
-      initialData: {},
+      initialData: { SETTINGS_ORDER_FIELDS: {} },
       queryFn: async () => {
         const { data: dataString } = await axios.get(`/cart/add`, {
           responseType: 'text',
@@ -276,12 +275,12 @@
     const isCartRelatedGoodsLength = cartRelatedGoods?.length;
 
     useEffect(() => {
-      console.log(
-        isCouponSend,
-        currentDeliveryId,
-        zoneId,
-        isCartRelatedGoodsLength
-      );
+      // console.log(
+      //   isCouponSend,
+      //   currentDeliveryId,
+      //   zoneId,
+      //   isCartRelatedGoodsLength
+      // );
       if (
         isCouponSend ||
         currentDeliveryId ||
@@ -625,41 +624,102 @@
     );
   }
 
-  function useFormValidation() {
+  function useFormValidation({ quickFormData }) {
+    const {
+      SETTINGS_ORDER_FIELDS: {
+        Country,
+        ConvenientTime,
+        ZipCode,
+        Region,
+        City,
+        Address,
+        Comment,
+      },
+    } = quickFormData;
+
+    // Получаем всех детей формы
+    // const formChildren = formRef.current?.elements;
+    // console.log(formChildren);
+    // if (formChildren) {
+    //   console.log(
+    //     Array.from(formChildren)
+    //       .filter((el) => Boolean(el.name))
+    //       .map((el) => el.name)
+    //   );
+    // }
+
     const [formErrors, setFormErrors] = useState({
       person: '',
+      phone: '',
       email: '',
       password: '',
-      phone: '',
+
+      country: '',
+      zipCode: '',
+
+      comment: '',
     });
 
-    const handleInputChange = ({ name, value }) => {
-      // Perform validation checks and update the error state
-      if (name === 'person' && value.length < 3) {
+    const handleInputChange = (eventTarget) => {
+      const { id, name, value, minLength } = eventTarget;
+
+      console.log(id, Comment.isRequired, !value.length);
+
+      if (id === 'person' && value.length < 3) {
         setFormErrors((prevState) => ({
           ...prevState,
-          person: 'Name must be at least 3 characters long.',
+          [id]: 'Name must be at least 3 characters long.',
         }));
-      } else if (name === 'email' && !isValidEmail(value)) {
+      } else if (id === 'email' && !isValidEmail(value)) {
         setFormErrors((prevState) => ({
           ...prevState,
-          email: 'Please enter a valid email address.',
+          [id]: 'Please enter a valid email address.',
         }));
-      } else if (name === 'password' && value.length < 8) {
+      } else if (id === 'password' && value.length < minLength) {
         setFormErrors((prevState) => ({
           ...prevState,
-          password: 'Password must be at least 8 characters long.',
+          [id]: 'Password must be at least 8 characters long.',
         }));
-      } else if (name === 'phone' && value.length < 11) {
+      } else if (id === 'phone' && !isValidPhone(value)) {
         setFormErrors((prevState) => ({
           ...prevState,
-          phone: 'Phone must be at least 11 characters long.',
+          [id]: 'Please enter a valid phone.',
+        }));
+      } else if (
+        id === 'zipCode' &&
+        ZipCode.isRequired &&
+        value.length < minLength
+      ) {
+        setFormErrors((prevState) => ({
+          ...prevState,
+          [id]: 'Please enter zipCode.',
+        }));
+      } else if (id === 'comment' && Comment.isRequired && !value.length) {
+        setFormErrors((prevState) => ({
+          ...prevState,
+          [id]: 'Please enter comment.',
         }));
       } else {
         setFormErrors((prevState) => ({
           ...prevState,
-          [name]: '', // Reset error message
+          [id]: '', // Reset error message
         }));
+      }
+
+      function isValidEmail(email) {
+        // Регулярное выражение для проверки валидности email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        // Проверка совпадения с регулярным выражением
+        return emailRegex.test(email);
+      }
+
+      function isValidPhone(phone) {
+        // Регулярное выражение для проверки валидности телефонного номера
+        var phoneRegex = /^\+\d{1,3}\s\d{1,3}\s\d{2,3}-\d{2}-\d{2}$/;
+
+        // Проверка совпадения с регулярным выражением
+        return phoneRegex.test(phone);
       }
     };
 
@@ -683,26 +743,22 @@
       },
     } = formState;
     const zoneList = deliveries?.find(({ id }) => id === deliveryId)?.zoneList;
-    const localFormState = useState({
+    const [localForm, setLocalFormState] = useState({
       wantRegister: false,
       showPassword: false,
-      addressCollapsed: true,
       extraDontCall: false,
     });
-    const [localForm, setLocalFormState] = localFormState;
     const { wantRegister, extraDontCall, showPassword } = localForm;
     const handleSubmit = (event) => {
       event.preventDefault();
-      const formElement = event.target;
-      const pristine = new Pristine(formElement);
 
-      const valid = pristine.validate();
-      console.log(valid);
-
-      createOrderMutation.mutate(formElement);
+      createOrderMutation.mutate(event.target);
     };
-    const { formErrors, handleInputChange } = useFormValidation();
-    console.log(formErrors);
+    const { formErrors, handleInputChange } = useFormValidation({
+      quickFormData,
+      formRef,
+    });
+
     const handleChange = (event) => {
       const { name, value, id } = event.target;
       // Разбиваем строку "form[contact][person]" на массив ключей ["form", "contact", "person"]
@@ -728,10 +784,7 @@
       );
 
       setFormState(newData);
-      handleInputChange({
-        name: keys[keys.length - 1],
-        value,
-      });
+      handleInputChange(event.target);
     };
     const handleCouponBtn = () => {
       setFormState({
@@ -754,54 +807,59 @@
 
     return (
       <>
-        {/* Форма заказа */}
-        <form onSubmit={handleSubmit} id="orderForm" noValidate="novalidate">
-          <div className="quickform">
-            <div className="quickform__input-wrap">
-              <input
-                className={`input ${formErrors.person ? 'error' : ''}`}
-                name="form[contact][person]"
-                value={formState.form.contact.person}
-                onChange={handleChange}
-                maxLength="100"
-                type="text"
-                placeholder="Имя"
-                required
-                pristine-required-message="Please choose a username"
-              />
-              {formErrors.person && (
-                <label className="error">{formErrors.person}</label>
-              )}
-            </div>
-            <div className="quickform__input-wrap">
-              <IMaskInput
-                className={`input ${formErrors.phone ? 'error' : ''}`}
-                placeholder="+7 999 999-99-99"
-                type="tel"
-                mask="+{7} {#00} 000-00-00"
-                definitions={{ '#': /[01234569]/ }}
-                id={`phoneInput`}
-                name="form[contact][phone]"
-                value={formState.form.contact.phone}
-                unmask={false}
-                onChange={handleChange}
-              />
-              {formErrors.phone && (
-                <label className="error">{formErrors.phone}</label>
-              )}
-            </div>
-            <div className="quickform__input-wrap">
-              <input
-                className={`input ${formErrors.email ? 'error' : ''}`}
-                name="form[contact][email]"
-                value={formState.form.contact.email}
-                onChange={handleChange}
-                maxLength="255"
-                type="email"
-                placeholder="Email"
-              />
-              {formErrors.email && <p className="error">{formErrors.email}</p>}
-            </div>
+        <form
+          onSubmit={handleSubmit}
+          id="orderForm"
+          noValidate="novalidate"
+          className="quickform"
+        >
+          <div className="quickform__input-wrap">
+            <input
+              id="person"
+              className={`input ${formErrors.person ? 'error' : ''}`}
+              name="form[contact][person]"
+              value={formState.form.contact.person}
+              onChange={handleChange}
+              maxLength="100"
+              type="text"
+              placeholder="Имя"
+              required
+            />
+            {formErrors.person && (
+              <label className="error">{formErrors.person}</label>
+            )}
+          </div>
+          <div className="quickform__input-wrap">
+            <IMaskInput
+              id="phone"
+              className={`input ${formErrors.phone ? 'error' : ''}`}
+              placeholder="+7 999 999-99-99"
+              type="tel"
+              mask="+{7} {#00} 000-00-00"
+              definitions={{ '#': /[01234569]/ }}
+              name="form[contact][phone]"
+              value={formState.form.contact.phone}
+              unmask={false}
+              onChange={handleChange}
+            />
+            {formErrors.phone && (
+              <label className="error">{formErrors.phone}</label>
+            )}
+          </div>
+          <div className="quickform__input-wrap">
+            <input
+              id="email"
+              className={`input ${formErrors.email ? 'error' : ''}`}
+              name="form[contact][email]"
+              value={formState.form.contact.email}
+              onChange={handleChange}
+              maxLength="255"
+              type="email"
+              placeholder="Email"
+            />
+            {formErrors.email && (
+              <label className="error">{formErrors.email}</label>
+            )}
           </div>
 
           {!CLIENT_IS_LOGIN && (
@@ -824,6 +882,7 @@
               {wantRegister && (
                 <div className="quickform__input-wrap">
                   <input
+                    id="password"
                     className="input"
                     type={showPassword ? 'text' : 'password'}
                     name="form[contact][pass]"
@@ -831,6 +890,9 @@
                     minLength="6"
                     placeholder="Придумайте пароль"
                   />
+                  {formErrors.password && (
+                    <label className="error">{formErrors.password}</label>
+                  )}
                   <button
                     type="button"
                     className="show-password"
@@ -851,6 +913,7 @@
           )}
           <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
             <input
+              id="couponCode"
               className="input"
               name="form[coupon_code]"
               value={couponCode}
@@ -871,11 +934,11 @@
           {deliveries?.length ? (
             <>
               <select
+                id="deliveryId"
                 onChange={handleChange}
                 name="form[delivery][id]"
                 className="quickform__select"
                 value={deliveryId}
-                id="delivery-select"
               >
                 {deliveries.map(({ id, name }) => (
                   <option value={id} key={id}>
@@ -885,6 +948,7 @@
               </select>
               {zoneList?.length ? (
                 <select
+                  id="deliveryZoneId"
                   onChange={handleChange}
                   name="form[delivery][zone_id]"
                   className="quickform__select"
@@ -899,6 +963,7 @@
               ) : null}
 
               <select
+                id="paymentId"
                 onChange={handleChange}
                 name="form[payment][id]"
                 className="quickform__select"
@@ -917,14 +982,16 @@
             </>
           ) : null}
           <hr />
+
           <Adresses
-            localFormState={localFormState}
             quickFormData={quickFormData}
+            handleChange={handleChange}
+            formErrors={formErrors}
           />
+
           <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
             <input
               type="checkbox"
-              id="contactWantRegister"
               onChange={() =>
                 setLocalFormState({
                   ...localForm,
@@ -973,10 +1040,10 @@
     );
   }
 
-  function Adresses({ localFormState, quickFormData }) {
-    const Nouislider = window.ReactNouislider;
-    const [localForm, setLocalFormState] = localFormState;
-    const { addressCollapsed } = localForm;
+  function Adresses({ quickFormData, handleChange, formErrors }) {
+    // const Nouislider = window.ReactNouislider;
+
+    const [addressCollapsed, setAddressCollapsed] = useState(true);
     const {
       ORDER_FORM_CONTACT_ADDR,
       ORDER_FORM_CONTACT_CITY,
@@ -1020,10 +1087,7 @@
             type="button"
             className="form-callapse__title"
             onClick={() => {
-              setLocalFormState({
-                ...localForm,
-                addressCollapsed: !addressCollapsed,
-              });
+              setAddressCollapsed(!addressCollapsed);
             }}
           >
             <span className="quickform__title">Адрес доставки заказа</span>
@@ -1039,11 +1103,13 @@
               {Country.isVisible && (
                 <div className="quickform__item">
                   <div className="quickform__input-wrap">
-                    <label className="quickform__label">Выберите страну</label>
+                    <label className="quickform__label">
+                      Выберите страну {Country.isRequired && <em>*</em>}
+                    </label>
                     <select
                       placeholder="Выберите страну"
                       className="quickform__select"
-                      id="quickDeliveryCountry"
+                      id="country"
                       name="form[delivery][country_id]"
                       defaultValue={ORDER_FORM_DELIVERY_COUNTRY_ID}
                     >
@@ -1067,11 +1133,13 @@
               {Region.isVisible && (
                 <div className="quickform__item">
                   <div className="quickform__input-wrap">
-                    <label className="quickform__label">Область</label>
+                    <label className="quickform__label">
+                      Область {Region.isRequired && <em>*</em>}
+                    </label>
                     <input
                       placeholder=""
                       type="text"
-                      id="quickDeliveryRegion"
+                      id="region"
                       name="form[delivery][region]"
                       defaultValue={ORDER_FORM_CONTACT_REGION}
                       maxLength="255"
@@ -1085,15 +1153,18 @@
               {City.isVisible && (
                 <div className="quickform__item">
                   <div className="quickform__input-wrap">
-                    <label className="quickform__label">Город</label>
+                    <label className="quickform__label">
+                      Город {City.isRequired && <em>*</em>}
+                    </label>
                     <input
                       placeholder=""
                       type="text"
-                      id="quickDeliveryCity"
+                      id="city"
                       name="form[delivery][city]"
                       defaultValue={ORDER_FORM_CONTACT_CITY}
                       className="input"
                       maxLength="255"
+                      onChange={handleChange}
                     />
                   </div>
                 </div>
@@ -1105,45 +1176,54 @@
                   {/* <!-- Улица --> */}
                   <div className="quickform__item">
                     <div className="quickform__input-wrap">
-                      <label className="quickform__label">Улица</label>
+                      <label className="quickform__label">
+                        Улица {Address.isRequired && <em>*</em>}
+                      </label>
                       <input
                         placeholder=""
                         type="text"
-                        id="quickDeliveryAddressStreet"
+                        id="addressStreet"
                         name="form[delivery][address_street]"
                         defaultValue=""
                         maxLength="500"
                         className="input"
+                        onChange={handleChange}
                       />
                     </div>
                   </div>
                   {/* <!-- Поле Дом/Корпус --> */}
                   <div className="quickform__item -small -first">
                     <div className="quickform__input-wrap">
-                      <label className="quickform__label">Дом</label>
+                      <label className="quickform__label">
+                        Дом {Address.isRequired && <em>*</em>}
+                      </label>
                       <input
                         placeholder=""
                         type="text"
-                        id="quickDeliveryAddressHome"
+                        id="addressHome"
                         name="form[delivery][address_home]"
                         defaultValue=""
                         maxLength="50"
                         className="input"
+                        onChange={handleChange}
                       />
                     </div>
                   </div>
                   {/* <!-- Поле Квартира --> */}
                   <div className="quickform__item -small -second">
                     <div className="quickform__input-wrap">
-                      <label className="quickform__label">Квартира</label>
+                      <label className="quickform__label">
+                        Квартира {Address.isRequired && <em>*</em>}
+                      </label>
                       <input
                         placeholder=""
                         type="text"
-                        id="quickDeliveryAddressFlat"
+                        id="addressFlat"
                         name="form[delivery][address_flat]"
                         defaultValue=""
                         maxLength="50"
                         className="input"
+                        onChange={handleChange}
                       />
                     </div>
                   </div>
@@ -1151,7 +1231,7 @@
                   <input
                     placeholder=""
                     type="hidden"
-                    id="quickDeliveryAddress"
+                    id="address"
                     name="form[delivery][address]"
                     defaultValue={ORDER_FORM_CONTACT_ADDR}
                     maxLength="500"
@@ -1164,17 +1244,23 @@
               {ZipCode.isVisible && (
                 <div className="quickform__item -small -third">
                   <div className="quickform__input-wrap">
-                    <label className="quickform__label">Индекс</label>
+                    <label className="quickform__label">
+                      Индекс {ZipCode.isRequired && <>*</>}
+                    </label>
                     <input
                       placeholder=""
                       type="number"
-                      id="quickDeliveryZipCode"
+                      id="zipCode"
                       name="form[delivery][zip_code]"
                       defaultValue={ORDER_FORM_CONTACT_ZIP_CODE}
                       minLength="5"
                       maxLength="6"
-                      className="input"
+                      className={`input ${formErrors.zipCode ? 'error' : ''}`}
+                      onChange={handleChange}
                     />
+                    {formErrors.zipCode && (
+                      <label className="error">{formErrors.zipCode}</label>
+                    )}
                   </div>
                 </div>
               )}
@@ -1191,7 +1277,7 @@
                     <input
                       placeholder="01.01.2021"
                       type="date"
-                      id="deliveryConvenientDate"
+                      id="convenientDate"
                       name="form[delivery][convenient_date]"
                       value={date}
                       className="input quickform__input-deliveryConvenientDate"
@@ -1219,7 +1305,8 @@
                     /> */}
 
                     <label className="quickform__label">
-                      Удобное время доставки
+                      Удобное время доставки{' '}
+                      {ConvenientTime.isRequired && <em>*</em>}
                     </label>
                     <div
                       style={{ display: 'flex', gap: 5, alignItems: 'center' }}
@@ -1227,6 +1314,7 @@
                       <div className="quickform__select-box -from">
                         <label className="quickform__label">С</label>
                         <select
+                          id="convenientTimeFrom"
                           className="quickform__select-convenient _from"
                           name="form[delivery][convenient_time_from]"
                           defaultValue=""
@@ -1248,6 +1336,7 @@
                       <div className="quickform__select-box -to">
                         <label className="quickform__label">До</label>
                         <select
+                          id="convenientTimeTo"
                           className="quickform__select-convenient _to"
                           name="form[delivery][convenient_time_to]"
                           defaultValue=""
@@ -1268,9 +1357,9 @@
                       </div>
                     </div>
 
-                    {false && (
+                    {/* {false && (
                       <Nouislider
-                        id="convenient-time"
+                        
                         style={{ marginTop: 6 }}
                         range={{ min: 0, max: 24 }}
                         start={[0, 24]}
@@ -1286,7 +1375,7 @@
                           });
                         }}
                       />
-                    )}
+                    )} */}
                   </div>
                 </div>
               </div>
@@ -1298,16 +1387,20 @@
                 <div className="quickform__list">
                   <div className="quickform__item">
                     <label className="quickform__label">
-                      Комментарий к заказу
+                      Комментарий к заказу {Comment.isRequired && <>*</>}
                     </label>
                     <div className="quickform__input-wrap">
                       <textarea
+                        onChange={handleChange}
                         cols="100"
                         rows="5"
-                        id="quickDeliveryComment"
+                        id="comment"
                         name="form[delivery][comment]"
-                        className="input textarea quickform-textarea"
+                        className={`input textarea quickform-textarea ${formErrors.comment ? 'error' : ''}`}
                       ></textarea>
+                      {formErrors.comment && (
+                        <label className="error">{formErrors.comment}</label>
+                      )}
                     </div>
                   </div>
                 </div>

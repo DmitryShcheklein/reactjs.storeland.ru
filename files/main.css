@@ -3245,26 +3245,26 @@ body.modal-open {overflow: hidden}
     font-size: 16px;
   }
 }
-.quickform .quickform__list {width: 100%;margin-bottom: 0;display: -webkit-box;display: -ms-flexbox;display: flex;-ms-flex-wrap: wrap;flex-wrap: wrap}
-.quickform__list.-adress-inputs-list {
+/* .quickform .quickform__list {width: 100%;margin-bottom: 0;display: -webkit-box;display: -ms-flexbox;display: flex;-ms-flex-wrap: wrap;flex-wrap: wrap} */
+/* .quickform__list.-adress-inputs-list {
   margin: 0 -10px;
   width: auto;
-}
+} */
 .quickform .quickform__item {position: relative;max-width: 100%;width: 100%;margin: 0;}
 .quickform  .quickform__input-wrap {
     position: relative;
 }
-.quickform .quickform__label {
+/* .quickform .quickform__label {
   display: block;
   margin-bottom: 20px;
-}
-.quickform .quickform__row.-adress .quickform__item {
+} */
+/* .quickform .quickform__row.-adress .quickform__item {
   margin-bottom:30px;
-}
-.quickform .quickform__list.-adress-inputs-list .quickform__item:not(.-small) {
+} */
+/* .quickform .quickform__list.-adress-inputs-list .quickform__item:not(.-small) {
     width: 50%;
     padding: 0 10px;
-}
+} */
 .quickform__select-box._full{
   display: flex;
   flex-direction: column;
@@ -3293,15 +3293,15 @@ body.modal-open {overflow: hidden}
   .quickform .quickform__list.-adress-inputs-list .quickform__item:not(.-small) {
     width: 100%;
   }
-  .quickform .quickform__list.-adress-inputs-list .quickform__item.-small.-first, 
+  /* .quickform .quickform__list.-adress-inputs-list .quickform__item.-small.-first, 
   .quickform .quickform__list.-adress-inputs-list .quickform__item.-small.-second {
     width: 50%;
   }
   .quickform .quickform__list.-adress-inputs-list .quickform__item.-small.-third {
     width: 100%;
-  }
+  } */
 }
-.quickform .quickform__list.-adress-inputs-list .quickform__item.-small {width: calc(16.66%);padding: 0 10px;}
+/* .quickform .quickform__list.-adress-inputs-list .quickform__item.-small {width: calc(16.66%);padding: 0 10px;} */
 /* Cтрана */
 .quickform__country-select {
   width: 100%;
