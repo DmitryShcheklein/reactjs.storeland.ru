@@ -483,6 +483,10 @@
         {isCartItemsLength && (
           <RelatedGoods cartData={cartData} refetchCart={refetchCart} />
         )}
+
+        {isCartItemsLength && (
+          <RecentlyViewed cartData={cartData} refetchCart={refetchCart} />
+        )}
       </>
     );
   }
@@ -1499,6 +1503,112 @@
     );
   }
   function RelatedGoodItem({ item, refetchCart }) {
+    const addCartMutation = useAddCartMutation({
+      onSuccess: refetchCart,
+    });
+
+    const onSubmitHandler = (event) => {
+      event.preventDefault();
+
+      const form = event.target;
+
+      addCartMutation.mutate(form);
+    };
+
+    const {
+      GOODS_MOD_ID,
+      GOODS_NAME,
+      GOODS_MOD_PRICE_NOW,
+      ORDER_LINE_QUANTITY,
+      GOODS_IMAGE,
+    } = item;
+
+    return (
+      <li key={GOODS_MOD_ID} style={{ position: 'relative' }}>
+        <form onSubmit={onSubmitHandler}>
+          <input type="hidden" name="form[goods_mod_id]" value={GOODS_MOD_ID} />
+
+          <div style={{ display: 'flex', gap: 20 }}>
+            <h3>{GOODS_NAME}</h3>
+          </div>
+          {/* <div>
+            <strong>Кол-во:{ORDER_LINE_QUANTITY}</strong>
+          </div> */}
+          <input
+            // type="number"
+            type="hidden"
+            pattern="\d*"
+            name="form[goods_mod_quantity]"
+            max="4"
+            defaultValue="1"
+            min="1"
+            title="Количество"
+            className="input qty__input"
+          />
+          <div>
+            <strong>Цена:{GOODS_MOD_PRICE_NOW}</strong>
+          </div>
+          <img width="80" src={GOODS_IMAGE} />
+          <div>
+            <button className="button">
+              {addCartMutation.isLoading ? 'Добавляется...' : 'В корзину'}
+            </button>
+          </div>
+        </form>
+      </li>
+    );
+  }
+  function RecentlyViewed({ refetchCart, cartData }) {
+    const { recentlyViewedGoods } = cartData || {};
+    const recentlyViewedGoodsFiltered = recentlyViewedGoods.filter(item=>!item.NB_GOODS_IN_CART)
+    const [collapsed, setCollapsed] = useState(true);
+
+    if (!recentlyViewedGoodsFiltered?.length) {
+      return null;
+    }
+
+    return (
+      <div className="form-callapse">
+        <button
+          type="button"
+          className={classNames('form-callapse__title', {
+            ['_active']: !collapsed,
+          })}
+          onClick={() => {
+            setCollapsed(!collapsed);
+          }}
+        >
+          <span className="quickform__title">Вы смотрели</span>
+        </button>
+        <div
+          className={classNames('form-callapse__list', {
+            ['_active']: !collapsed,
+          })}
+        >
+          <ul
+            style={{
+              display: 'flex',
+              gap: 20,
+              listStyle: 'none',
+              padding: 0,
+              margin: 0,
+            }}
+          >
+            {recentlyViewedGoodsFiltered.map((item) => {
+              return (
+                <RecentlyViewedItem
+                  key={item.GOODS_MOD_ID}
+                  item={item}
+                  refetchCart={refetchCart}
+                />
+              );
+            })}
+          </ul>
+        </div>
+      </div>
+    );
+  }
+  function RecentlyViewedItem({ item, refetchCart }) {
     const addCartMutation = useAddCartMutation({
       onSuccess: refetchCart,
     });

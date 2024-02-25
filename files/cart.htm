@@ -57,6 +57,22 @@
   {% ENDFOR %}
   {% ENDIF %}
   ],
+  "recentlyViewedGoods": [  
+  {% IFNOT recently_viewed_goods_empty %}
+  {% FOR recently_viewed_goods %}    
+    {
+      "ID": "{recently_viewed_goods.ID}",
+      "NB_GOODS_IN_CART": {recently_viewed_goods.NB_GOODS_IN_CART},
+      "GOODS_NAME": "{recently_viewed_goods.NAME}",
+      "GOODS_MOD_ID": "{recently_viewed_goods.MIN_PRICE_NOW_ID}",
+      "ORDER_LINE_QUANTITY": 1,
+      "GOODS_MOD_PRICE_NOW": {recently_viewed_goods.MIN_PRICE_NOW},
+      "GOODS_IMAGE": "{% IF recently_viewed_goods.IMAGE_EMPTY %}{ASSETS_IMAGES_PATH}no-photo-icon.png?design=conditer{% ELSE %}{recently_viewed_goods.IMAGE_MEDIUM}{% ENDIF %}"
+    }    
+    {% IFNOT recently_viewed_goods.last %},{% ENDIF %}
+  {% ENDFOR %}
+  {% ENDIF %}
+  ],
   "favoritesGoods": [  
   {% IFNOT favorites_goods_empty %}
   {% FOR favorites_goods %}
