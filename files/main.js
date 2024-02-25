@@ -1316,7 +1316,7 @@ function catalogFunctions() {
 // Добавление товара в корзину
 function addCart() {
   $(
-    ".product-view__form, .product__form, .goodsToCartFromCompareForm, .goodsListForm"
+    ".product-view__form,  .goodsToCartFromCompareForm, .goodsListForm"
   )
     .off("submit")
     .on("submit", function () {
