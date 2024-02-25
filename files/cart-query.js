@@ -38,7 +38,6 @@
         <EmptyCart />
         <Cart />
         <OrderForm />
-        <RelatedGoods />
       </>
     );
   }
@@ -61,7 +60,6 @@
         coupon_code: '',
         isCouponSend: false,
       },
-      cartRelatedGoods: [],
     };
     const key = QUERY_KEYS.FormState;
     const query = useQuery({
@@ -221,6 +219,26 @@
       },
     });
   }
+  function useAddCartMutation(options) {
+    return useMutation({
+      mutationFn: async (form) => {
+        const formData = new FormData(form);
+
+        for (const pair of formData.entries()) {
+          // console.log(pair[0] + ', ' + pair[1]);formData
+        }
+        const response = await axios.post(`/cart/add/`, formData, {
+          params: {
+            ajax_q: 1,
+            hash: window.HASH,
+          },
+        });
+        console.log(response);
+        return response;
+      },
+      ...options,
+    });
+  }
 
   function Cart() {
     const formRef = useRef(null);
@@ -233,7 +251,6 @@
         coupon_code: couponCode,
         isCouponSend,
       },
-      cartRelatedGoods,
     } = formState;
 
     const {
@@ -272,7 +289,6 @@
       SETTINGS_STORE_ORDER_MIN_PRICE_WITHOUT_DELIVERY,
     } = cartData || {};
     const isCartItemsLength = cartItems?.length;
-    const isCartRelatedGoodsLength = cartRelatedGoods?.length;
 
     useEffect(() => {
       // console.log(
@@ -281,15 +297,10 @@
       //   zoneId,
       //   isCartRelatedGoodsLength
       // );
-      if (
-        isCouponSend ||
-        currentDeliveryId ||
-        zoneId ||
-        isCartRelatedGoodsLength
-      ) {
+      if (isCouponSend || currentDeliveryId || zoneId) {
         refetchCart();
       }
-    }, [isCouponSend, currentDeliveryId, zoneId, isCartRelatedGoodsLength]);
+    }, [isCouponSend, currentDeliveryId, zoneId]);
     const clearCartMutation = useClearCartMutation();
 
     const handleSubmit = (event) => {
@@ -374,22 +385,20 @@
                 </button>
               )}
 
-              <div>
-                <label>
-                  <input
-                    type="checkbox"
-                    onChange={(evt) => {
-                      const { checked } = evt.target;
+              <label style={{ display: 'flex', gap: 10 }}>
+                <input
+                  type="checkbox"
+                  onChange={(evt) => {
+                    const { checked } = evt.target;
 
-                      setDeletedItemsArray(
-                        checked ? cartItems.map((el) => el.GOODS_MOD_ID) : []
-                      );
-                    }}
-                    checked={cartItems.length === deletedItemsArray.length}
-                  />
-                  Выбрать всё
-                </label>
-              </div>
+                    setDeletedItemsArray(
+                      checked ? cartItems.map((el) => el.GOODS_MOD_ID) : []
+                    );
+                  }}
+                  checked={cartItems.length === deletedItemsArray.length}
+                />
+                Выбрать всё
+              </label>
             </div>
           ) : null}
 
@@ -420,8 +429,8 @@
             )}
 
             {isCartItemsLength ? (
-              <ul>
-                {[...cartItems, ...cartRelatedGoods].map((item) => (
+              <ul style={{ listStyle: 'none' }}>
+                {cartItems.map((item) => (
                   <CartItem
                     item={item}
                     key={item.GOODS_MOD_ID}
@@ -470,6 +479,9 @@
             </ul>
           ) : null}
         </div>
+        {isCartItemsLength && (
+          <RelatedGoods cartData={cartData} refetchCart={refetchCart} />
+        )}
       </>
     );
   }
@@ -1410,75 +1422,103 @@
       </>
     );
   }
-  function RelatedGoods() {
-    const { data: cartData, isSuccess, isFetching, refetch } = useCart();
+  function RelatedGoods({ refetchCart, cartData }) {
     const { cartRelatedGoods } = cartData || {};
-    const [formState, setFormState] = useFormState();
-    // console.log(cartRelatedGoods);
 
-    const isCartEmpty =
-      window.CART_IS_EMPTY || (!cartData?.CART_COUNT_TOTAL && isSuccess);
-    const addCartHandler = (item) => {
-      setFormState({
-        ...formState,
-        cartRelatedGoods: [...formState.cartRelatedGoods, item],
-      });
+    const addCartMutation = useAddCartMutation({
+      onSuccess: refetchCart,
+    });
+
+    const onSubmitHandler = (event) => {
+      event.preventDefault();
+
+      const form = event.target;
+
+      addCartMutation.mutate(form);
     };
-    if (!isSuccess) {
-      return null;
-    }
-    if (isCartEmpty) {
-      return null;
-    }
+    const [collapsed, setCollapsed] = useState(true);
+
     return (
-      <>
-        <h2 className="section-title">С этим товаром покупают</h2>
-        {cartRelatedGoods?.length ? (
-          <ul>
-            {cartRelatedGoods.map((item) => {
-              const {
-                GOODS_MOD_ID,
-                GOODS_NAME,
-                GOODS_MOD_PRICE_NOW,
-                ORDER_LINE_QUANTITY,
-                GOODS_IMAGE,
-              } = item;
+      <div className="form-callapse">
+        <button
+          type="button"
+          className="form-callapse__title"
+          onClick={() => {
+            setCollapsed(!collapsed);
+          }}
+        >
+          <span className="quickform__title">С этим товаром покупают</span>
+        </button>
+        <div
+          className={
+            'quickform__list -adress-inputs-list form-callapse__list' +
+            (collapsed ? '' : ' _active')
+          }
+        >
+          {cartRelatedGoods?.length ? (
+            <ul
+              style={{
+                display: 'flex',
+                gap: 20,
+                listStyle: 'none',
+                padding: 0,
+                margin: 0,
+              }}
+            >
+              {cartRelatedGoods.map((item) => {
+                const {
+                  GOODS_MOD_ID,
+                  GOODS_NAME,
+                  GOODS_MOD_PRICE_NOW,
+                  ORDER_LINE_QUANTITY,
+                  GOODS_IMAGE,
+                } = item;
 
-              return (
-                <li key={GOODS_MOD_ID} style={{ position: 'relative' }}>
-                  <form action="/cart/add/" method="post">
-                    <input type="hidden" name="hash" value="804a579e" />
-                    <input
-                      type="hidden"
-                      name="form[goods_mod_id]"
-                      value={GOODS_MOD_ID}
-                    />
+                return (
+                  <li key={GOODS_MOD_ID} style={{ position: 'relative' }}>
+                    <form onSubmit={onSubmitHandler}>
+                      <input
+                        type="hidden"
+                        name="form[goods_mod_id]"
+                        value={GOODS_MOD_ID}
+                      />
 
-                    <div style={{ display: 'flex', gap: 20 }}>
-                      <h3>{GOODS_NAME}</h3>
-                    </div>
-                    <div>
-                      <strong>Кол-во:{ORDER_LINE_QUANTITY}</strong>
-                    </div>
-                    <div>
-                      <strong>Цена:{GOODS_MOD_PRICE_NOW}</strong>
-                    </div>
-                    <img width="80" src={GOODS_IMAGE} />
-                    <div>
-                      <button
-                        className="button  _cart-page"
-                        // onClick={() => addCartHandler(item)}
-                      >
-                        В корзину
-                      </button>
-                    </div>
-                  </form>
-                </li>
-              );
-            })}
-          </ul>
-        ) : null}
-      </>
+                      <div style={{ display: 'flex', gap: 20 }}>
+                        <h3>{GOODS_NAME}</h3>
+                      </div>
+                      <div>
+                        <strong>Кол-во:{ORDER_LINE_QUANTITY}</strong>
+                      </div>
+                      <input
+                        type="number"
+                        pattern="\d*"
+                        name="form[goods_mod_quantity]"
+                        max="4"
+                        defaultValue="1"
+                        min="1"
+                        title="Количество"
+                        className="input qty__input"
+                      />
+                      <div>
+                        <strong>Цена:{GOODS_MOD_PRICE_NOW}</strong>
+                      </div>
+                      <img width="80" src={GOODS_IMAGE} />
+                      <div>
+                        <button
+                          className="button"
+                          // onClick={() => addCartHandler(item)}
+                        >
+                          В корзину
+                        </button>
+                      </div>
+                    </form>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : null}
+        </div>
+      </div>
     );
   }
 })();
