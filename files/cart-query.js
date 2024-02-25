@@ -1063,7 +1063,7 @@
   function Adresses({ quickFormData, handleChange, formErrors }) {
     // const Nouislider = window.ReactNouislider;
 
-    const [addressCollapsed, setAddressCollapsed] = useState(true);
+    const [collapsed, setCollapsed] = useState(true);
     const {
       ORDER_FORM_CONTACT_ADDR,
       ORDER_FORM_CONTACT_CITY,
@@ -1105,9 +1105,11 @@
         <section className="quickform__row -adress form-callapse">
           <button
             type="button"
-            className="form-callapse__title"
+            className={classNames('form-callapse__title', {
+              ['_active']: !collapsed,
+            })}
             onClick={() => {
-              setAddressCollapsed(!addressCollapsed);
+              setCollapsed(!collapsed);
             }}
           >
             <span className="quickform__title">Адрес доставки заказа</span>
@@ -1116,7 +1118,7 @@
             className={classNames(
               'quickform__list -adress-inputs-list form-callapse__list',
               {
-                ['_active']: !addressCollapsed,
+                ['_active']: !collapsed,
               }
             )}
           >
@@ -1447,18 +1449,6 @@
     const { cartRelatedGoods } = cartData || {};
     const [collapsed, setCollapsed] = useState(true);
 
-    const addCartMutation = useAddCartMutation({
-      onSuccess: refetchCart,
-    });
-
-    const onSubmitHandler = (event) => {
-      event.preventDefault();
-
-      const form = event.target;
-
-      addCartMutation.mutate(form);
-    };
-
     if (!cartRelatedGoods?.length) {
       return null;
     }
@@ -1467,7 +1457,9 @@
       <div className="form-callapse">
         <button
           type="button"
-          className="form-callapse__title"
+          className={classNames('form-callapse__title', {
+            ['_active']: !collapsed,
+          })}
           onClick={() => {
             setCollapsed(!collapsed);
           }}
@@ -1482,69 +1474,83 @@
             }
           )}
         >
-          {cartRelatedGoods?.length ? (
-            <ul
-              style={{
-                display: 'flex',
-                gap: 20,
-                listStyle: 'none',
-                padding: 0,
-                margin: 0,
-              }}
-            >
-              {cartRelatedGoods.map((item) => {
-                const {
-                  GOODS_MOD_ID,
-                  GOODS_NAME,
-                  GOODS_MOD_PRICE_NOW,
-                  ORDER_LINE_QUANTITY,
-                  GOODS_IMAGE,
-                } = item;
-
-                return (
-                  <li key={GOODS_MOD_ID} style={{ position: 'relative' }}>
-                    <form onSubmit={onSubmitHandler}>
-                      <input
-                        type="hidden"
-                        name="form[goods_mod_id]"
-                        value={GOODS_MOD_ID}
-                      />
-
-                      <div style={{ display: 'flex', gap: 20 }}>
-                        <h3>{GOODS_NAME}</h3>
-                      </div>
-                      <div>
-                        <strong>Кол-во:{ORDER_LINE_QUANTITY}</strong>
-                      </div>
-                      <input
-                        type="number"
-                        pattern="\d*"
-                        name="form[goods_mod_quantity]"
-                        max="4"
-                        defaultValue="1"
-                        min="1"
-                        title="Количество"
-                        className="input qty__input"
-                      />
-                      <div>
-                        <strong>Цена:{GOODS_MOD_PRICE_NOW}</strong>
-                      </div>
-                      <img width="80" src={GOODS_IMAGE} />
-                      <div>
-                        <button className="button">
-                          {addCartMutation.isLoading
-                            ? 'Добавляется...'
-                            : 'В корзину'}
-                        </button>
-                      </div>
-                    </form>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : null}
+          <ul
+            style={{
+              display: 'flex',
+              gap: 20,
+              listStyle: 'none',
+              padding: 0,
+              margin: 0,
+            }}
+          >
+            {cartRelatedGoods.map((item) => {
+              return (
+                <RelatedGoodItem
+                  key={item.GOODS_MOD_ID}
+                  item={item}
+                  refetchCart={refetchCart}
+                />
+              );
+            })}
+          </ul>
         </div>
       </div>
+    );
+  }
+  function RelatedGoodItem({ item, refetchCart }) {
+    const addCartMutation = useAddCartMutation({
+      onSuccess: refetchCart,
+    });
+
+    const onSubmitHandler = (event) => {
+      event.preventDefault();
+
+      const form = event.target;
+
+      addCartMutation.mutate(form);
+    };
+
+    const {
+      GOODS_MOD_ID,
+      GOODS_NAME,
+      GOODS_MOD_PRICE_NOW,
+      ORDER_LINE_QUANTITY,
+      GOODS_IMAGE,
+    } = item;
+
+    return (
+      <li key={GOODS_MOD_ID} style={{ position: 'relative' }}>
+        <form onSubmit={onSubmitHandler}>
+          <input type="hidden" name="form[goods_mod_id]" value={GOODS_MOD_ID} />
+
+          <div style={{ display: 'flex', gap: 20 }}>
+            <h3>{GOODS_NAME}</h3>
+          </div>
+          {/* <div>
+            <strong>Кол-во:{ORDER_LINE_QUANTITY}</strong>
+          </div> */}
+          <input
+            // type="number"
+            type="hidden"
+            pattern="\d*"
+            name="form[goods_mod_quantity]"
+            max="4"
+            defaultValue="1"
+            min="1"
+            title="Количество"
+            className="input qty__input"
+          />
+          <div>
+            <strong>Цена:{GOODS_MOD_PRICE_NOW}</strong>
+          </div>
+          <img width="80" src={GOODS_IMAGE} />
+          <div>
+            <button className="button">
+              {addCartMutation.isLoading ? 'Добавляется...' : 'В корзину'}
+            </button>
+          </div>
+        </form>
+      </li>
     );
   }
 })();
