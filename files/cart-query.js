@@ -1021,6 +1021,7 @@
               checked={extraDontCall}
               name="form[extra][Дозвон]"
               value="НЕ ПЕРЕЗВАНИВАТЬ"
+              id="contactWantRegister"
             />
             <label htmlFor="contactWantRegister">Не перезванивать</label>
           </div>
