@@ -756,7 +756,6 @@
     };
     const { formErrors, handleInputChange } = useFormValidation({
       quickFormData,
-      formRef,
     });
 
     const handleChange = (event) => {
