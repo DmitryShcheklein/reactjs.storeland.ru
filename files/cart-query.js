@@ -234,7 +234,7 @@
             hash: window.HASH,
           },
         });
-        console.log(response);
+        // console.log(response);
         return response;
       },
       ...options,
@@ -825,6 +825,8 @@
           noValidate="novalidate"
           className="quickform"
         >
+          <h3 className="quickform__title">Оформление заказа</h3>
+
           <div className="quickform__input-wrap">
             <input
               id="person"
@@ -1443,6 +1445,7 @@
   }
   function RelatedGoods({ refetchCart, cartData }) {
     const { cartRelatedGoods } = cartData || {};
+    const [collapsed, setCollapsed] = useState(true);
 
     const addCartMutation = useAddCartMutation({
       onSuccess: refetchCart,
@@ -1455,7 +1458,10 @@
 
       addCartMutation.mutate(form);
     };
-    const [collapsed, setCollapsed] = useState(true);
+
+    if (!cartRelatedGoods?.length) {
+      return null;
+    }
 
     return (
       <div className="form-callapse">
@@ -1525,11 +1531,10 @@
                       </div>
                       <img width="80" src={GOODS_IMAGE} />
                       <div>
-                        <button
-                          className="button"
-                          // onClick={() => addCartHandler(item)}
-                        >
-                          В корзину
+                        <button className="button">
+                          {addCartMutation.isLoading
+                            ? 'Добавляется...'
+                            : 'В корзину'}
                         </button>
                       </div>
                     </form>
