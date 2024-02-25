@@ -9,6 +9,7 @@
   } = window.ReactQuery;
   const { IMaskInput } = window.ReactIMask;
   const { ReactQueryDevtools } = window.ReactQueryDevtools;
+  const classNames = window.classNames;
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -827,7 +828,9 @@
           <div className="quickform__input-wrap">
             <input
               id="person"
-              className={`input ${formErrors.person ? 'error' : ''}`}
+              className={classNames(`input`, {
+                ['error']: formErrors.person,
+              })}
               name="form[contact][person]"
               value={formState.form.contact.person}
               onChange={handleChange}
@@ -843,7 +846,9 @@
           <div className="quickform__input-wrap">
             <IMaskInput
               id="phone"
-              className={`input ${formErrors.phone ? 'error' : ''}`}
+              className={classNames(`input`, {
+                ['error']: formErrors.phone,
+              })}
               placeholder="+7 999 999-99-99"
               type="tel"
               mask="+{7} {#00} 000-00-00"
@@ -860,7 +865,9 @@
           <div className="quickform__input-wrap">
             <input
               id="email"
-              className={`input ${formErrors.email ? 'error' : ''}`}
+              className={classNames(`input`, {
+                ['error']: formErrors.email,
+              })}
               name="form[contact][email]"
               value={formState.form.contact.email}
               onChange={handleChange}
@@ -1104,10 +1111,12 @@
             <span className="quickform__title">Адрес доставки заказа</span>
           </button>
           <div
-            className={
-              'quickform__list -adress-inputs-list form-callapse__list' +
-              (addressCollapsed ? '' : ' _active')
-            }
+            className={classNames(
+              'quickform__list -adress-inputs-list form-callapse__list',
+              {
+                ['_active']: !addressCollapsed,
+              }
+            )}
           >
             <div>
               {/* <!-- Если поле страны доставки запрашивается --> */}
@@ -1173,10 +1182,15 @@
                       id="city"
                       name="form[delivery][city]"
                       defaultValue={ORDER_FORM_CONTACT_CITY}
-                      className="input"
                       maxLength="255"
                       onChange={handleChange}
+                      className={classNames(`input`, {
+                        ['error']: formErrors.city,
+                      })}
                     />
+                    {formErrors.city && (
+                      <label className="error">{formErrors.city}</label>
+                    )}
                   </div>
                 </div>
               )}
@@ -1266,7 +1280,9 @@
                       defaultValue={ORDER_FORM_CONTACT_ZIP_CODE}
                       minLength="5"
                       maxLength="6"
-                      className={`input ${formErrors.zipCode ? 'error' : ''}`}
+                      className={classNames(`input`, {
+                        ['error']: formErrors.zipCode,
+                      })}
                       onChange={handleChange}
                     />
                     {formErrors.zipCode && (
@@ -1407,7 +1423,10 @@
                         rows="5"
                         id="comment"
                         name="form[delivery][comment]"
-                        className={`input textarea quickform-textarea ${formErrors.comment ? 'error' : ''}`}
+                        className={classNames(
+                          `input textarea quickform-textarea`,
+                          { ['error']: formErrors.comment }
+                        )}
                       ></textarea>
                       {formErrors.comment && (
                         <label className="error">{formErrors.comment}</label>
@@ -1450,10 +1469,12 @@
           <span className="quickform__title">С этим товаром покупают</span>
         </button>
         <div
-          className={
-            'quickform__list -adress-inputs-list form-callapse__list' +
-            (collapsed ? '' : ' _active')
-          }
+          className={classNames(
+            'quickform__list -adress-inputs-list form-callapse__list',
+            {
+              ['_active']: !collapsed,
+            }
+          )}
         >
           {cartRelatedGoods?.length ? (
             <ul

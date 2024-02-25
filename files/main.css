@@ -3081,7 +3081,8 @@ body.modal-open {overflow: hidden}
   flex-direction: column;
   gap: 25px;
 }
-#root-cart label {
+#root-cart label,
+#root-cart [type="checkbox"] {
   cursor: pointer;
   user-select: none;
 }
