@@ -58,7 +58,7 @@
   ],
   "cartDiscount": [
   {% FOR cart_discount %}
-    
+  {% IF cart_discount.DISCOUNT_IS_ENABLED %}
     {
       "DISCOUNT_TYPE": "{cart_discount.DISCOUNT_TYPE}",
       "DISCOUNT_NAME": "{cart_discount.DISCOUNT_NAME}",
@@ -68,8 +68,7 @@
       "DISCOUNT_IS_ENABLED": "{cart_discount.DISCOUNT_IS_ENABLED}",
       "DISCOUNT_TYPE_DESCRIPTION": "{cart_discount.DISCOUNT_TYPE_DESCRIPTION}"
     }
-    {% IFNOT cart_discount.last %},{% ENDIF %}
-    
+    {% ENDIF %}
   {% ENDFOR %}
   ],
   "FORM_NOTICE": "{% IF FORM_NOTICE %}{FORM_NOTICE}{% ENDIF %}",

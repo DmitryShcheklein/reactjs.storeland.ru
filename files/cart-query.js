@@ -288,6 +288,7 @@
       CART_SUM_NOW_WITH_DELIVERY,
       SETTINGS_STORE_ORDER_MIN_ORDER_PRICE,
       SETTINGS_STORE_ORDER_MIN_PRICE_WITHOUT_DELIVERY,
+      cartDiscount,
     } = cartData || {};
     const isCartItemsLength = cartItems?.length;
 
@@ -341,6 +342,7 @@
         }
       });
     };
+    const [cartDiscountObj] = cartDiscount || [];
     if (window.CART_IS_EMPTY) {
       return null;
     }
@@ -459,8 +461,18 @@
               )}
               <li>Метод оплаты (id): {currentPaymentId}</li>
               <li>Купон : {couponCode}</li>
-              <li>Скидка: {CART_SUM_DISCOUNT}</li>
-              <li>Скидка процент: {CART_SUM_DISCOUNT_PERCENT}</li>
+              {cartDiscountObj && (
+                <ul>
+                  <li>
+                    {cartDiscountObj.DISCOUNT_VALUE}{' '}
+                    {cartDiscountObj.IS_PERCENT ? '%' : 'р.'}
+                  </li>
+                  <li>{cartDiscountObj.DISCOUNT_NAME}</li>
+                  <li>{cartDiscountObj.DISCOUNT_TYPE_DESCRIPTION}</li>
+                </ul>
+              )}
+              {/* <li> Скидка: {CART_SUM_DISCOUNT} </li> */}
+              {/* <li>Скидка процент: {CART_SUM_DISCOUNT_PERCENT}</li> */}
               <li>Итого с доставкой: {CART_SUM_NOW_WITH_DELIVERY}</li>
               {SETTINGS_STORE_ORDER_MIN_ORDER_PRICE ? (
                 <li>
@@ -1560,7 +1572,9 @@
   }
   function RecentlyViewed({ refetchCart, cartData }) {
     const { recentlyViewedGoods } = cartData || {};
-    const recentlyViewedGoodsFiltered = recentlyViewedGoods.filter(item=>!item.NB_GOODS_IN_CART)
+    const recentlyViewedGoodsFiltered = recentlyViewedGoods.filter(
+      (item) => !item.NB_GOODS_IN_CART
+    );
     const [collapsed, setCollapsed] = useState(true);
 
     if (!recentlyViewedGoodsFiltered?.length) {
