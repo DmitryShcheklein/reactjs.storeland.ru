@@ -248,7 +248,7 @@
     const { data: quickFormData } = useQuickFormData({
       enabled: !Boolean(window.CART_IS_EMPTY),
     });
-    
+
     const {
       form: {
         delivery: { id: currentDeliveryId, zone_id: zoneId },
@@ -501,13 +501,15 @@
             </ul>
           ) : null}
         </div>
+
         {isCartItemsLength ? (
           <RelatedGoods cartData={cartData} refetchCart={refetchCart} />
         ) : null}
-
+        <br />
         {isCartItemsLength ? (
           <RecentlyViewed cartData={cartData} refetchCart={refetchCart} />
         ) : null}
+        <br />
       </>
     );
   }
@@ -1498,6 +1500,7 @@
               listStyle: 'none',
               padding: 0,
               margin: 0,
+              overflow: 'auto'
             }}
           >
             {cartRelatedGoods.map((item) => {
@@ -1606,6 +1609,7 @@
               listStyle: 'none',
               padding: 0,
               margin: 0,
+              overflow: 'auto',
             }}
           >
             {recentlyViewedGoodsFiltered.map((item) => {
