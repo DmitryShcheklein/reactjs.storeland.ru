@@ -248,7 +248,7 @@
     const { data: quickFormData } = useQuickFormData({
       enabled: !Boolean(window.CART_IS_EMPTY),
     });
-    console.log(quickFormData.ORDER_DISCOUNT_COUPON_IS_ENABLED);
+    
     const {
       form: {
         delivery: { id: currentDeliveryId, zone_id: zoneId },
@@ -893,7 +893,7 @@
           </div>
 
           {!CLIENT_IS_LOGIN && (
-            <div className="quickform">
+            <>
               <label style={{ display: 'flex', gap: 15, alignItems: 'center' }}>
                 <input
                   type="checkbox"
@@ -939,7 +939,7 @@
                   </button>
                 </div>
               )}
-            </div>
+            </>
           )}
           {ORDER_DISCOUNT_COUPON_IS_ENABLED && (
             <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
