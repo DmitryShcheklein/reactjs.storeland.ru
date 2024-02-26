@@ -245,6 +245,10 @@
     const formRef = useRef(null);
     const formElement = formRef?.current;
     const [formState, setFormState] = useFormState();
+    const { data: quickFormData } = useQuickFormData({
+      enabled: !Boolean(window.CART_IS_EMPTY),
+    });
+    console.log(quickFormData.ORDER_DISCOUNT_COUPON_IS_ENABLED);
     const {
       form: {
         delivery: { id: currentDeliveryId, zone_id: zoneId },
@@ -460,7 +464,9 @@
                 </li>
               )}
               <li>Метод оплаты (id): {currentPaymentId}</li>
-              {1 && <li>Купон : {couponCode}</li>}
+              {quickFormData.ORDER_DISCOUNT_COUPON_IS_ENABLED && (
+                <li>Купон : {couponCode}</li>
+              )}
               {cartDiscountObj && (
                 <>
                   Скидка
@@ -748,7 +754,8 @@
       useQuickFormData({
         enabled: !Boolean(window.CART_IS_EMPTY),
       });
-    const { deliveries, CLIENT_IS_LOGIN } = quickFormData;
+    const { deliveries, CLIENT_IS_LOGIN, ORDER_DISCOUNT_COUPON_IS_ENABLED } =
+      quickFormData;
     const createOrderMutation = useCreateOrderMutation();
     const { isLoading: isOrderLoading } = createOrderMutation;
     const {
@@ -934,26 +941,28 @@
               )}
             </div>
           )}
-          <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
-            <input
-              id="couponCode"
-              className="input"
-              name="form[coupon_code]"
-              value={couponCode}
-              onChange={handleChange}
-              maxLength="255"
-              type="text"
-              placeholder="Купон (123456)"
-            />
-            <button
-              disabled={!couponCode}
-              onClick={handleCouponBtn}
-              className="button"
-              type="button"
-            >
-              Применить
-            </button>
-          </div>
+          {ORDER_DISCOUNT_COUPON_IS_ENABLED && (
+            <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
+              <input
+                id="couponCode"
+                className="input"
+                name="form[coupon_code]"
+                value={couponCode}
+                onChange={handleChange}
+                maxLength="255"
+                type="text"
+                placeholder="Купон (123456)"
+              />
+              <button
+                disabled={!couponCode}
+                onClick={handleCouponBtn}
+                className="button"
+                type="button"
+              >
+                Применить
+              </button>
+            </div>
+          )}
           {deliveries?.length ? (
             <>
               <select
