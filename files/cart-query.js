@@ -1077,7 +1077,17 @@
 
   function Adresses({ quickFormData, handleChange, formErrors }) {
     // const Nouislider = window.ReactNouislider;
-
+    const [formState] = useFormState();
+    const {
+      form: {
+        delivery: {
+          address_street: addressStreet,
+          address_home: addressHome,
+          address_flat: addressFlat,
+        },
+      },
+    } = formState;
+    const fullAddress = `Улица: ${addressStreet}, Дом/Корпус: ${addressHome}, Квартира: ${addressFlat}`
     const [collapsed, setCollapsed] = useState(true);
     const {
       ORDER_FORM_CONTACT_ADDR,
@@ -1279,7 +1289,10 @@
                     type="hidden"
                     id="address"
                     name="form[delivery][address]"
-                    defaultValue={ORDER_FORM_CONTACT_ADDR}
+                    defaultValue={
+                      ORDER_FORM_CONTACT_ADDR ||
+                      fullAddress
+                    }
                     maxLength="500"
                     className="input"
                   />
@@ -1500,7 +1513,7 @@
               listStyle: 'none',
               padding: 0,
               margin: 0,
-              overflow: 'auto'
+              overflow: 'auto',
             }}
           >
             {cartRelatedGoods.map((item) => {
