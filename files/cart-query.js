@@ -460,7 +460,7 @@
                 </li>
               )}
               <li>Метод оплаты (id): {currentPaymentId}</li>
-              <li>Купон : {couponCode}</li>
+              {1 && <li>Купон : {couponCode}</li>}
               {cartDiscountObj && (
                 <>
                   Скидка
@@ -657,18 +657,6 @@
   }
 
   function useFormValidation({ quickFormData }) {
-    const {
-      SETTINGS_ORDER_FIELDS: {
-        Country,
-        ConvenientTime,
-        ZipCode,
-        Region,
-        City,
-        Address,
-        Comment,
-      },
-    } = quickFormData;
-
     // Получаем всех детей формы
     // const formChildren = formRef.current?.elements;
     // console.log(formChildren);
@@ -715,21 +703,17 @@
       } else if (id === 'phone' && !isValidPhone(value)) {
         setFormErrors((prevState) => ({
           ...prevState,
-          [id]: 'Please enter a valid phone.',
+          [id]: 'Пожалуйста, введите корректный телефон.',
         }));
-      } else if (
-        id === 'zipCode' &&
-        ZipCode.isRequired &&
-        value.length < minLength
-      ) {
+      } else if (id === 'zipCode' && required && value.length < minLength) {
         setFormErrors((prevState) => ({
           ...prevState,
           [id]: 'Please enter zipCode.',
         }));
-      } else if (id === 'comment' && Comment.isRequired && !value.length) {
+      } else if (required && !value) {
         setFormErrors((prevState) => ({
           ...prevState,
-          [id]: 'Please enter comment.',
+          [id]: 'Это поле необходимо заполнить.',
         }));
       } else {
         setFormErrors((prevState) => ({
@@ -1188,6 +1172,7 @@
                       defaultValue={ORDER_FORM_CONTACT_REGION}
                       maxLength="255"
                       className="input"
+                      required={Region.isRequired}
                     />
                   </div>
                 </div>
@@ -1211,6 +1196,7 @@
                       className={classNames(`input`, {
                         ['error']: formErrors.city,
                       })}
+                      required={City.isRequired}
                     />
                     {formErrors.city && (
                       <label className="error">{formErrors.city}</label>
@@ -1308,6 +1294,7 @@
                         ['error']: formErrors.zipCode,
                       })}
                       onChange={handleChange}
+                      required={ZipCode.isRequired}
                     />
                     {formErrors.zipCode && (
                       <label className="error">{formErrors.zipCode}</label>
@@ -1442,6 +1429,7 @@
                     </label>
                     <div className="quickform__input-wrap">
                       <textarea
+                        required={Comment.isRequired}
                         onChange={handleChange}
                         cols="100"
                         rows="5"
