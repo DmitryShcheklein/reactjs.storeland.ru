@@ -664,18 +664,7 @@
     );
   }
 
-  function useFormValidation({ quickFormData }) {
-    // Получаем всех детей формы
-    // const formChildren = formRef.current?.elements;
-    // console.log(formChildren);
-    // if (formChildren) {
-    //   console.log(
-    //     Array.from(formChildren)
-    //       .filter((el) => Boolean(el.name))
-    //       .map((el) => el.name)
-    //   );
-    // }
-
+  function useFormValidation() {
     const [formErrors, setFormErrors] = useState({
       person: '',
       phone: '',
@@ -779,9 +768,7 @@
 
       createOrderMutation.mutate(event.target);
     };
-    const { formErrors, handleInputChange } = useFormValidation({
-      quickFormData,
-    });
+    const { formErrors, handleInputChange } = useFormValidation();
 
     const handleChange = (event) => {
       const { name, value, id } = event.target;
@@ -1087,7 +1074,7 @@
         },
       },
     } = formState;
-    const fullAddress = `Улица: ${addressStreet}, Дом/Корпус: ${addressHome}, Квартира: ${addressFlat}`
+    const fullAddress = `Улица: ${addressStreet}, Дом/Корпус: ${addressHome}, Квартира: ${addressFlat}`;
     const [collapsed, setCollapsed] = useState(true);
     const {
       ORDER_FORM_CONTACT_ADDR,
@@ -1289,10 +1276,7 @@
                     type="hidden"
                     id="address"
                     name="form[delivery][address]"
-                    defaultValue={
-                      ORDER_FORM_CONTACT_ADDR ||
-                      fullAddress
-                    }
+                    defaultValue={ORDER_FORM_CONTACT_ADDR || fullAddress}
                     maxLength="500"
                     className="input"
                   />
