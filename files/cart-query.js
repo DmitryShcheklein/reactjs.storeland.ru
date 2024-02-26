@@ -105,9 +105,12 @@
           form: {
             ...prev.form,
             contact: {
-              person: ORDER_FORM_CONTACT_PERSON || 'User',
-              phone: ORDER_FORM_CONTACT_PHONE || '89876543210',
-              email: ORDER_FORM_CONTACT_EMAIL || 'user@test.ru',
+              person: ORDER_FORM_CONTACT_PERSON,
+              //  || 'User'
+              phone: ORDER_FORM_CONTACT_PHONE,
+              // || '89876543210'
+              email: ORDER_FORM_CONTACT_EMAIL,
+              //  || 'user@test.ru'
             },
             delivery: {
               id: firstDelivery?.id,
@@ -695,7 +698,7 @@
       } else if (id === 'password' && value.length < minLength) {
         setFormErrors((prevState) => ({
           ...prevState,
-          [id]: 'Password must be at least 8 characters long.',
+          [id]: `Password must be at least ${minLength} characters long.`,
         }));
       } else if (id === 'phone' && !isValidPhone(value)) {
         setFormErrors((prevState) => ({
@@ -735,8 +738,21 @@
         return phoneRegex.test(phone);
       }
     };
+    const checkFormValid = (form) => {
+      const formElements = Array.from(form.elements).filter(
+        (el) => el.required
+      );
+      formElements.forEach((el) => handleInputChange(el));
 
-    return { formErrors, setFormErrors, handleInputChange };
+      return Object.values(formErrors).every((error) => error != '');
+    };
+
+    return {
+      formErrors,
+      setFormErrors,
+      handleInputChange,
+      checkFormValid,
+    };
   }
   function OrderForm() {
     const { data: cartData } = useCart();
@@ -763,12 +779,21 @@
       extraDontCall: false,
     });
     const { wantRegister, extraDontCall, showPassword } = localForm;
+    const { formErrors, handleInputChange, checkFormValid } =
+      useFormValidation();
     const handleSubmit = (event) => {
       event.preventDefault();
 
-      createOrderMutation.mutate(event.target);
+      const formElement = event.target;
+      const isFormValid = checkFormValid(formElement);
+      console.log(isFormValid, formErrors);
+
+      if (!isFormValid) {
+        return;
+      }
+
+      createOrderMutation.mutate(formElement);
     };
-    const { formErrors, handleInputChange } = useFormValidation();
 
     const handleChange = (event) => {
       const { name, value, id } = event.target;
@@ -858,6 +883,7 @@
               value={formState.form.contact.phone}
               unmask={false}
               onChange={handleChange}
+              required
             />
             {formErrors.phone && (
               <label className="error">{formErrors.phone}</label>
@@ -874,7 +900,8 @@
               onChange={handleChange}
               maxLength="255"
               type="email"
-              placeholder="Email"
+              placeholder={`Email ${wantRegister ? '*' : ''}`}
+              required={wantRegister ? 'required' : undefined}
             />
             {formErrors.email && (
               <label className="error">{formErrors.email}</label>
@@ -902,12 +929,15 @@
                 <div className="quickform__input-wrap">
                   <input
                     id="password"
-                    className="input"
+                    className={classNames(`input`, {
+                      ['error']: formErrors.password,
+                    })}
                     type={showPassword ? 'text' : 'password'}
                     name="form[contact][pass]"
                     maxLength="50"
                     minLength="6"
                     placeholder="Придумайте пароль"
+                    required
                   />
                   {formErrors.password && (
                     <label className="error">{formErrors.password}</label>
