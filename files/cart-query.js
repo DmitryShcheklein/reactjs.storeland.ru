@@ -542,19 +542,22 @@
     });
     const [inputValue, setInputValue] = useState(ORDER_LINE_QUANTITY);
     const handleBlur = (event) => {
-      const { value } = event.target;
+      const { value, min } = event.target;
+      const numericValue = Math.max(Number(parseInt(value, 10)), Number(min));
 
-      if (value < 1) {
-        setInputValue(1);
+      setInputValue(numericValue);
+
+      if (ORDER_LINE_QUANTITY != inputValue) {
+        handleSubmit();
       }
     };
 
     const handleChange = (event) => {
       const { value } = event.target;
-      setInputValue(Number(value));
+      const numericValue = Number(value);
 
-      if (Number(value) > 0) {
-        handleSubmit();
+      if (!isNaN(numericValue)) {
+        setInputValue(value === '' ? '' : numericValue);
       }
     };
     const handleRemoveItem = () => {
@@ -615,7 +618,7 @@
               </>
             ) : null}
             <div>
-              <strong>Кол-во:{inputValue}</strong>
+              <strong>Кол-во:{ORDER_LINE_QUANTITY}</strong>
             </div>
             <div>
               <strong>Цена:{ORDER_LINE_PRICE_NOW / ORDER_LINE_QUANTITY}</strong>
@@ -631,8 +634,9 @@
                   type="submit"
                   className="qty__btn"
                   onClick={() => {
-                    setInputValue(inputValue - 1);
+                    setInputValue(inputValue - 1 || 1);
                   }}
+                  disabled={inputValue <= 1}
                 >
                   <svg className="icon">
                     <use xlinkHref="/design/sprite.svg#minus-icon"></use>
@@ -641,6 +645,8 @@
                 <input
                   name={`form[quantity][${GOODS_MOD_ID}]`}
                   min="1"
+                  pattern="[0-9]*"
+                  inputMode="numeric"
                   type="number"
                   value={inputValue}
                   onChange={handleChange}

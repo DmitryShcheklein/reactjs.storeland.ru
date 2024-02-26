@@ -1938,6 +1938,7 @@ body.modal-open {overflow: hidden}
   flex-grow: 0;
 }
 .qty__btn {display: -webkit-box;display: -ms-flexbox;display: flex;width: 25px;height: 25px;line-height: 25px;flex-shrink: 0;font-size: 11px;border-radius: 0;margin: 0;opacity: 1;visibility: visible;text-align: center;border-radius: 5px;border: 1px solid #c9ced6;background-color: #fff;}
+.qty__btn:disabled {opacity: .5;pointer-events: none;}
 .qty__btn:hover {border: 1px solid #6053c7}
 .qty__btn:hover .icon {fill: #6053c7}
 .qty__btn .icon {fill: #c9ced6;width: 10px;height: 10px;margin: auto;-webkit-transition: fill .3s ease;transition: fill .3s ease}
