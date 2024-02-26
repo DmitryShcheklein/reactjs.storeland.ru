@@ -462,14 +462,17 @@
               <li>Метод оплаты (id): {currentPaymentId}</li>
               <li>Купон : {couponCode}</li>
               {cartDiscountObj && (
-                <ul>
-                  <li>
-                    {cartDiscountObj.DISCOUNT_VALUE}{' '}
-                    {cartDiscountObj.IS_PERCENT ? '%' : 'р.'}
-                  </li>
-                  <li>{cartDiscountObj.DISCOUNT_NAME}</li>
-                  <li>{cartDiscountObj.DISCOUNT_TYPE_DESCRIPTION}</li>
-                </ul>
+                <>
+                  Скидка
+                  <ul>
+                    <li>
+                      {cartDiscountObj.DISCOUNT_VALUE}{' '}
+                      {cartDiscountObj.IS_PERCENT ? '%' : 'р.'}
+                    </li>
+                    <li>{cartDiscountObj.DISCOUNT_NAME}</li>
+                    <li>{cartDiscountObj.DISCOUNT_TYPE_DESCRIPTION}</li>
+                  </ul>
+                </>
               )}
               {/* <li> Скидка: {CART_SUM_DISCOUNT} </li> */}
               {/* <li>Скидка процент: {CART_SUM_DISCOUNT_PERCENT}</li> */}
@@ -492,13 +495,13 @@
             </ul>
           ) : null}
         </div>
-        {isCartItemsLength && (
+        {isCartItemsLength ? (
           <RelatedGoods cartData={cartData} refetchCart={refetchCart} />
-        )}
+        ) : null}
 
-        {isCartItemsLength && (
+        {isCartItemsLength ? (
           <RecentlyViewed cartData={cartData} refetchCart={refetchCart} />
-        )}
+        ) : null}
       </>
     );
   }
@@ -690,9 +693,9 @@
     });
 
     const handleInputChange = (eventTarget) => {
-      const { id, name, value, minLength } = eventTarget;
+      const { id, name, value, required, minLength } = eventTarget;
 
-      console.log(id, Comment.isRequired, !value.length);
+      console.log(id, required, !value.length);
 
       if (id === 'person' && value.length < 3) {
         setFormErrors((prevState) => ({
