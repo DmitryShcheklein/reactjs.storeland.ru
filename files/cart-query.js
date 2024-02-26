@@ -528,7 +528,7 @@
       GOODS_ID,
       GOODS_MOD_ID,
       GOODS_NAME,
-      GOODS_MOD_PRICE_NOW,
+      ORDER_LINE_PRICE_NOW,
       ORDER_LINE_QUANTITY = 1,
       GOODS_IMAGE,
       GOODS_URL,
@@ -618,7 +618,7 @@
               <strong>Кол-во:{inputValue}</strong>
             </div>
             <div>
-              <strong>Цена:{GOODS_MOD_PRICE_NOW}</strong>
+              <strong>Цена:{ORDER_LINE_PRICE_NOW / ORDER_LINE_QUANTITY}</strong>
             </div>
           </div>
           <div>
@@ -1574,7 +1574,7 @@
     const {
       GOODS_MOD_ID,
       GOODS_NAME,
-      GOODS_MOD_PRICE_NOW,
+      MIN_PRICE_NOW_WITHOUT_DISCOUNT,
       ORDER_LINE_QUANTITY,
       GOODS_IMAGE,
     } = item;
@@ -1602,7 +1602,7 @@
             className="input qty__input"
           />
           <div>
-            <strong>Цена:{GOODS_MOD_PRICE_NOW}</strong>
+            <strong>Цена:{MIN_PRICE_NOW_WITHOUT_DISCOUNT}</strong>
           </div>
           <img width="80" src={GOODS_IMAGE} />
           <div>
@@ -1683,7 +1683,7 @@
     const {
       GOODS_MOD_ID,
       GOODS_NAME,
-      GOODS_MOD_PRICE_NOW,
+      MIN_PRICE_NOW_WITHOUT_DISCOUNT,
       ORDER_LINE_QUANTITY,
       GOODS_IMAGE,
     } = item;
@@ -1711,7 +1711,7 @@
             className="input qty__input"
           />
           <div>
-            <strong>Цена:{GOODS_MOD_PRICE_NOW}</strong>
+            <strong>Цена:{MIN_PRICE_NOW_WITHOUT_DISCOUNT}</strong>
           </div>
           <img width="80" src={GOODS_IMAGE} />
           <div>

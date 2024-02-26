@@ -50,7 +50,7 @@
       "GOODS_NAME": "{cart_related_goods.NAME}",
       "GOODS_MOD_ID": "{cart_related_goods.MIN_PRICE_NOW_ID}",
       "ORDER_LINE_QUANTITY": 1,
-      "GOODS_MOD_PRICE_NOW": {cart_related_goods.MIN_PRICE_NOW},
+      "MIN_PRICE_NOW_WITHOUT_DISCOUNT": {cart_related_goods.MIN_PRICE_NOW_WITHOUT_DISCOUNT},
       "GOODS_IMAGE": "{% IF cart_related_goods.IMAGE_EMPTY %}{ASSETS_IMAGES_PATH}no-photo-icon.png?design=conditer{% ELSE %}{cart_related_goods.IMAGE_MEDIUM}{% ENDIF %}"
     }
   {% IFNOT cart_related_goods.last %},{% ENDIF %}
@@ -66,7 +66,7 @@
       "GOODS_NAME": "{recently_viewed_goods.NAME}",
       "GOODS_MOD_ID": "{recently_viewed_goods.MIN_PRICE_NOW_ID}",
       "ORDER_LINE_QUANTITY": 1,
-      "GOODS_MOD_PRICE_NOW": {recently_viewed_goods.MIN_PRICE_NOW},
+      "MIN_PRICE_NOW_WITHOUT_DISCOUNT": {recently_viewed_goods.MIN_PRICE_NOW_WITHOUT_DISCOUNT},
       "GOODS_IMAGE": "{% IF recently_viewed_goods.IMAGE_EMPTY %}{ASSETS_IMAGES_PATH}no-photo-icon.png?design=conditer{% ELSE %}{recently_viewed_goods.IMAGE_MEDIUM}{% ENDIF %}"
     }    
     {% IFNOT recently_viewed_goods.last %},{% ENDIF %}
