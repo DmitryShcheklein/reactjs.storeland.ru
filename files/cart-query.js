@@ -679,47 +679,60 @@
 
       comment: '',
     });
+    const validateElement = (element) => {
+      const { id, value, required, minLength } = element;
 
-    const handleInputChange = (eventTarget) => {
-      const { id, name, value, required, minLength } = eventTarget;
-
-      console.log(id, required, !value.length);
+      // console.log(id, required, !value.length);
 
       if (id === 'person' && value.length < 3) {
         setFormErrors((prevState) => ({
           ...prevState,
           [id]: 'Name must be at least 3 characters long.',
         }));
+
+        return false;
       } else if (id === 'email' && !isValidEmail(value)) {
         setFormErrors((prevState) => ({
           ...prevState,
           [id]: 'Please enter a valid email address.',
         }));
+
+        return false;
       } else if (id === 'password' && value.length < minLength) {
         setFormErrors((prevState) => ({
           ...prevState,
           [id]: `Password must be at least ${minLength} characters long.`,
         }));
+
+        return false;
       } else if (id === 'phone' && !isValidPhone(value)) {
         setFormErrors((prevState) => ({
           ...prevState,
           [id]: 'Пожалуйста, введите корректный телефон.',
         }));
+
+        return false;
       } else if (id === 'zipCode' && required && value.length < minLength) {
         setFormErrors((prevState) => ({
           ...prevState,
           [id]: 'Please enter zipCode.',
         }));
+
+        return false;
       } else if (required && !value) {
         setFormErrors((prevState) => ({
           ...prevState,
           [id]: 'Это поле необходимо заполнить.',
         }));
+
+        return false;
       } else {
         setFormErrors((prevState) => ({
           ...prevState,
           [id]: '', // Reset error message
         }));
+
+        return true;
       }
 
       function isValidEmail(email) {
@@ -738,19 +751,21 @@
         return phoneRegex.test(phone);
       }
     };
+
     const checkFormValid = (form) => {
       const formElements = Array.from(form.elements).filter(
         (el) => el.required
       );
-      formElements.forEach((el) => handleInputChange(el));
 
-      return Object.values(formErrors).every((error) => error != '');
+      const isValid = formElements.map(validateElement).every(Boolean);
+
+      return isValid;
     };
 
     return {
       formErrors,
       setFormErrors,
-      handleInputChange,
+      validateElement,
       checkFormValid,
     };
   }
@@ -779,8 +794,7 @@
       extraDontCall: false,
     });
     const { wantRegister, extraDontCall, showPassword } = localForm;
-    const { formErrors, handleInputChange, checkFormValid } =
-      useFormValidation();
+    const { formErrors, validateElement, checkFormValid } = useFormValidation();
     const handleSubmit = (event) => {
       event.preventDefault();
 
@@ -820,7 +834,7 @@
       );
 
       setFormState(newData);
-      handleInputChange(event.target);
+      validateElement(event.target);
     };
     const handleCouponBtn = () => {
       setFormState({
@@ -893,7 +907,7 @@
             <input
               id="email"
               className={classNames(`input`, {
-                ['error']: formErrors.email,
+                ['error']: formErrors.email && wantRegister,
               })}
               name="form[contact][email]"
               value={formState.form.contact.email}
@@ -903,7 +917,7 @@
               placeholder={`Email ${wantRegister ? '*' : ''}`}
               required={wantRegister ? 'required' : undefined}
             />
-            {formErrors.email && (
+            {formErrors.email && wantRegister && (
               <label className="error">{formErrors.email}</label>
             )}
           </div>
