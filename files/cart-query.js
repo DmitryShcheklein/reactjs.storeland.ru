@@ -42,7 +42,7 @@ function App() {
   );
 }
 
-export function useFormState(options) {
+function useFormState(options) {
   const INITIAL_FORM_DATA = {
     form: {
       contact: {
