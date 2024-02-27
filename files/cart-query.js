@@ -370,7 +370,7 @@ function Cart() {
             <h1 style={{ width: '100%' }}>Корзина</h1>
 
             {deletedItemsArray.length &&
-            !(deletedItemsArray.length === cartItems.length) ? (
+              !(deletedItemsArray.length === cartItems.length) ? (
               <button
                 className="button"
                 onClick={() => {
@@ -560,7 +560,7 @@ function CartItem({
   const handleRemoveItem = () => {
     deleteCartItemMutation.mutate(GOODS_MOD_ID);
   };
-  const handlePaste = () => {};
+  const handlePaste = () => { };
 
   if (deleteCartItemMutation.isSuccess) {
     return null;
@@ -672,17 +672,7 @@ function CartItem({
 }
 
 function useFormValidation() {
-  const [formErrors, setFormErrors] = useState({
-    person: '',
-    phone: '',
-    email: '',
-    password: '',
-
-    country: '',
-    zipCode: '',
-
-    comment: '',
-  });
+  const [formErrors, setFormErrors] = useState({});
   const validateElement = (element) => {
     const { id, value, required, minLength } = element;
 
@@ -1190,23 +1180,29 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                   </label>
                   <select
                     placeholder="Выберите страну"
-                    className="quickform__select"
+                    className={classNames(`input`, {
+                      ['error']: formErrors.country,
+                    })}
                     id="country"
                     name="form[delivery][country_id]"
                     defaultValue={ORDER_FORM_DELIVERY_COUNTRY_ID}
+                    required={Country.isRequired}
                   >
                     <option value=""></option>
                     {countryList?.map(({ id, name }) => (
                       <option
                         key={id}
                         value={id}
-                        // selected={id === ORDER_FORM_DELIVERY_COUNTRY_ID}
-                        //  {% IF country_list.ID=ORDER_FORM_DELIVERY_COUNTRY_ID %}selected="selected"{% ENDIF %}
+                      // selected={id === ORDER_FORM_DELIVERY_COUNTRY_ID}
+                      //  {% IF country_list.ID=ORDER_FORM_DELIVERY_COUNTRY_ID %}selected="selected"{% ENDIF %}
                       >
                         {name}
                       </option>
                     ))}
                   </select>
+                  {formErrors.country && (
+                    <label className="error">{formErrors.country}</label>
+                  )}
                 </div>
               </div>
             )}
@@ -1225,9 +1221,14 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                     name="form[delivery][region]"
                     defaultValue={ORDER_FORM_CONTACT_REGION}
                     maxLength="255"
-                    className="input"
+                    className={classNames(`input`, {
+                      ['error']: formErrors.region,
+                    })}
                     required={Region.isRequired}
                   />
+                  {formErrors.region && (
+                    <label className="error">{formErrors.region}</label>
+                  )}
                 </div>
               </div>
             )}
@@ -1275,9 +1276,15 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                       name="form[delivery][address_street]"
                       defaultValue=""
                       maxLength="500"
-                      className="input"
+                      className={classNames(`input`, {
+                        ['error']: formErrors.addressStreet,
+                      })}
                       onChange={handleChange}
+                      required={Address.isRequired}
                     />
+                    {formErrors.addressStreet && (
+                      <label className="error">{formErrors.addressStreet}</label>
+                    )}
                   </div>
                 </div>
                 {/* <!-- Поле Дом/Корпус --> */}
@@ -1293,9 +1300,15 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                       name="form[delivery][address_home]"
                       defaultValue=""
                       maxLength="50"
-                      className="input"
+                      className={classNames(`input`, {
+                        ['error']: formErrors.addressHome,
+                      })}
                       onChange={handleChange}
+                      required={Address.isRequired}
                     />
+                    {formErrors.addressHome && (
+                      <label className="error">{formErrors.addressHome}</label>
+                    )}
                   </div>
                 </div>
                 {/* <!-- Поле Квартира --> */}
@@ -1311,9 +1324,15 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                       name="form[delivery][address_flat]"
                       defaultValue=""
                       maxLength="50"
-                      className="input"
+                      className={classNames(`input`, {
+                        ['error']: formErrors.addressFlat,
+                      })}
                       onChange={handleChange}
+                      required={Address.isRequired}
                     />
+                    {formErrors.addressFlat && (
+                      <label className="error">{formErrors.addressFlat}</label>
+                    )}
                   </div>
                 </div>
 
@@ -1372,7 +1391,9 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                     id="convenientDate"
                     name="form[delivery][convenient_date]"
                     value={date}
-                    className="input quickform__input-deliveryConvenientDate"
+                    className={classNames(`input`, {
+                      ['error']: formErrors.convenientDate,
+                    })}
                     autoComplete="off"
                     onChange={(evt) => {
                       const { value } = evt.target;
@@ -1380,7 +1401,11 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                       setDate(value);
                     }}
                     min={formattedTomorrow}
+                    required={ConvenientTime.isRequired}
                   />
+                  {formErrors.convenientDate && (
+                    <label className="error">{formErrors.convenientDate}</label>
+                  )}
                 </div>
               </div>
               <div className="quickform__item -deliveryConvenientTime">
@@ -1397,8 +1422,7 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                   /> */}
 
                   <label className="quickform__label">
-                    Удобное время доставки{' '}
-                    {ConvenientTime.isRequired && <em>*</em>}
+                    Удобное время доставки
                   </label>
                   <div
                     style={{ display: 'flex', gap: 5, alignItems: 'center' }}
@@ -1417,7 +1441,7 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                             <option
                               key={HOUR_INT}
                               value={HOUR_INT}
-                              // selected={SELECTED ? 'selected' : ''}
+                            // selected={SELECTED ? 'selected' : ''}
                             >
                               {HOUR}
                             </option>
@@ -1439,7 +1463,7 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                             <option
                               key={HOUR_INT}
                               value={HOUR_INT}
-                              // selected={SELECTED ? 'selected' : ''}
+                            // selected={SELECTED ? 'selected' : ''}
                             >
                               {HOUR}
                             </option>
