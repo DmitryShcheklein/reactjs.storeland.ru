@@ -455,7 +455,7 @@ function Cart() {
             <li>
               Доставка (id: {currentDeliveryId}):{' '}
               <b>{zoneId ? CART_SUM_OLD_WITH_DELIVERY : CART_SUM_DELIVERY}</b>
-              //BUG: бек неверно отдаёт цену доставки при выбранной зоне
+              {/* BUG: бек неверно отдаёт цену доставки при выбранной зоне */}
               доставки
             </li>
             {zoneId && (
@@ -619,7 +619,7 @@ function CartItem({
           </div>
           <div>
             <strong>Цена:{ORDER_LINE_PRICE_NOW / ORDER_LINE_QUANTITY}</strong>{' '}
-            //BUG: бек отдаёт неверную цену товара при скидке по сумме заказа
+            {/* BUG: бек отдаёт неверную цену товара при скидке по сумме заказа */}
           </div>
         </div>
         <div>
