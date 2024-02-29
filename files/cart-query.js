@@ -242,6 +242,20 @@ function useAddCartMutation(options) {
     ...options,
   });
 }
+function getCurrentMinOrderPrice(cartData) {
+  const { SETTINGS_STORE_ORDER_MIN_PRICE_WITHOUT_DELIVERY, SETTINGS_STORE_ORDER_MIN_ORDER_PRICE, CART_SUM_NOW, CART_SUM_NOW_WITH_DELIVERY } = cartData || {};
+
+  let result;
+
+  if (SETTINGS_STORE_ORDER_MIN_PRICE_WITHOUT_DELIVERY) {
+    result = SETTINGS_STORE_ORDER_MIN_ORDER_PRICE - CART_SUM_NOW;
+  } else {
+    result =
+      SETTINGS_STORE_ORDER_MIN_ORDER_PRICE - CART_SUM_NOW_WITH_DELIVERY;
+  }
+
+  return Math.max(result, 0);
+};
 
 function Cart() {
   const formRef = useRef(null);
@@ -318,18 +332,7 @@ function Cart() {
       refetchCart();
     }, 300)();
   };
-  const getCurrentMinOrderPrice = () => {
-    let result;
 
-    if (SETTINGS_STORE_ORDER_MIN_PRICE_WITHOUT_DELIVERY) {
-      result = SETTINGS_STORE_ORDER_MIN_ORDER_PRICE - CART_SUM_NOW;
-    } else {
-      result =
-        SETTINGS_STORE_ORDER_MIN_ORDER_PRICE - CART_SUM_NOW_WITH_DELIVERY;
-    }
-
-    return Math.max(result, 0);
-  };
   const [deletedItemsArray, setDeletedItemsArray] = useState([]);
   const clearCartItemsMutation = useClearCartItemsMutation({
     onSuccess: () => {
@@ -456,7 +459,6 @@ function Cart() {
               Доставка (id: {currentDeliveryId}):{' '}
               <b>{zoneId ? CART_SUM_OLD_WITH_DELIVERY : CART_SUM_DELIVERY}</b>
               {/* BUG: бек неверно отдаёт цену доставки при выбранной зоне */}
-              доставки
             </li>
             {zoneId && (
               <li>
@@ -490,7 +492,7 @@ function Cart() {
                   ? 'Без учёта стоимости доставки'
                   : 'с доставкой'}
                 ): {SETTINGS_STORE_ORDER_MIN_ORDER_PRICE}, Осталось:{' '}
-                {getCurrentMinOrderPrice()}
+                {getCurrentMinOrderPrice(cartData)}
               </li>
             ) : null}
             {/* <li>Итого old с доставкой: {CART_SUM_OLD_WITH_DELIVERY}</li> */}
@@ -838,7 +840,9 @@ function OrderForm() {
     });
     console.log('reset');
   };
+  const isMinOrderPrice = Boolean(getCurrentMinOrderPrice(cartData));
 
+  console.log(isMinOrderPrice);
   if (window.CART_IS_EMPTY || !cartData?.CART_COUNT_TOTAL) {
     return null;
   }
@@ -1062,7 +1066,7 @@ function OrderForm() {
           />
           <label htmlFor="contactWantRegister">Не перезванивать</label>
         </div>
-        <button className="button _big" disabled={isOrderLoading}>
+        <button className="button _big" disabled={isMinOrderPrice || isOrderLoading}>
           {isOrderLoading ? 'Оформляется...' : 'Оформить'}
         </button>
       </form>
