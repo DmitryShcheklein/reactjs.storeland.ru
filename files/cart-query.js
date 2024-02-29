@@ -1372,6 +1372,7 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                   defaultValue={ORDER_FORM_CONTACT_ADDR || fullAddress}
                   maxLength="500"
                   className="input"
+                  required={Address.isRequired}
                 />
               </>
             )}
@@ -1450,7 +1451,7 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                   /> */}
 
                   <label className="quickform__label">
-                    Удобное время доставки
+                    Удобное время доставки {ConvenientTime.isRequired && <em>*</em>}
                   </label>
                   <div
                     style={{ display: 'flex', gap: 5, alignItems: 'center' }}
@@ -1459,9 +1460,12 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                       <label className="quickform__label">С</label>
                       <select
                         id="convenientTimeFrom"
-                        className="quickform__select-convenient _from"
+                        className={classNames(`input`, {
+                          ['error']: formErrors.convenientDate,
+                        })}
                         name="form[delivery][convenient_time_from]"
                         defaultValue=""
+                        required={ConvenientTime.isRequired}
                       >
                         <option value=""></option>
                         {convenient_time_from_list?.map(
@@ -1481,9 +1485,12 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                       <label className="quickform__label">До</label>
                       <select
                         id="convenientTimeTo"
-                        className="quickform__select-convenient _to"
+                        className={classNames(`input`, {
+                          ['error']: formErrors.convenientDate,
+                        })}
                         name="form[delivery][convenient_time_to]"
                         defaultValue=""
+                        required={ConvenientTime.isRequired}
                       >
                         <option value=""></option>
                         {convenient_time_to_list?.map(
