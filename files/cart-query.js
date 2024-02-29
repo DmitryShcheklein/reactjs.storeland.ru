@@ -1132,7 +1132,12 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
       },
     },
   } = formState;
-  const fullAddress = `Улица: ${addressStreet}, Дом/Корпус: ${addressHome}, Квартира: ${addressFlat}`;
+
+  const fullAddress = []
+    .concat(addressStreet ? [`Улица: ${addressStreet}`] : [])
+    .concat(addressHome ? [`Дом/Корпус: ${addressHome}`] : [])
+    .concat(addressFlat ? [`Квартира: ${addressFlat}`] : [])
+    .join(', ')
 
   const {
     ORDER_FORM_CONTACT_ADDR,
