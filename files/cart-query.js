@@ -785,9 +785,10 @@ function OrderForm() {
   const [localForm, setLocalFormState] = useState({
     wantRegister: false,
     showPassword: false,
-    extraDontCall: false,
+    extraAddSubscribes: false,
+    agreePolitics: true,
   });
-  const { wantRegister, extraDontCall, showPassword } = localForm;
+  const { wantRegister, extraAddSubscribes, showPassword, agreePolitics } = localForm;
   const { formErrors, validateElement, checkFormValid } = useFormValidation();
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -842,7 +843,7 @@ function OrderForm() {
   };
   const isMinOrderPrice = Boolean(getCurrentMinOrderPrice(cartData));
 
-  console.log(isMinOrderPrice);
+
   if (window.CART_IS_EMPTY || !cartData?.CART_COUNT_TOTAL) {
     return null;
   }
@@ -1050,25 +1051,42 @@ function OrderForm() {
           formErrors={formErrors}
         />
 
+        <button className="button _big" disabled={isMinOrderPrice || isOrderLoading || !agreePolitics}>
+          {isOrderLoading ? 'Оформляется...' : 'Оформить'}
+        </button>
+
         <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
           <input
             type="checkbox"
             onChange={() =>
               setLocalFormState({
                 ...localForm,
-                extraDontCall: !extraDontCall,
+                agreePolitics: !agreePolitics,
               })
             }
-            checked={extraDontCall}
-            name="form[extra][Дозвон]"
-            value="НЕ ПЕРЕЗВАНИВАТЬ"
-            id="contactWantRegister"
+            checked={agreePolitics}
+            value="ДА"
+            id="agreePolitics"
           />
-          <label htmlFor="contactWantRegister">Не перезванивать</label>
+          <label htmlFor="agreePolitics">Я принимаю условия политики конфиденциальности</label>
         </div>
-        <button className="button _big" disabled={isMinOrderPrice || isOrderLoading}>
-          {isOrderLoading ? 'Оформляется...' : 'Оформить'}
-        </button>
+
+        <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
+          <input
+            type="checkbox"
+            onChange={() =>
+              setLocalFormState({
+                ...localForm,
+                extraAddSubscribes: !extraAddSubscribes,
+              })
+            }
+            checked={extraAddSubscribes}
+            name="form[extra][Скидки и предложения]"
+            value="ДА"
+            id="contactWantSubscribes"
+          />
+          <label htmlFor="contactWantSubscribes">Хочу получать скидки и специальные предложения</label>
+        </div>
       </form>
     </>
   );
