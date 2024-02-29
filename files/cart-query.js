@@ -1133,7 +1133,7 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
     },
   } = formState;
   const fullAddress = `Улица: ${addressStreet}, Дом/Корпус: ${addressHome}, Квартира: ${addressFlat}`;
-  const [collapsed, setCollapsed] = useState(true);
+
   const {
     ORDER_FORM_CONTACT_ADDR,
     ORDER_FORM_CONTACT_CITY,
@@ -1150,6 +1150,7 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
   } = quickFormData;
   const { Country, ConvenientTime, ZipCode, Region, City, Address, Comment } =
     SETTINGS_ORDER_FIELDS;
+  const [collapsed, setCollapsed] = useState(Object.values(SETTINGS_ORDER_FIELDS).every(el => !el.isRequired));
   const [{ from, to }, setConvenientState] = useState({
     from: 0,
     to: 24,
