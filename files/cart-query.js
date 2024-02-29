@@ -309,7 +309,13 @@ function Cart() {
     SETTINGS_STORE_ORDER_MIN_ORDER_PRICE,
     SETTINGS_STORE_ORDER_MIN_PRICE_WITHOUT_DELIVERY,
     cartDiscount,
+    cartRelatedGoods,
+    recentlyViewedGoods
   } = cartData || {};
+
+  const recentlyViewedGoodsFiltered = recentlyViewedGoods?.filter(
+    (item) => !item.NB_GOODS_IN_CART
+  );
   const isCartItemsLength = cartItems?.length;
 
   useEffect(() => {
@@ -505,11 +511,12 @@ function Cart() {
       </div>
 
       {isCartItemsLength ? (
-        <RelatedGoods cartData={cartData} refetchCart={refetchCart} />
+        <GoodsList title="С этим товаром покупают" goods={cartRelatedGoods} refetchCart={refetchCart} />
       ) : null}
       <br />
+
       {isCartItemsLength ? (
-        <RecentlyViewed cartData={cartData} refetchCart={refetchCart} />
+        <GoodsList title="Вы смотрели" goods={recentlyViewedGoodsFiltered} refetchCart={refetchCart} />
       ) : null}
       <br />
     </>
@@ -1566,11 +1573,12 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
     </>
   );
 }
-function RelatedGoods({ refetchCart, cartData }) {
-  const { cartRelatedGoods } = cartData || {};
+
+function GoodsList({ refetchCart, goods, title }) {
+
   const [collapsed, setCollapsed] = useState(true);
 
-  if (!cartRelatedGoods?.length) {
+  if (!goods?.length) {
     return null;
   }
 
@@ -1585,119 +1593,7 @@ function RelatedGoods({ refetchCart, cartData }) {
           setCollapsed(!collapsed);
         }}
       >
-        <span className="quickform__title">С этим товаром покупают</span>
-      </button>
-      <div
-        className={classNames(
-          'quickform__list -adress-inputs-list form-callapse__list',
-          {
-            ['_active']: !collapsed,
-          }
-        )}
-      >
-        <ul
-          style={{
-            display: 'flex',
-            gap: 20,
-            listStyle: 'none',
-            padding: 0,
-            margin: 0,
-            overflow: 'auto',
-          }}
-        >
-          {cartRelatedGoods.map((item) => {
-            return (
-              <RelatedGoodItem
-                key={item.GOODS_MOD_ID}
-                item={item}
-                refetchCart={refetchCart}
-              />
-            );
-          })}
-        </ul>
-      </div>
-    </div>
-  );
-}
-function RelatedGoodItem({ item, refetchCart }) {
-  const addCartMutation = useAddCartMutation({
-    onSuccess: refetchCart,
-  });
-
-  const onSubmitHandler = (event) => {
-    event.preventDefault();
-
-    const form = event.target;
-
-    addCartMutation.mutate(form);
-  };
-
-  const {
-    GOODS_MOD_ID,
-    GOODS_NAME,
-    MIN_PRICE_NOW_WITHOUT_DISCOUNT,
-    ORDER_LINE_QUANTITY,
-    GOODS_IMAGE,
-  } = item;
-
-  return (
-    <li key={GOODS_MOD_ID} style={{ position: 'relative' }}>
-      <form onSubmit={onSubmitHandler}>
-        <input type="hidden" name="form[goods_mod_id]" value={GOODS_MOD_ID} />
-
-        <div style={{ display: 'flex', gap: 20 }}>
-          <h3>{GOODS_NAME}</h3>
-        </div>
-        {/* <div>
-          <strong>Кол-во:{ORDER_LINE_QUANTITY}</strong>
-        </div> */}
-        <input
-          // type="number"
-          type="hidden"
-          pattern="\d*"
-          name="form[goods_mod_quantity]"
-          max="4"
-          defaultValue="1"
-          min="1"
-          title="Количество"
-          className="input qty__input"
-        />
-        <div>
-          <strong>Цена:{MIN_PRICE_NOW_WITHOUT_DISCOUNT}</strong>
-        </div>
-        <img width="80" src={GOODS_IMAGE} />
-        <div>
-          <button className="button">
-            {addCartMutation.isLoading ? 'Добавляется...' : 'В корзину'}
-          </button>
-        </div>
-      </form>
-    </li>
-  );
-}
-function RecentlyViewed({ refetchCart, cartData }) {
-  const { recentlyViewedGoods } = cartData || {};
-  const recentlyViewedGoodsFiltered = recentlyViewedGoods.filter(
-    (item) => !item.NB_GOODS_IN_CART
-  );
-  const [collapsed, setCollapsed] = useState(true);
-
-  if (!recentlyViewedGoodsFiltered?.length) {
-    return null;
-  }
-
-  return (
-    <div className="form-callapse">
-      <button
-        type="button"
-        className={classNames('form-callapse__title', {
-          ['_active']: !collapsed,
-        })}
-        onClick={() => {
-          setCollapsed(!collapsed);
-        }}
-      >
-        <span className="quickform__title">Вы смотрели</span>
+        <span className="quickform__title">{title}</span>
       </button>
       <div
         className={classNames('form-callapse__list', {
@@ -1714,9 +1610,9 @@ function RecentlyViewed({ refetchCart, cartData }) {
             overflow: 'auto',
           }}
         >
-          {recentlyViewedGoodsFiltered.map((item) => {
+          {goods.map((item) => {
             return (
-              <RecentlyViewedItem
+              <GoodItem
                 key={item.GOODS_MOD_ID}
                 item={item}
                 refetchCart={refetchCart}
@@ -1728,7 +1624,26 @@ function RecentlyViewed({ refetchCart, cartData }) {
     </div>
   );
 }
-function RecentlyViewedItem({ item, refetchCart }) {
+
+function GoodItem({ item, refetchCart }) {
+  const [quantity, setQuantity] = useState(1);
+  const handleDecrease = () => {
+    if (quantity > 1) {
+      setQuantity(quantity - 1);
+    }
+  };
+
+  const handleIncrease = () => {
+    setQuantity(quantity + 1);
+  };
+
+  const handleChange = (event) => {
+    const value = parseInt(event.target.value, 10);
+    if (!isNaN(value) && value >= 1) {
+      setQuantity(value);
+    }
+  };
+
   const addCartMutation = useAddCartMutation({
     onSuccess: refetchCart,
   });
@@ -1757,20 +1672,32 @@ function RecentlyViewedItem({ item, refetchCart }) {
         <div style={{ display: 'flex', gap: 20 }}>
           <h3>{GOODS_NAME}</h3>
         </div>
-        {/* <div>
-          <strong>Кол-во:{ORDER_LINE_QUANTITY}</strong>
-        </div> */}
-        <input
-          // type="number"
-          type="hidden"
-          pattern="\d*"
-          name="form[goods_mod_quantity]"
-          max="4"
-          defaultValue="1"
-          min="1"
-          title="Количество"
-          className="input qty__input"
-        />
+
+        <div className="qty qty--good">
+          <div className="qty__wrap">
+            <button className="qty__btn qty__btn--minus" title="Уменьшить" onClick={handleDecrease} type="button">
+              <svg className="icon">
+                <use xlinkHref="/design/sprite.svg#minus-icon"></use>
+              </svg>
+            </button>
+            <input
+              type="number"
+              pattern="\d*"
+              name="form[goods_mod_quantity]"
+              value={quantity}
+              title="Количество"
+              className="input qty__input"
+              onChange={handleChange}
+              autoComplete="off"
+            />
+            <button className="qty__btn qty__btn--plus" title="Увеличить" onClick={handleIncrease} type="button">
+              <svg className="icon">
+                <use xlinkHref="/design/sprite.svg#plus-icon"></use>
+              </svg>
+            </button>
+          </div>
+        </div>
+
         <div>
           <strong>Цена:{MIN_PRICE_NOW_WITHOUT_DISCOUNT}</strong>
         </div>
