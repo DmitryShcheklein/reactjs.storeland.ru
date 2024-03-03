@@ -51,14 +51,10 @@ function useFormState(options) {
         email: '',
       },
       delivery: {
-        id: undefined,
-        zone_id: undefined,
+        address_street: undefined,
+        address_home: undefined,
+        address_flat: undefined,
       },
-      payment: {
-        id: undefined,
-      },
-      coupon_code: '',
-      isCouponSend: false,
     },
   };
   const key = QUERY_KEYS.FormState;
@@ -88,7 +84,7 @@ function useCartState(options) {
   ];
 }
 
-function useQuickFormData(option) {
+function useQuickFormData() {
   const [, setFormState] = useFormState();
   const [, setCartState] = useCartState();
 
@@ -133,25 +129,19 @@ function useQuickFormData(option) {
             email: ORDER_FORM_CONTACT_EMAIL,
             //  || 'user@test.ru'
           },
-          delivery: {
-            id: firstDelivery?.id,
-            zone_id: firstDelivery?.zoneList[0]?.zoneId,
-          },
-          payment: {
-            id: firstDelivery?.availablePaymentList[0]?.id,
-          },
         },
       }));
     },
-    ...option,
+    enabled: !Boolean(window.CART_IS_EMPTY),
   });
 }
 
-function useCart(option) {
+function useCart() {
   const [cartState, setCartState] = useCartState();
 
   return useQuery({
     queryKey: [QUERY_KEYS.Cart],
+    initialData: {},
     queryFn: async () => {
       const formData = new FormData();
       formData.append('form[payment][id]', cartState['form[payment][id]']);
@@ -187,7 +177,7 @@ function useCart(option) {
       return cardData;
     },
     onSuccess(data) {
-      const { cartItems } = data || {};
+      const { cartItems } = data;
       if (cartItems) {
         setCartState((prev) => ({
           ...prev,
@@ -200,9 +190,7 @@ function useCart(option) {
         }));
       }
     },
-    // enabled: Boolean(formElement),
     enabled: Boolean(cartState['form[delivery][id]']),
-    ...option,
   });
 }
 
@@ -299,7 +287,7 @@ function getCurrentMinOrderPrice(cartData) {
     SETTINGS_STORE_ORDER_MIN_ORDER_PRICE,
     CART_SUM_NOW,
     CART_SUM_NOW_WITH_DELIVERY,
-  } = cartData || {};
+  } = cartData;
 
   let result;
 
@@ -313,23 +301,14 @@ function getCurrentMinOrderPrice(cartData) {
 }
 
 function Cart() {
-  // const formRef = useRef(null);
-  // const formElement = formRef?.current;
   const [cartState, setCartState] = useCartState();
-  // console.log('cartState', cartState);
-  const [formState, setFormState] = useFormState();
-  const { data: quickFormData } = useQuickFormData({
-    enabled: !Boolean(window.CART_IS_EMPTY), // TODO: перенести в хук
-  });
-
   const {
-    form: {
-      delivery: { id: currentDeliveryId, zone_id: zoneId },
-      payment: { id: currentPaymentId },
-      coupon_code: couponCode,
-      isCouponSend,
-    },
-  } = formState;
+    ['form[delivery][id]']: deliveryId,
+    ['form[delivery][zone_id]']: zoneId,
+    ['form[payment][id]']: paymentId,
+  } = cartState;
+
+  const { data: quickFormData } = useQuickFormData();
 
   const {
     data: cartData,
@@ -337,20 +316,7 @@ function Cart() {
     isSuccess: isSuccessCart,
     isLoading: isLoadingCart,
     isFetching: isFetchingCart,
-  } = useCart(
-    {
-      // onSuccess: () => {
-      //   setFormState({
-      //     ...formState,
-      //     form: {
-      //       ...formState.form,
-      //       isCouponSend: false,
-      //     },
-      //   });
-      // },
-    }
-    // formElement
-  );
+  } = useCart();
 
   const {
     CART_SUM_DISCOUNT,
@@ -368,44 +334,20 @@ function Cart() {
     cartDiscount,
     cartRelatedGoods,
     recentlyViewedGoods,
-  } = cartData || {};
+  } = cartData;
 
   const recentlyViewedGoodsFiltered = recentlyViewedGoods?.filter(
     (item) => !item.NB_GOODS_IN_CART
   );
   const isCartItemsLength = cartItems?.length;
 
-  // useEffect(() => {
-  //   if (isCouponSend || currentDeliveryId || zoneId) {
-  //     console.log('refetch');
-  //     refetchCart();
-  //   }
-  // }, [isCouponSend, currentDeliveryId, zoneId]);
   useEffect(() => {
-    // console.log(
-    //   isCouponSend,
-    //   currentDeliveryId,
-    //   zoneId,
-    //   isCartRelatedGoodsLength
-    // );
-    if (
-      cartState['form[delivery][id]'] ||
-      cartState['form[delivery][zone_id]']
-    ) {
-      console.log('refetch');
+    if (deliveryId || zoneId) {
       refetchCart();
     }
-  }, [cartState['form[delivery][id]'], cartState['form[delivery][zone_id]']]);
+  }, [deliveryId, zoneId]);
 
   const clearCartMutation = useClearCartMutation();
-
-  const handleSubmit = (event) => {
-    event?.preventDefault();
-
-    window.Utils.debounce(() => {
-      refetchCart();
-    }, 300)();
-  };
 
   const [deletedItemsArray, setDeletedItemsArray] = useState([]);
   const clearCartItemsMutation = useClearCartItemsMutation({
@@ -495,7 +437,6 @@ function Cart() {
                 <CartItem
                   item={item}
                   key={item.GOODS_MOD_ID}
-                  handleSubmit={handleSubmit}
                   refetchCart={refetchCart}
                   checked={deletedItemsArray.includes(item.GOODS_MOD_ID)}
                   changeDeletedItemHandler={changeDeletedItemHandler}
@@ -509,7 +450,7 @@ function Cart() {
             <li>Товаров: {CART_COUNT_TOTAL} шт.</li>
             <li>Сумма товаров: {CART_SUM_NOW}</li>
             <li>
-              Доставка (id: {currentDeliveryId}):{' '}
+              Доставка (id: {deliveryId}):{' '}
               <b>{zoneId ? CART_SUM_OLD_WITH_DELIVERY : CART_SUM_DELIVERY}</b>
               {/* BUG: бек неверно отдаёт цену доставки при выбранной зоне */}
             </li>
@@ -518,7 +459,7 @@ function Cart() {
                 Зона доставки (zoneId: {zoneId}): <b></b>
               </li>
             )}
-            <li>Метод оплаты (id): {currentPaymentId}</li>
+            <li>Метод оплаты (id): {paymentId}</li>
             {quickFormData.ORDER_DISCOUNT_COUPON_IS_ENABLED && (
               <li>Купон : {couponCode}</li>
             )}
@@ -578,13 +519,7 @@ function Cart() {
   );
 }
 
-function CartItem({
-  item,
-  handleSubmit,
-  refetchCart,
-  checked,
-  changeDeletedItemHandler,
-}) {
+function CartItem({ item, refetchCart, checked, changeDeletedItemHandler }) {
   const [cartState, setCartState] = useCartState();
   const {
     GOODS_ID,
@@ -608,7 +543,7 @@ function CartItem({
     console.log('inputValue', inputValue);
     setCartState((prev) => ({
       ...prev,
-      cartItems: prev.cartItems.map((el) => {
+      cartItems: prev?.cartItems?.map((el) => {
         console.log(el.GOODS_MOD_ID === GOODS_MOD_ID);
         if (el.GOODS_MOD_ID === GOODS_MOD_ID) {
           return {
@@ -627,15 +562,12 @@ function CartItem({
       }, 300)();
     }
   }, [inputValue]);
+
   const handleBlur = (event) => {
     const { value, min } = event.target;
     const numericValue = Math.max(Number(value), Number(min));
 
     setInputValue(numericValue);
-
-    // if (inputValue !== numericValue) {
-    // handleSubmit();
-    // }
   };
 
   const handleChange = (event) => {
@@ -852,23 +784,19 @@ function useFormValidation() {
 }
 function OrderForm() {
   const [cartState, setCartState] = useCartState();
+  const {
+    ['form[delivery][id]']: deliveryId,
+    ['form[delivery][zone_id]']: zoneId,
+    ['form[payment][id]']: paymentId,
+  } = cartState;
   const { data: cartData } = useCart();
-  const [formState, setFormState] = useFormState();
+  const [formState] = useFormState();
   const { data: quickFormData, isLoading: isLoadingDelivery } =
-    useQuickFormData({
-      enabled: !Boolean(window.CART_IS_EMPTY),
-    });
+    useQuickFormData();
   const { deliveries, CLIENT_IS_LOGIN, ORDER_DISCOUNT_COUPON_IS_ENABLED } =
     quickFormData;
   const createOrderMutation = useCreateOrderMutation();
   const { isLoading: isOrderLoading } = createOrderMutation;
-  const {
-    form: {
-      delivery: { id: deliveryId, zone_id: zoneId },
-      payment: { id: paymentId },
-      coupon_code: couponCode,
-    },
-  } = formState;
   const zoneList = deliveries?.find(({ id }) => id === deliveryId)?.zoneList;
   const [localForm, setLocalFormState] = useState({
     wantRegister: false,
@@ -884,7 +812,6 @@ function OrderForm() {
 
     const formElement = event.target;
     const isFormValid = checkFormValid(formElement);
-    console.log(isFormValid, formErrors);
 
     if (!isFormValid) {
       return;
@@ -895,14 +822,6 @@ function OrderForm() {
 
   const handleChange = (event) => {
     const { name, value, id } = event.target;
-    // Разбиваем строку "form[contact][person]" на массив ключей ["form", "contact", "person"]
-    const keys = name.split(/\[|\]/).filter(Boolean);
-
-    const fieldData = keys.reduceRight((acc, key, index) => {
-      const isLast = index === keys.length - 1;
-
-      return { [key]: isLast ? value : acc };
-    }, {});
 
     if (name === 'form[delivery][id]') {
       const zL = deliveries?.find(({ id }) => id === value)?.zoneList;
@@ -911,33 +830,17 @@ function OrderForm() {
         ...prev,
         'form[delivery][zone_id]': zL[0]?.zoneId,
       }));
-
-      fieldData.form.delivery.zone_id = zL[0]?.zoneId;
-      console.log(keys, zL, fieldData);
     }
-    // console.log(fieldData);
-    const newData = Utils.mergeWith(
-      { ...formState },
-      fieldData,
-      Utils.customizer
-    );
+
     setCartState((prev) => ({
       ...prev,
       [name]: value,
     }));
-    setFormState(newData);
+
     validateElement(event.target);
   };
-  const handleCouponBtn = () => {
-    setFormState({
-      ...formState,
-      form: {
-        ...formState.form,
-        isCouponSend: true,
-      },
-    });
-    console.log('reset');
-  };
+
+  const handleCouponBtn = () => {};
   const isMinOrderPrice = Boolean(getCurrentMinOrderPrice(cartData));
 
   if (window.CART_IS_EMPTY || !cartData?.CART_COUNT_TOTAL) {
