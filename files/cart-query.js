@@ -565,7 +565,7 @@ function CartItem({
 
     setInputValue(numericValue);
 
-    if (ORDER_LINE_QUANTITY != inputValue) {
+    if (ORDER_LINE_QUANTITY !== numericValue) {
       handleSubmit();
     }
   };
@@ -1696,6 +1696,7 @@ function GoodItem({ item, refetchCart }) {
               className="input qty__input"
               onChange={handleChange}
               autoComplete="off"
+              readOnly
             />
             <button
               className="qty__btn qty__btn--plus"
