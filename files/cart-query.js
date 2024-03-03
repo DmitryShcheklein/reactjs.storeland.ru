@@ -141,7 +141,6 @@ function useCart() {
 
   return useQuery({
     queryKey: [QUERY_KEYS.Cart],
-    initialData: { cartDiscount: [] },
     queryFn: async () => {
       const formData = new FormData();
 
@@ -176,7 +175,7 @@ function useCart() {
 
       return cardData;
     },
-    onSuccess(data) {
+    onSuccess(data = {}) {
       const { cartItems } = data;
       if (cartItems) {
         setCartState((prev) => ({
@@ -200,7 +199,7 @@ function useClearCartMutation(options) {
       const response = await axios.get(`/cart/truncate/`);
       const isOk = response.status === 200;
       if (isOk) {
-        queryClient.setQueryData([QUERY_KEYS.Cart], null);
+        queryClient.setQueryData([QUERY_KEYS.Cart], {});
       }
       return isOk;
     },
@@ -281,7 +280,7 @@ function useAddCartMutation(options) {
     ...options,
   });
 }
-function getCurrentMinOrderPrice(cartData) {
+function getCurrentMinOrderPrice(cartData = {}) {
   const {
     SETTINGS_STORE_ORDER_MIN_PRICE_WITHOUT_DELIVERY,
     SETTINGS_STORE_ORDER_MIN_ORDER_PRICE,
@@ -310,7 +309,7 @@ function Cart() {
   const { data: quickFormData } = useQuickFormData();
 
   const {
-    data: cartData,
+    data: cartData = {},
     refetch: refetchCart,
     isSuccess: isSuccessCart,
     isLoading: isLoadingCart,
@@ -330,7 +329,7 @@ function Cart() {
     CART_SUM_NOW_WITH_DELIVERY,
     SETTINGS_STORE_ORDER_MIN_ORDER_PRICE,
     SETTINGS_STORE_ORDER_MIN_PRICE_WITHOUT_DELIVERY,
-    cartDiscount,
+    cartDiscount = [],
     cartRelatedGoods,
     recentlyViewedGoods,
   } = cartData;
@@ -539,11 +538,9 @@ function CartItem({ item, refetchCart, checked, changeDeletedItemHandler }) {
   const [inputValue, setInputValue] = useState(ORDER_LINE_QUANTITY);
 
   useEffect(() => {
-    console.log('inputValue', inputValue);
     setCartState((prev) => ({
       ...prev,
       cartItems: prev?.cartItems?.map((el) => {
-        console.log(el.GOODS_MOD_ID === GOODS_MOD_ID);
         if (el.GOODS_MOD_ID === GOODS_MOD_ID) {
           return {
             ...el,
@@ -1106,7 +1103,7 @@ function Preloader() {
 }
 
 function EmptyCart() {
-  const { data: cartData, isSuccess } = useCart();
+  const { data: cartData, isSuccess, isFetching } = useCart();
   const isCartEmpty =
     window.CART_IS_EMPTY || (!cartData?.CART_COUNT_TOTAL && isSuccess);
 

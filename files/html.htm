@@ -562,6 +562,7 @@
               <div class="col-center col">                
                 <div id="root-cart"></div>
                 <script>window.HASH = '{HASH}'</script>
+                <script>window.CART_IS_EMPTY = {% IF cart_count_empty %}true{% ELSE %}false{% ENDIF %}</script>
                 <!-- <script type="text/babel" type="module" src="/design/react.js"></script> -->
                 <script type="text/babel" data-type="module" type="module" src="/design/cart-query.js" defer></script>
                 <!-- <script type="text/babel" data-type="module" type="module" src="/design/components_EmptyCart.js"></script>
