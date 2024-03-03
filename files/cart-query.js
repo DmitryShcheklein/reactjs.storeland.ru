@@ -378,6 +378,7 @@ function Cart() {
     });
   };
   const [cartDiscountObj] = cartDiscount;
+
   if (window.CART_IS_EMPTY) {
     return null;
   }
@@ -798,7 +799,7 @@ function OrderForm() {
     ['form[payment][id]']: paymentId,
     ['form[coupon_code]']: couponCode,
   } = cartState;
-  const { data: cartData, refetch: refetchCart } = useCart();
+  const { data: cartData = {}, refetch: refetchCart } = useCart();
   const [formState] = useFormState();
   const { data: quickFormData, isLoading: isLoadingDelivery } =
     useQuickFormData();
@@ -852,6 +853,10 @@ function OrderForm() {
   const handleCouponBtn = () => {
     refetchCart();
   };
+  const { cartDiscount = [] } = cartData;
+  const [cartDiscountObj] = cartDiscount;
+  const isCouponEnabled = cartDiscountObj?.DISCOUNT_TYPE === 'coupon';
+
   const isMinOrderPrice = Boolean(getCurrentMinOrderPrice(cartData));
 
   if (window.CART_IS_EMPTY || !cartData?.CART_COUNT_TOTAL) {
@@ -993,14 +998,15 @@ function OrderForm() {
                 maxLength="255"
                 type="text"
                 placeholder="Купон (123456)"
+                readOnly={isCouponEnabled}
               />
               <button
-                disabled={!couponCode}
+                disabled={!couponCode || isCouponEnabled}
                 onClick={handleCouponBtn}
                 className="button"
                 type="button"
               >
-                Применить
+                {isCouponEnabled ? 'Применён' : 'Применить'}
               </button>
             </div>
             <pre>123456</pre>
