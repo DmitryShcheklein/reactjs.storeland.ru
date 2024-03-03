@@ -1,4 +1,4 @@
-const { useState, useEffect, useRef } = window.React;
+const { useState, useEffect, useRef, useCallback } = window.React;
 const {
   useQuery,
   useMutation,
@@ -243,19 +243,23 @@ function useAddCartMutation(options) {
   });
 }
 function getCurrentMinOrderPrice(cartData) {
-  const { SETTINGS_STORE_ORDER_MIN_PRICE_WITHOUT_DELIVERY, SETTINGS_STORE_ORDER_MIN_ORDER_PRICE, CART_SUM_NOW, CART_SUM_NOW_WITH_DELIVERY } = cartData || {};
+  const {
+    SETTINGS_STORE_ORDER_MIN_PRICE_WITHOUT_DELIVERY,
+    SETTINGS_STORE_ORDER_MIN_ORDER_PRICE,
+    CART_SUM_NOW,
+    CART_SUM_NOW_WITH_DELIVERY,
+  } = cartData || {};
 
   let result;
 
   if (SETTINGS_STORE_ORDER_MIN_PRICE_WITHOUT_DELIVERY) {
     result = SETTINGS_STORE_ORDER_MIN_ORDER_PRICE - CART_SUM_NOW;
   } else {
-    result =
-      SETTINGS_STORE_ORDER_MIN_ORDER_PRICE - CART_SUM_NOW_WITH_DELIVERY;
+    result = SETTINGS_STORE_ORDER_MIN_ORDER_PRICE - CART_SUM_NOW_WITH_DELIVERY;
   }
 
   return Math.max(result, 0);
-};
+}
 
 function Cart() {
   const formRef = useRef(null);
@@ -310,7 +314,7 @@ function Cart() {
     SETTINGS_STORE_ORDER_MIN_PRICE_WITHOUT_DELIVERY,
     cartDiscount,
     cartRelatedGoods,
-    recentlyViewedGoods
+    recentlyViewedGoods,
   } = cartData || {};
 
   const recentlyViewedGoodsFiltered = recentlyViewedGoods?.filter(
@@ -379,7 +383,7 @@ function Cart() {
             <h1 style={{ width: '100%' }}>Корзина</h1>
 
             {deletedItemsArray.length &&
-              !(deletedItemsArray.length === cartItems.length) ? (
+            !(deletedItemsArray.length === cartItems.length) ? (
               <button
                 className="button"
                 onClick={() => {
@@ -511,12 +515,20 @@ function Cart() {
       </div>
 
       {isCartItemsLength ? (
-        <GoodsList title="С этим товаром покупают" goods={cartRelatedGoods} refetchCart={refetchCart} />
+        <GoodsList
+          title="С этим товаром покупают"
+          goods={cartRelatedGoods}
+          refetchCart={refetchCart}
+        />
       ) : null}
       <br />
 
       {isCartItemsLength ? (
-        <GoodsList title="Вы смотрели" goods={recentlyViewedGoodsFiltered} refetchCart={refetchCart} />
+        <GoodsList
+          title="Вы смотрели"
+          goods={recentlyViewedGoodsFiltered}
+          refetchCart={refetchCart}
+        />
       ) : null}
       <br />
     </>
@@ -569,7 +581,7 @@ function CartItem({
   const handleRemoveItem = () => {
     deleteCartItemMutation.mutate(GOODS_MOD_ID);
   };
-  const handlePaste = () => { };
+  const handlePaste = () => {};
 
   if (deleteCartItemMutation.isSuccess) {
     return null;
@@ -795,7 +807,8 @@ function OrderForm() {
     extraAddSubscribes: false,
     agreePolitics: true,
   });
-  const { wantRegister, extraAddSubscribes, showPassword, agreePolitics } = localForm;
+  const { wantRegister, extraAddSubscribes, showPassword, agreePolitics } =
+    localForm;
   const { formErrors, validateElement, checkFormValid } = useFormValidation();
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -849,7 +862,6 @@ function OrderForm() {
     console.log('reset');
   };
   const isMinOrderPrice = Boolean(getCurrentMinOrderPrice(cartData));
-
 
   if (window.CART_IS_EMPTY || !cartData?.CART_COUNT_TOTAL) {
     return null;
@@ -1058,7 +1070,10 @@ function OrderForm() {
           formErrors={formErrors}
         />
 
-        <button className="button _big" disabled={isMinOrderPrice || isOrderLoading || !agreePolitics}>
+        <button
+          className="button _big"
+          disabled={isMinOrderPrice || isOrderLoading || !agreePolitics}
+        >
           {isOrderLoading ? 'Оформляется...' : 'Оформить'}
         </button>
 
@@ -1075,7 +1090,9 @@ function OrderForm() {
             value="ДА"
             id="agreePolitics"
           />
-          <label htmlFor="agreePolitics">Я принимаю условия политики конфиденциальности</label>
+          <label htmlFor="agreePolitics">
+            Я принимаю условия политики конфиденциальности
+          </label>
         </div>
 
         <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
@@ -1092,7 +1109,9 @@ function OrderForm() {
             value="ДА"
             id="contactWantSubscribes"
           />
-          <label htmlFor="contactWantSubscribes">Хочу получать скидки и специальные предложения</label>
+          <label htmlFor="contactWantSubscribes">
+            Хочу получать скидки и специальные предложения
+          </label>
         </div>
       </form>
     </>
@@ -1144,7 +1163,7 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
     .concat(addressStreet ? [`Улица: ${addressStreet}`] : [])
     .concat(addressHome ? [`Дом/Корпус: ${addressHome}`] : [])
     .concat(addressFlat ? [`Квартира: ${addressFlat}`] : [])
-    .join(', ')
+    .join(', ');
 
   const {
     ORDER_FORM_CONTACT_ADDR,
@@ -1162,25 +1181,13 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
   } = quickFormData;
   const { Country, ConvenientTime, ZipCode, Region, City, Address, Comment } =
     SETTINGS_ORDER_FIELDS;
-  const [collapsed, setCollapsed] = useState(Object.values(SETTINGS_ORDER_FIELDS).every(el => !el.isRequired));
+  const [collapsed, setCollapsed] = useState(
+    Object.values(SETTINGS_ORDER_FIELDS).every((el) => !el.isRequired)
+  );
   const [{ from, to }, setConvenientState] = useState({
     from: 0,
     to: 24,
   });
-  const [date, setDate] = useState('');
-
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-
-  const formattedTomorrow = tomorrow
-    .toLocaleDateString('ru', {
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-    })
-    .split('.')
-    .reverse()
-    .join('-');
 
   return (
     <>
@@ -1228,8 +1235,8 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                       <option
                         key={id}
                         value={id}
-                      // selected={id === ORDER_FORM_DELIVERY_COUNTRY_ID}
-                      //  {% IF country_list.ID=ORDER_FORM_DELIVERY_COUNTRY_ID %}selected="selected"{% ENDIF %}
+                        // selected={id === ORDER_FORM_DELIVERY_COUNTRY_ID}
+                        //  {% IF country_list.ID=ORDER_FORM_DELIVERY_COUNTRY_ID %}selected="selected"{% ENDIF %}
                       >
                         {name}
                       </option>
@@ -1318,7 +1325,9 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                       required={Address.isRequired}
                     />
                     {formErrors.addressStreet && (
-                      <label className="error">{formErrors.addressStreet}</label>
+                      <label className="error">
+                        {formErrors.addressStreet}
+                      </label>
                     )}
                   </div>
                 </div>
@@ -1421,23 +1430,16 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                   <label className="quickform__label">
                     Дата доставки {ConvenientTime.isRequired && <em>*</em>}
                   </label>
-                  <input
+
+                  <AirDatepickerReact
                     placeholder="01.01.2021"
-                    type="date"
-                    id="convenientDate"
                     name="form[delivery][convenient_date]"
-                    value={date}
+                    onChange={handleChange}
+                    id="convenientDate"
+                    required={ConvenientTime.isRequired}
                     className={classNames(`input`, {
                       ['error']: formErrors.convenientDate,
                     })}
-                    autoComplete="off"
-                    onChange={(evt) => {
-                      const { value } = evt.target;
-
-                      setDate(value);
-                    }}
-                    min={formattedTomorrow}
-                    required={ConvenientTime.isRequired}
                   />
                   {formErrors.convenientDate && (
                     <label className="error">{formErrors.convenientDate}</label>
@@ -1458,7 +1460,8 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                   /> */}
 
                   <label className="quickform__label">
-                    Удобное время доставки {ConvenientTime.isRequired && <em>*</em>}
+                    Удобное время доставки{' '}
+                    {ConvenientTime.isRequired && <em>*</em>}
                   </label>
                   <div
                     style={{ display: 'flex', gap: 5, alignItems: 'center' }}
@@ -1480,7 +1483,7 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                             <option
                               key={HOUR_INT}
                               value={HOUR_INT}
-                            // selected={SELECTED ? 'selected' : ''}
+                              // selected={SELECTED ? 'selected' : ''}
                             >
                               {HOUR}
                             </option>
@@ -1505,7 +1508,7 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                             <option
                               key={HOUR_INT}
                               value={HOUR_INT}
-                            // selected={SELECTED ? 'selected' : ''}
+                              // selected={SELECTED ? 'selected' : ''}
                             >
                               {HOUR}
                             </option>
@@ -1575,7 +1578,6 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
 }
 
 function GoodsList({ refetchCart, goods, title }) {
-
   const [collapsed, setCollapsed] = useState(true);
 
   if (!goods?.length) {
@@ -1675,7 +1677,12 @@ function GoodItem({ item, refetchCart }) {
 
         <div className="qty qty--good">
           <div className="qty__wrap">
-            <button className="qty__btn qty__btn--minus" title="Уменьшить" onClick={handleDecrease} type="button">
+            <button
+              className="qty__btn qty__btn--minus"
+              title="Уменьшить"
+              onClick={handleDecrease}
+              type="button"
+            >
               <svg className="icon">
                 <use xlinkHref="/design/sprite.svg#minus-icon"></use>
               </svg>
@@ -1690,7 +1697,12 @@ function GoodItem({ item, refetchCart }) {
               onChange={handleChange}
               autoComplete="off"
             />
-            <button className="qty__btn qty__btn--plus" title="Увеличить" onClick={handleIncrease} type="button">
+            <button
+              className="qty__btn qty__btn--plus"
+              title="Увеличить"
+              onClick={handleIncrease}
+              type="button"
+            >
               <svg className="icon">
                 <use xlinkHref="/design/sprite.svg#plus-icon"></use>
               </svg>
@@ -1710,4 +1722,65 @@ function GoodItem({ item, refetchCart }) {
       </form>
     </li>
   );
+}
+
+function AirDatepickerReact(props) {
+  const { createPopper } = window.Popper;
+  const $input = useRef(null);
+  const dp = useRef(null);
+
+  useEffect(() => {
+    if ($input.current) {
+      dp.current = new AirDatepicker($input.current, {
+        ...props,
+        // inline: true,
+        autoClose: true,
+        minDate: new Date(),
+        position({ $datepicker, $target, $pointer, done }) {
+          const popper = createPopper($target, $datepicker, {
+            placement: 'bottom',
+            modifiers: [
+              {
+                name: 'flip',
+                options: {
+                  padding: {
+                    top: 0,
+                  },
+                },
+              },
+              {
+                name: 'offset',
+                options: {
+                  offset: [0, 1],
+                },
+              },
+              {
+                name: 'arrow',
+                options: {
+                  element: $pointer,
+                },
+              },
+            ],
+          });
+
+          return function completeHide() {
+            popper.destroy();
+            done();
+          };
+        },
+      });
+    }
+
+    return () => {
+      dp.current?.destroy();
+    };
+  }, []);
+
+  useEffect(() => {
+    dp.current?.update({
+      ...props,
+    });
+  }, [props]);
+
+  return <input readOnly ref={$input} {...props} />;
 }

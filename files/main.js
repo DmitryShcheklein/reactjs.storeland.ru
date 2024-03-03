@@ -1579,12 +1579,12 @@ function orderScripts() {
 
   // Выбор даты доставки
   // Документация к плагину //t1m0n.name/air-datepicker/docs/index-ru.html
-  $("#deliveryConvenientDate").datepicker({
-    // Если true, то при активации даты, календарь закроется.
-    autoClose: true,
-    // Можно выбрать только даты, идущие за сегодняшним днем, включая сегодня
-    minDate: new Date(),
-  });
+  // $("#deliveryConvenientDate").datepicker({
+  //   // Если true, то при активации даты, календарь закроется.
+  //   autoClose: true,
+  //   // Можно выбрать только даты, идущие за сегодняшним днем, включая сегодня
+  //   minDate: new Date(),
+  // });
 
   // Разделение поле адрес на Улица, Дом, Квартира
   $(function () {
