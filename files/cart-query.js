@@ -18,6 +18,7 @@ const queryClient = new QueryClient({
 });
 const QUERY_KEYS = {
   Cart: 'Cart',
+  CartState: 'CartState',
   FormState: 'FormState',
   QuickFormData: 'QuickFormData',
 };
@@ -70,18 +71,16 @@ function useFormState(options) {
 }
 
 function useCartState(options) {
+  const key = QUERY_KEYS.CartState;
   const query = useQuery({
-    queryKey: ['CartState'],
+    queryKey: [key],
     initialData: {},
     queryFn: () => initialData,
     enabled: false,
     ...options,
   });
 
-  return [
-    query.data,
-    (value) => queryClient.setQueryData(['CartState'], value),
-  ];
+  return [query.data, (value) => queryClient.setQueryData([key], value)];
 }
 
 function useQuickFormData() {
