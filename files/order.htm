@@ -13,11 +13,12 @@
   "CART_SUM_DISCOUNT": "{CART_SUM_DISCOUNT}",
   "CART_SUM_DISCOUNT_PERCENT": "{CART_SUM_DISCOUNT_PERCENT}",
   "CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT": "{CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT}",
-  "SETTINGS_STORE_ORDER_MIN_ORDER_PRICE": "{SETTINGS_STORE_ORDER_MIN_ORDER_PRICE}",
-  "SETTINGS_STORE_ORDER_MIN_PRICE_WITHOUT_DELIVERY": "{SETTINGS_STORE_ORDER_MIN_PRICE_WITHOUT_DELIVERY}",
+  "SETTINGS_STORE_ORDER_MIN_ORDER_PRICE": {SETTINGS_STORE_ORDER_MIN_ORDER_PRICE},
+  "SETTINGS_STORE_ORDER_MIN_PRICE_WITHOUT_DELIVERY": {SETTINGS_STORE_ORDER_MIN_PRICE_WITHOUT_DELIVERY},
   "cartItems": [
   {% FOR cart_items %}
     {
+      "GOODS_ID": "{cart_items.GOODS_ID}",
       "GOODS_NAME": "{cart_items.GOODS_NAME}",
       "GOODS_MOD_ID": {cart_items.GOODS_MOD_ID},
       "ORDER_LINE_QUANTITY": {cart_items.ORDER_LINE_QUANTITY},
@@ -49,10 +50,38 @@
       "GOODS_NAME": "{cart_related_goods.NAME}",
       "GOODS_MOD_ID": "{cart_related_goods.MIN_PRICE_NOW_ID}",
       "ORDER_LINE_QUANTITY": 1,
-      "GOODS_MOD_PRICE_NOW": {cart_related_goods.MIN_PRICE_NOW},
+      "MIN_PRICE_NOW_WITHOUT_DISCOUNT": {cart_related_goods.MIN_PRICE_NOW_WITHOUT_DISCOUNT},
       "GOODS_IMAGE": "{% IF cart_related_goods.IMAGE_EMPTY %}{ASSETS_IMAGES_PATH}no-photo-icon.png?design=conditer{% ELSE %}{cart_related_goods.IMAGE_MEDIUM}{% ENDIF %}"
     }
   {% IFNOT cart_related_goods.last %},{% ENDIF %}
+  {% ENDFOR %}
+  {% ENDIF %}
+  ],
+  "recentlyViewedGoods": [  
+  {% IFNOT recently_viewed_goods_empty %}
+  {% FOR recently_viewed_goods %}    
+    {
+      "ID": "{recently_viewed_goods.ID}",
+      "NB_GOODS_IN_CART": {recently_viewed_goods.NB_GOODS_IN_CART},
+      "GOODS_NAME": "{recently_viewed_goods.NAME}",
+      "GOODS_MOD_ID": "{recently_viewed_goods.MIN_PRICE_NOW_ID}",
+      "ORDER_LINE_QUANTITY": 1,
+      "MIN_PRICE_NOW_WITHOUT_DISCOUNT": {recently_viewed_goods.MIN_PRICE_NOW_WITHOUT_DISCOUNT},
+      "GOODS_IMAGE": "{% IF recently_viewed_goods.IMAGE_EMPTY %}{ASSETS_IMAGES_PATH}no-photo-icon.png?design=conditer{% ELSE %}{recently_viewed_goods.IMAGE_MEDIUM}{% ENDIF %}"
+    }    
+    {% IFNOT recently_viewed_goods.last %},{% ENDIF %}
+  {% ENDFOR %}
+  {% ENDIF %}
+  ],
+  "favoritesGoods": [  
+  {% IFNOT favorites_goods_empty %}
+  {% FOR favorites_goods %}
+    {      
+      "ID": "{favorites_goods.ID}",
+      "MAX_PRICE_NOW_ID": "{favorites_goods.MAX_PRICE_NOW_ID}",
+      "MIN_PRICE_NOW_ID": "{favorites_goods.MIN_PRICE_NOW_ID}"
+    }
+  {% IFNOT favorites_goods.last %},{% ENDIF %}
   {% ENDFOR %}
   {% ENDIF %}
   ],
