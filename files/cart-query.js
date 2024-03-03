@@ -561,7 +561,7 @@ function CartItem({
   const [inputValue, setInputValue] = useState(ORDER_LINE_QUANTITY);
   const handleBlur = (event) => {
     const { value, min } = event.target;
-    const numericValue = Math.max(Number(parseInt(value, 10)), Number(min));
+    const numericValue = Math.max(Number(value), Number(min));
 
     setInputValue(numericValue);
 
