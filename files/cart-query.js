@@ -144,7 +144,7 @@ function useCart() {
     initialData: {},
     queryFn: async () => {
       const formData = new FormData();
-      formData.append('form[payment][id]', cartState['form[payment][id]']);
+
       formData.append('form[delivery][id]', cartState['form[delivery][id]']);
 
       if (cartState['form[delivery][zone_id]']) {
@@ -305,7 +305,6 @@ function Cart() {
   const {
     ['form[delivery][id]']: deliveryId,
     ['form[delivery][zone_id]']: zoneId,
-    ['form[payment][id]']: paymentId,
   } = cartState;
 
   const { data: quickFormData } = useQuickFormData();
@@ -459,7 +458,7 @@ function Cart() {
                 Зона доставки (zoneId: {zoneId}): <b></b>
               </li>
             )}
-            <li>Метод оплаты (id): {paymentId}</li>
+
             {quickFormData.ORDER_DISCOUNT_COUPON_IS_ENABLED && (
               <li>Купон : {couponCode}</li>
             )}
