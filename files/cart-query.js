@@ -266,7 +266,7 @@ function Cart() {
   const formElement = formRef?.current;
   const [formState, setFormState] = useFormState();
   const { data: quickFormData } = useQuickFormData({
-    enabled: !Boolean(window.CART_IS_EMPTY),
+    enabled: !Boolean(window.CART_IS_EMPTY), // TODO: перенести в хук
   });
 
   const {
@@ -330,6 +330,7 @@ function Cart() {
     //   isCartRelatedGoodsLength
     // );
     if (isCouponSend || currentDeliveryId || zoneId) {
+      console.log('refetch');
       refetchCart();
     }
   }, [isCouponSend, currentDeliveryId, zoneId]);
@@ -835,7 +836,7 @@ function OrderForm() {
       return { [key]: isLast ? value : acc };
     }, {});
 
-    if (id === 'delivery-select') {
+    if (name === 'form[delivery][id]') {
       const zL = deliveries?.find(({ id }) => id === value)?.zoneList;
 
       fieldData.form.delivery.zone_id = zL[0]?.zoneId;
