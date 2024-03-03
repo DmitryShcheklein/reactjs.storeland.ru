@@ -141,7 +141,7 @@ function useCart() {
 
   return useQuery({
     queryKey: [QUERY_KEYS.Cart],
-    initialData: {},
+    initialData: { cartDiscount: [] },
     queryFn: async () => {
       const formData = new FormData();
 
@@ -366,7 +366,7 @@ function Cart() {
       }
     });
   };
-  const [cartDiscountObj] = cartDiscount || [];
+  const [cartDiscountObj] = cartDiscount;
   if (window.CART_IS_EMPTY) {
     return null;
   }
