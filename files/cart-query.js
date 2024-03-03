@@ -74,7 +74,9 @@ function useCartState(options) {
   const key = QUERY_KEYS.CartState;
   const query = useQuery({
     queryKey: [key],
-    initialData: {},
+    initialData: {
+      // 'form[coupon_code]': '123456',
+    },
     queryFn: () => initialData,
     enabled: false,
     ...options,
@@ -145,6 +147,9 @@ function useCart() {
 
       formData.append('form[delivery][id]', cartState['form[delivery][id]']);
 
+      if (cartState['form[coupon_code]']) {
+        formData.append('form[coupon_code]', cartState['form[coupon_code]']);
+      }
       if (cartState['form[delivery][zone_id]']) {
         formData.append(
           'form[delivery][zone_id]',
@@ -158,9 +163,6 @@ function useCart() {
         )
       );
 
-      for (const pair of formData.entries()) {
-        // console.log(pair[0] + ', ' + pair[1]);
-      }
       const { data } = await axios.post(`/cart`, formData, {
         // const { data } = await axios.post(`/order/stage/confirm`, formData, {
         responseType: 'text',
@@ -169,8 +171,18 @@ function useCart() {
           hash: window.HASH,
         },
       });
-
-      const cardData = JSON.parse(data);
+      let couponData;
+      if (cartState['form[coupon_code]']) {
+        const { data } = await axios.post(`/order/stage/confirm`, formData, {
+          responseType: 'text',
+          params: {
+            only_body: 1,
+            ajax_q: 1,
+          },
+        });
+        couponData = data;
+      }
+      const cardData = JSON.parse(couponData || data);
 
       return cardData;
     },
@@ -303,6 +315,7 @@ function Cart() {
   const {
     ['form[delivery][id]']: deliveryId,
     ['form[delivery][zone_id]']: zoneId,
+    ['form[coupon_code]']: couponCode,
   } = cartState;
 
   const { data: quickFormData } = useQuickFormData();
@@ -783,8 +796,9 @@ function OrderForm() {
     ['form[delivery][id]']: deliveryId,
     ['form[delivery][zone_id]']: zoneId,
     ['form[payment][id]']: paymentId,
+    ['form[coupon_code]']: couponCode,
   } = cartState;
-  const { data: cartData } = useCart();
+  const { data: cartData, refetch: refetchCart } = useCart();
   const [formState] = useFormState();
   const { data: quickFormData, isLoading: isLoadingDelivery } =
     useQuickFormData();
@@ -835,7 +849,9 @@ function OrderForm() {
     validateElement(event.target);
   };
 
-  const handleCouponBtn = () => {};
+  const handleCouponBtn = () => {
+    refetchCart();
+  };
   const isMinOrderPrice = Boolean(getCurrentMinOrderPrice(cartData));
 
   if (window.CART_IS_EMPTY || !cartData?.CART_COUNT_TOTAL) {
@@ -966,26 +982,29 @@ function OrderForm() {
           </>
         )}
         {ORDER_DISCOUNT_COUPON_IS_ENABLED && (
-          <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
-            <input
-              id="couponCode"
-              className="input"
-              name="form[coupon_code]"
-              value={couponCode}
-              onChange={handleChange}
-              maxLength="255"
-              type="text"
-              placeholder="Купон (123456)"
-            />
-            <button
-              disabled={!couponCode}
-              onClick={handleCouponBtn}
-              className="button"
-              type="button"
-            >
-              Применить
-            </button>
-          </div>
+          <>
+            <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
+              <input
+                id="couponCode"
+                className="input"
+                name="form[coupon_code]"
+                value={couponCode}
+                onChange={handleChange}
+                maxLength="255"
+                type="text"
+                placeholder="Купон (123456)"
+              />
+              <button
+                disabled={!couponCode}
+                onClick={handleCouponBtn}
+                className="button"
+                type="button"
+              >
+                Применить
+              </button>
+            </div>
+            <pre>123456</pre>
+          </>
         )}
         {deliveries?.length ? (
           <>
