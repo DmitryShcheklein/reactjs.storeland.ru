@@ -825,35 +825,42 @@ function OrderForm() {
 
   const handleChange = (event) => {
     const { name, value, id } = event.target;
-    // Разбиваем строку "form[contact][person]" на массив ключей ["form", "contact", "person"]
-    const keys = name.split(/\[|\]/).filter(Boolean);
 
-    const fieldData = keys.reduceRight((acc, key, index) => {
-      const isLast = index === keys.length - 1;
+    if (id === 'deliveryId' || id === 'deliveryZoneId' || id === 'couponCode') {
+      const [firstZone] =
+        deliveries?.find(({ id }) => id === value)?.zoneList || [];
 
-      return { [key]: isLast ? value : acc };
-    }, {});
+      setCartState((prev) => {
+        const zoneObj =
+          id === 'deliveryId'
+            ? { 'form[delivery][zone_id]': firstZone.zoneId }
+            : {};
 
-    setFormState((prev) => {
-      const newData = Utils.mergeWith({ ...prev }, fieldData, Utils.customizer);
+        return {
+          ...prev,
+          ...zoneObj,
+          [name]: value,
+        };
+      });
+    } else {
+      // Разбиваем строку "form[contact][person]" на массив ключей ["form", "contact", "person"]
+      const keys = name.split(/\[|\]/).filter(Boolean);
 
-      return newData;
-    });
+      const fieldData = keys.reduceRight((acc, key, index) => {
+        const isLast = index === keys.length - 1;
 
-    if (name === 'form[coupon_code]') {
-      setCartState((prev) => ({
-        ...prev,
-        'form[coupon_code]': value,
-      }));
-    }
+        return { [key]: isLast ? value : acc };
+      }, {});
 
-    if (name === 'form[delivery][id]') {
-      const zL = deliveries?.find(({ id }) => id === value)?.zoneList;
+      setFormState((prev) => {
+        const newData = Utils.mergeWith(
+          { ...prev },
+          fieldData,
+          Utils.customizer
+        );
 
-      setCartState((prev) => ({
-        ...prev,
-        'form[delivery][zone_id]': zL[0]?.zoneId,
-      }));
+        return newData;
+      });
     }
 
     validateElement(event.target);
