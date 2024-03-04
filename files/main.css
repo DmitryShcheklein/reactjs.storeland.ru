@@ -3186,16 +3186,35 @@ body.modal-open {overflow: hidden}
 
 /* Купон */
 .coupon {position: relative;    margin-bottom: 30px;}
-.coupon .coupon__clear {position: absolute;display: flex;align-items: center;z-index: 1;font-size: 26px;top: 0;right: 40px;height: 100%;padding: 0 10px;cursor: pointer;opacity: 0;visibility: hidden;-webkit-transition: all .3s;transition: all .3s;color: #898989;}
+.coupon .coupon__clear {position: absolute;display: flex;align-items: center;z-index: 1;font-size: 26px;top: 0;right: 105px;height: 100%;padding: 0 10px;cursor: pointer;opacity: 0;visibility: hidden;-webkit-transition: all .3s;transition: all .3s;color: #898989;}
 .coupon .coupon__clear._active {opacity: 1;visibility: visible}
 .coupon .coupon__clear._active:hover .icon {
   fill: #607d8b;
 }
 .coupon .coupon__clear .icon {width: 13px;height: 13px}
-.coupon .coupon__box {display: block;position: relative;max-width: 315px;}
+.coupon .coupon__box {display: block;position: relative;max-width: 100%;}
 .coupon .coupon__input {max-width: 100%;height: 40px;padding-left: 10px;padding-right: 70px}
 .coupon .coupon__label {display: block;margin-bottom: 15px;font-size: 16px}
-.coupon .coupon__btn {position: absolute;z-index: 1;top: 0;right: 0;width: 40px;height: 100%;padding: 0;background: #607d8b;color: #fff;font-size: 18px;font-weight: 400;text-transform: uppercase;border: none;border-top-left-radius: 0;border-bottom-left-radius: 0;display: -webkit-box;display: -ms-flexbox;display: flex}
+.coupon .coupon__btn {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: 0;
+  width: auto;
+  height: 100%;
+  padding: 0 10px;
+  
+  color: #fff;
+  font-size: 18px;
+  font-weight: 400;
+  border: none;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  align-items: center;  
+}
 .coupon .coupon__btn._added,
 .coupon .coupon__btn:hover {background-color: #6053c7;color: #fff}
 .coupon .coupon__btn .icon {fill: #fff;width: 18px;margin: auto}

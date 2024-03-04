@@ -869,6 +869,10 @@ function OrderForm() {
   const handleCouponBtn = () => {
     refetchCart();
   };
+  const handleResetCouponBtn = () => {
+    setCartState((prev) => ({ ...prev, 'form[coupon_code]': undefined }));
+    refetchCart();
+  };
   const { cartDiscount = [] } = cartData;
   const [cartDiscountObj] = cartDiscount;
   const isCouponEnabled = cartDiscountObj?.DISCOUNT_TYPE === 'coupon';
@@ -1004,8 +1008,11 @@ function OrderForm() {
           </>
         )}
         {ORDER_DISCOUNT_COUPON_IS_ENABLED && (
-          <>
-            <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
+          <div className="coupon">
+            <div
+              className="coupon__box"
+              style={{ display: 'flex', gap: 20, alignItems: 'center' }}
+            >
               <input
                 id="couponCode"
                 className="input"
@@ -1018,16 +1025,28 @@ function OrderForm() {
                 readOnly={isCouponEnabled}
               />
               <button
+                type="button"
+                className={classNames('coupon__clear', {
+                  [' _active']: isCouponEnabled,
+                })}
+                title="Очистить купон"
+                onClick={handleResetCouponBtn}
+              >
+                <svg className="icon _close">
+                  <use xlinkHref="/design/sprite.svg#close"></use>
+                </svg>
+              </button>
+              <button
                 disabled={!couponCode || isCouponEnabled}
                 onClick={handleCouponBtn}
-                className="button"
+                className="button coupon__btn"
                 type="button"
               >
                 {isCouponEnabled ? 'Применён' : 'Применить'}
               </button>
             </div>
-            <pre>123456</pre>
-          </>
+            <pre>1234567</pre>
+          </div>
         )}
         {deliveries?.length ? (
           <>
