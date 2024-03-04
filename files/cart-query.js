@@ -311,6 +311,7 @@ function getCurrentMinOrderPrice(cartData = {}) {
 }
 
 function Cart() {
+  const isCartEmpty = useCheckCartEmpty();
   const [cartState, setCartState] = useCartState();
   const {
     ['form[delivery][id]']: deliveryId,
@@ -379,7 +380,7 @@ function Cart() {
   };
   const [cartDiscountObj] = cartDiscount;
 
-  if (window.CART_IS_EMPTY) {
+  if (isCartEmpty) {
     return null;
   }
 
@@ -388,143 +389,136 @@ function Cart() {
       <div className="cart" style={{ position: 'relative' }}>
         {(isFetchingCart || clearCartMutation.isLoading) && <Preloader />}
 
-        {isCartItemsLength ? (
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              alignItems: 'center',
-              gap: 10,
-            }}
-          >
-            <h1 style={{ width: '100%' }}>Корзина</h1>
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            gap: 10,
+          }}
+        >
+          <h1 style={{ width: '100%' }}>Корзина</h1>
 
-            {deletedItemsArray.length &&
-            !(deletedItemsArray.length === cartItems.length) ? (
-              <button
-                className="button"
-                onClick={() => {
-                  clearCartItemsMutation.mutate(deletedItemsArray);
-                }}
-              >
-                {clearCartMutation.isLoading
-                  ? '(Очищается..)'
-                  : `Удалить выбранные (${deletedItemsArray.length})`}
-              </button>
-            ) : (
-              <button
-                className="button"
-                onClick={() => {
-                  clearCartMutation.mutate();
-                }}
-              >
-                {clearCartMutation.isLoading
-                  ? '(Очищается..)'
-                  : 'Очистить корзину'}
-              </button>
-            )}
+          {deletedItemsArray?.length &&
+          !(deletedItemsArray?.length === cartItems?.length) ? (
+            <button
+              className="button"
+              onClick={() => {
+                clearCartItemsMutation.mutate(deletedItemsArray);
+              }}
+            >
+              {clearCartMutation.isLoading
+                ? '(Очищается..)'
+                : `Удалить выбранные (${deletedItemsArray.length})`}
+            </button>
+          ) : (
+            <button
+              className="button"
+              onClick={() => {
+                clearCartMutation.mutate();
+              }}
+            >
+              {clearCartMutation.isLoading
+                ? '(Очищается..)'
+                : 'Очистить корзину'}
+            </button>
+          )}
 
-            <label style={{ display: 'flex', gap: 10 }}>
-              <input
-                type="checkbox"
-                onChange={(evt) => {
-                  const { checked } = evt.target;
+          <label style={{ display: 'flex', gap: 10 }}>
+            <input
+              type="checkbox"
+              onChange={(evt) => {
+                const { checked } = evt.target;
 
-                  setDeletedItemsArray(
-                    checked ? cartItems.map((el) => el.GOODS_MOD_ID) : []
-                  );
-                }}
-                checked={cartItems.length === deletedItemsArray.length}
-              />
-              Выбрать всё
-            </label>
-          </div>
-        ) : null}
+                setDeletedItemsArray(
+                  checked ? cartItems.map((el) => el.GOODS_MOD_ID) : []
+                );
+              }}
+              checked={cartItems?.length === deletedItemsArray?.length}
+            />
+            Выбрать всё
+          </label>
+        </div>
 
         <form id="card">
-          {isCartItemsLength ? (
-            <ul style={{ listStyle: 'none' }}>
-              {cartItems.map((item) => (
-                <CartItem
-                  item={item}
-                  key={item.GOODS_MOD_ID}
-                  refetchCart={refetchCart}
-                  checked={deletedItemsArray.includes(item.GOODS_MOD_ID)}
-                  changeDeletedItemHandler={changeDeletedItemHandler}
-                />
-              ))}
-            </ul>
-          ) : null}
-        </form>
-        {isCartItemsLength ? (
-          <ul>
-            <li>Товаров: {CART_COUNT_TOTAL} шт.</li>
-            <li>Сумма товаров: {CART_SUM_NOW}</li>
-            <li>
-              Доставка (id: {deliveryId}):{' '}
-              <b>{zoneId ? CART_SUM_OLD_WITH_DELIVERY : CART_SUM_DELIVERY}</b>
-              {/* BUG: бек неверно отдаёт цену доставки при выбранной зоне */}
-            </li>
-            {zoneId && (
-              <li>
-                Зона доставки (zoneId: {zoneId}): <b></b>
-              </li>
-            )}
-
-            {quickFormData.ORDER_DISCOUNT_COUPON_IS_ENABLED && (
-              <li>Купон : {couponCode}</li>
-            )}
-            {cartDiscountObj && (
-              <>
-                Скидка
-                <ul>
-                  <li>
-                    {cartDiscountObj.DISCOUNT_VALUE}{' '}
-                    {cartDiscountObj.IS_PERCENT ? '%' : 'р.'}
-                  </li>
-                  <li>{cartDiscountObj.DISCOUNT_NAME}</li>
-                  <li>{cartDiscountObj.DISCOUNT_TYPE_DESCRIPTION}</li>
-                </ul>
-              </>
-            )}
-            {/* <li> Скидка: {CART_SUM_DISCOUNT} </li> */}
-            {/* <li>Скидка процент: {CART_SUM_DISCOUNT_PERCENT}</li> */}
-            <li>Итого с доставкой: {CART_SUM_NOW_WITH_DELIVERY}</li>
-            {SETTINGS_STORE_ORDER_MIN_ORDER_PRICE ? (
-              <li>
-                Минимальная сумма заказа (
-                {SETTINGS_STORE_ORDER_MIN_PRICE_WITHOUT_DELIVERY
-                  ? 'Без учёта стоимости доставки'
-                  : 'с доставкой'}
-                ): {SETTINGS_STORE_ORDER_MIN_ORDER_PRICE}, Осталось:{' '}
-                {getCurrentMinOrderPrice(cartData)}
-              </li>
-            ) : null}
-            {/* <li>Итого old с доставкой: {CART_SUM_OLD_WITH_DELIVERY}</li> */}
-            <li>
-              Итого с доставкой и скидкой:{' '}
-              <b>{CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT}</b>
-            </li>
+          <ul style={{ listStyle: 'none' }}>
+            {cartItems?.map((item) => (
+              <CartItem
+                item={item}
+                key={item.GOODS_MOD_ID}
+                refetchCart={refetchCart}
+                checked={deletedItemsArray.includes(item.GOODS_MOD_ID)}
+                changeDeletedItemHandler={changeDeletedItemHandler}
+              />
+            ))}
           </ul>
-        ) : null}
+        </form>
+
+        <ul>
+          <li>Товаров: {CART_COUNT_TOTAL} шт.</li>
+          <li>Сумма товаров: {CART_SUM_NOW}</li>
+          <li>
+            Доставка (id: {deliveryId}):{' '}
+            <b>{zoneId ? CART_SUM_OLD_WITH_DELIVERY : CART_SUM_DELIVERY}</b>
+            {/* BUG: бек неверно отдаёт цену доставки при выбранной зоне */}
+          </li>
+          {zoneId && (
+            <li>
+              Зона доставки (zoneId: {zoneId}): <b></b>
+            </li>
+          )}
+
+          {quickFormData.ORDER_DISCOUNT_COUPON_IS_ENABLED && (
+            <li>Купон : {couponCode}</li>
+          )}
+          {cartDiscountObj && (
+            <>
+              Скидка
+              <ul>
+                <li>
+                  {cartDiscountObj.DISCOUNT_VALUE}{' '}
+                  {cartDiscountObj.IS_PERCENT ? '%' : 'р.'}
+                </li>
+                <li>{cartDiscountObj.DISCOUNT_NAME}</li>
+                <li>{cartDiscountObj.DISCOUNT_TYPE_DESCRIPTION}</li>
+              </ul>
+            </>
+          )}
+          {/* <li> Скидка: {CART_SUM_DISCOUNT} </li> */}
+          {/* <li>Скидка процент: {CART_SUM_DISCOUNT_PERCENT}</li> */}
+          <li>Итого с доставкой: {CART_SUM_NOW_WITH_DELIVERY}</li>
+          {SETTINGS_STORE_ORDER_MIN_ORDER_PRICE ? (
+            <li>
+              Минимальная сумма заказа (
+              {SETTINGS_STORE_ORDER_MIN_PRICE_WITHOUT_DELIVERY
+                ? 'Без учёта стоимости доставки'
+                : 'с доставкой'}
+              ): {SETTINGS_STORE_ORDER_MIN_ORDER_PRICE}, Осталось:{' '}
+              {getCurrentMinOrderPrice(cartData)}
+            </li>
+          ) : null}
+          {/* <li>Итого old с доставкой: {CART_SUM_OLD_WITH_DELIVERY}</li> */}
+          <li>
+            Итого с доставкой и скидкой:{' '}
+            <b>{CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT}</b>
+          </li>
+        </ul>
       </div>
 
-      {isCartItemsLength ? (
-        <GoodsList
-          title="С этим товаром покупают"
-          goods={cartRelatedGoods}
-          refetchCart={refetchCart}
-        />
-      ) : null}
+      <GoodsList
+        title="С этим товаром покупают"
+        goods={cartRelatedGoods}
+        refetchCart={refetchCart}
+      />
+
       <br />
 
-      {isCartItemsLength ? (
-        <GoodsList
-          title="Вы смотрели"
-          goods={recentlyViewedGoodsFiltered}
-          refetchCart={refetchCart}
-        />
-      ) : null}
+      <GoodsList
+        title="Вы смотрели"
+        goods={recentlyViewedGoodsFiltered}
+        refetchCart={refetchCart}
+      />
+
       <br />
     </>
   );
@@ -858,8 +852,9 @@ function OrderForm() {
   const isCouponEnabled = cartDiscountObj?.DISCOUNT_TYPE === 'coupon';
 
   const isMinOrderPrice = Boolean(getCurrentMinOrderPrice(cartData));
+  const isCartEmpty = useCheckCartEmpty();
 
-  if (window.CART_IS_EMPTY || !cartData?.CART_COUNT_TOTAL) {
+  if (isCartEmpty) {
     return null;
   }
 
@@ -1125,11 +1120,15 @@ function Preloader() {
     </div>
   );
 }
-
-function EmptyCart() {
+function useCheckCartEmpty() {
   const { data: cartData, isSuccess, isFetching } = useCart();
   const isCartEmpty =
     window.CART_IS_EMPTY || (!cartData?.CART_COUNT_TOTAL && isSuccess);
+  console.log('isCartEmpty', isCartEmpty);
+  return isCartEmpty;
+}
+function EmptyCart() {
+  const isCartEmpty = useCheckCartEmpty();
 
   if (!isCartEmpty) {
     return null;
@@ -1214,7 +1213,7 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
         >
           <div>
             {/* <!-- Если поле страны доставки запрашивается --> */}
-            {Country.isVisible && (
+            {Country?.isVisible && (
               <div className="quickform__item">
                 <div className="quickform__input-wrap">
                   <label className="quickform__label">
@@ -1250,7 +1249,7 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
             )}
 
             {/* <!-- Если поле области запрашивается --> */}
-            {Region.isVisible && (
+            {Region?.isVisible && (
               <div className="quickform__item">
                 <div className="quickform__input-wrap">
                   <label className="quickform__label">
@@ -1276,7 +1275,7 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
             )}
 
             {/* <!-- Если поле города запрашивается --> */}
-            {City.isVisible && (
+            {City?.isVisible && (
               <div className="quickform__item">
                 <div className="quickform__input-wrap">
                   <label className="quickform__label">
@@ -1303,7 +1302,7 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
             )}
 
             {/* <!-- Если поле адреса доставки запрашивается --> */}
-            {Address.isVisible && (
+            {Address?.isVisible && (
               <>
                 {/* <!-- Улица --> */}
                 <div className="quickform__item">
@@ -1394,7 +1393,7 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
             )}
 
             {/* <!-- Если поле почтового индекса запрашивается --> */}
-            {ZipCode.isVisible && (
+            {ZipCode?.isVisible && (
               <div className="quickform__item -small -third">
                 <div className="quickform__input-wrap">
                   <label className="quickform__label">
@@ -1423,7 +1422,7 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
           </div>
 
           {/* <!-- Если поле даты доставки запрашивается --> */}
-          {ConvenientTime.isVisible && (
+          {ConvenientTime?.isVisible && (
             <div className="quickform__list -deliveryConvenient">
               <div className="quickform__item -deliveryConvenientDate">
                 <div className="quickform__input-wrap">
@@ -1543,7 +1542,7 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
           )}
 
           {/* <!-- Если поле комментарии запрашивается --> */}
-          {Comment.isVisible && (
+          {Comment?.isVisible && (
             <section className="quickform__row -comment">
               <div className="quickform__list">
                 <div className="quickform__item">
