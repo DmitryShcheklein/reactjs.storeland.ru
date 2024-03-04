@@ -832,7 +832,7 @@ function OrderForm() {
 
       setCartState((prev) => {
         const zoneObj =
-          id === 'deliveryId'
+          id === 'deliveryId' && firstZone?.zoneId
             ? { 'form[delivery][zone_id]': firstZone.zoneId }
             : {};
 
