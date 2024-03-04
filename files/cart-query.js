@@ -399,6 +399,21 @@ function Cart() {
         >
           <h1 style={{ width: '100%' }}>Корзина</h1>
 
+          <label style={{ display: 'flex', gap: 10 }}>
+            <input
+              type="checkbox"
+              onChange={(evt) => {
+                const { checked } = evt.target;
+
+                setDeletedItemsArray(
+                  checked ? cartItems.map((el) => el.GOODS_MOD_ID) : []
+                );
+              }}
+              checked={cartItems?.length === deletedItemsArray?.length}
+            />
+            Выбрать всё
+          </label>
+
           {deletedItemsArray?.length &&
           !(deletedItemsArray?.length === cartItems?.length) ? (
             <button
@@ -423,21 +438,6 @@ function Cart() {
                 : 'Очистить корзину'}
             </button>
           )}
-
-          <label style={{ display: 'flex', gap: 10 }}>
-            <input
-              type="checkbox"
-              onChange={(evt) => {
-                const { checked } = evt.target;
-
-                setDeletedItemsArray(
-                  checked ? cartItems.map((el) => el.GOODS_MOD_ID) : []
-                );
-              }}
-              checked={cartItems?.length === deletedItemsArray?.length}
-            />
-            Выбрать всё
-          </label>
         </div>
 
         <form id="card">
@@ -794,7 +794,7 @@ function OrderForm() {
     ['form[coupon_code]']: couponCode,
   } = cartState;
   const { data: cartData = {}, refetch: refetchCart } = useCart();
-  const [formState] = useFormState();
+  const [formState, setFormState] = useFormState();
   const { data: quickFormData, isLoading: isLoadingDelivery } =
     useQuickFormData();
   const { deliveries, CLIENT_IS_LOGIN, ORDER_DISCOUNT_COUPON_IS_ENABLED } =
@@ -826,6 +826,27 @@ function OrderForm() {
 
   const handleChange = (event) => {
     const { name, value, id } = event.target;
+    // Разбиваем строку "form[contact][person]" на массив ключей ["form", "contact", "person"]
+    const keys = name.split(/\[|\]/).filter(Boolean);
+
+    const fieldData = keys.reduceRight((acc, key, index) => {
+      const isLast = index === keys.length - 1;
+
+      return { [key]: isLast ? value : acc };
+    }, {});
+
+    setFormState((prev) => {
+      const newData = Utils.mergeWith({ ...prev }, fieldData, Utils.customizer);
+
+      return newData;
+    });
+
+    if (name === 'form[coupon_code]') {
+      setCartState((prev) => ({
+        ...prev,
+        'form[coupon_code]': value,
+      }));
+    }
 
     if (name === 'form[delivery][id]') {
       const zL = deliveries?.find(({ id }) => id === value)?.zoneList;
@@ -835,11 +856,6 @@ function OrderForm() {
         'form[delivery][zone_id]': zL[0]?.zoneId,
       }));
     }
-
-    setCartState((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
 
     validateElement(event.target);
   };
@@ -1124,7 +1140,7 @@ function useCheckCartEmpty() {
   const { data: cartData, isSuccess, isFetching } = useCart();
   const isCartEmpty =
     window.CART_IS_EMPTY || (!cartData?.CART_COUNT_TOTAL && isSuccess);
-  console.log('isCartEmpty', isCartEmpty);
+  // console.log('isCartEmpty', isCartEmpty);
   return isCartEmpty;
 }
 function EmptyCart() {
@@ -1228,6 +1244,7 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                     name="form[delivery][country_id]"
                     defaultValue={ORDER_FORM_DELIVERY_COUNTRY_ID}
                     required={Country.isRequired}
+                    onChange={handleChange}
                   >
                     <option value=""></option>
                     {countryList?.map(({ id, name }) => (
@@ -1262,6 +1279,7 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                     name="form[delivery][region]"
                     defaultValue={ORDER_FORM_CONTACT_REGION}
                     maxLength="255"
+                    onChange={handleChange}
                     className={classNames(`input`, {
                       ['error']: formErrors.region,
                     })}
