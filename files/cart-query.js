@@ -468,21 +468,20 @@ function Cart() {
             </li>
           )}
 
-          {quickFormData.ORDER_DISCOUNT_COUPON_IS_ENABLED && (
+          {quickFormData.ORDER_DISCOUNT_COUPON_IS_ENABLED && couponCode && (
             <li>Купон : {couponCode}</li>
           )}
           {cartDiscountObj && (
-            <>
-              Скидка
+            <li>
+              <h4>{cartDiscountObj.DISCOUNT_TYPE_DESCRIPTION}</h4>
               <ul>
                 <li>
                   {cartDiscountObj.DISCOUNT_VALUE}{' '}
                   {cartDiscountObj.IS_PERCENT ? '%' : 'р.'}
                 </li>
-                <li>{cartDiscountObj.DISCOUNT_NAME}</li>
-                <li>{cartDiscountObj.DISCOUNT_TYPE_DESCRIPTION}</li>
+                <li>{cartDiscountObj.END_PRICE}</li>
               </ul>
-            </>
+            </li>
           )}
           {/* <li> Скидка: {CART_SUM_DISCOUNT} </li> */}
           {/* <li>Скидка процент: {CART_SUM_DISCOUNT_PERCENT}</li> */}
