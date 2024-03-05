@@ -84,7 +84,7 @@ function useCartState(options) {
         payment: {
           id: undefined
         },
-        coupon_code: undefined,
+        coupon_code: '',
         isCouponSend: false
       }
     },
@@ -489,9 +489,6 @@ function Cart() {
             </li>
           )}
 
-          {quickFormData.ORDER_DISCOUNT_COUPON_IS_ENABLED && couponCode && (
-            <li>Купон : {couponCode}</li>
-          )}
           {cartDiscountObj && (
             <li>
               <h4>{cartDiscountObj.DISCOUNT_TYPE_DESCRIPTION}</h4>
@@ -902,9 +899,10 @@ function OrderForm() {
 
   const handleResetCouponBtn = () => {
     setCartState((prev) => ({
-      ...prev, form: {
+      ...prev,
+      form: {
         ...prev.form,
-        coupon_code: undefined,
+        coupon_code: '',
         isCouponSend: false
       }
     }));
