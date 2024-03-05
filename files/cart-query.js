@@ -84,7 +84,8 @@ function useCartState(options) {
         payment: {
           id: undefined
         },
-        coupon_code: undefined
+        coupon_code: undefined,
+        isCouponSend: false
       }
     },
     queryFn: () => initialData,
@@ -162,12 +163,15 @@ function useCart() {
   return useQuery({
     queryKey: [QUERY_KEYS.Cart],
     queryFn: async () => {
-      const { form: { delivery: { id: deliveryId, zone_id: zoneId }, coupon_code: couponCode } } = cartState;
+      const { form: { delivery: { id: deliveryId, zone_id: zoneId }, coupon_code: couponCode, isCouponSend } } = cartState;
 
       const formData = new FormData();
       formData.append('form[delivery][id]', deliveryId);
-      formData.append('form[coupon_code]', couponCode);
       formData.append('form[delivery][zone_id]', zoneId);
+
+      if (isCouponSend) {
+        formData.append('form[coupon_code]', couponCode);
+      }
 
 
       cartState?.cartItems?.forEach((item) =>
@@ -187,7 +191,7 @@ function useCart() {
 
       let couponData;
 
-      if (couponCode) {
+      if (isCouponSend && couponCode) {
         const { data } = await axios.post(`/order/stage/confirm`, formData, {
           responseType: 'text',
           params: {
@@ -246,7 +250,7 @@ function useClearCartItemsMutation(options) {
   return useMutation({
     mutationFn: async (itemsIdArray) => {
       const formData = new FormData();
-      formData.append('ajax_q', 1);
+      formData.append('ajax_q', 1); //TODO : add to axios params
       itemsIdArray.forEach((id) => formData.append('id[]', id));
 
       const response = await axios.post(`/cart/delete/`, formData);
@@ -333,7 +337,7 @@ function Cart() {
     form: { delivery: {
       id: deliveryId,
       zone_id: zoneId
-    }, coupon_code: couponCode }
+    }, coupon_code: couponCode, isCouponSend }
   } = cartState;
 
   const { data: quickFormData } = useQuickFormData();
@@ -370,10 +374,10 @@ function Cart() {
   const isCartItemsLength = cartItems?.length;
 
   useEffect(() => {
-    if (deliveryId || zoneId) {
+    if (deliveryId || zoneId || isCouponSend) {
       refetchCart();
     }
-  }, [deliveryId, zoneId]);
+  }, [deliveryId, zoneId, isCouponSend]);
 
   const clearCartMutation = useClearCartMutation();
 
@@ -888,17 +892,23 @@ function OrderForm() {
   };
 
   const handleCouponBtn = () => {
-    refetchCart();
+    setCartState((prev) => ({
+      ...prev, form: {
+        ...prev.form,
+        isCouponSend: true
+      }
+    }));
   };
 
   const handleResetCouponBtn = () => {
     setCartState((prev) => ({
       ...prev, form: {
         ...prev.form,
-        coupon_code: undefined
+        coupon_code: undefined,
+        isCouponSend: false
       }
     }));
-    refetchCart();
+
   };
   const { cartDiscount = [] } = cartData;
   const [cartDiscountObj] = cartDiscount;
@@ -1011,6 +1021,7 @@ function OrderForm() {
                   maxLength="50"
                   minLength="6"
                   placeholder="Придумайте пароль"
+                  onChange={handleChange}
                   required
                 />
                 {formErrors.password && (
