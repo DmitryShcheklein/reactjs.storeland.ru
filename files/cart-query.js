@@ -47,9 +47,9 @@ function useFormState(options) {
   const INITIAL_FORM_DATA = {
     form: {
       contact: {
-        person: '',
-        phone: '',
-        email: '',
+        person: undefined,
+        phone: undefined,
+        email: undefined,
       },
       delivery: {
         address_street: undefined,
@@ -75,7 +75,17 @@ function useCartState(options) {
   const query = useQuery({
     queryKey: [key],
     initialData: {
-      // 'form[coupon_code]': '123456',
+      form: {
+        delivery: {
+          id: undefined,
+          zone_id: undefined
+        }
+        ,
+        payment: {
+          id: undefined
+        },
+        coupon_code: undefined
+      }
     },
     queryFn: () => initialData,
     enabled: false,
@@ -111,11 +121,20 @@ function useQuickFormData() {
       } = data;
 
       const [firstDelivery] = data?.deliveries;
+
       setCartState((prev) => ({
         ...prev,
-        'form[delivery][id]': firstDelivery?.id,
-        'form[delivery][zone_id]': firstDelivery?.zoneList[0]?.zoneId,
-        'form[payment][id]': firstDelivery?.availablePaymentList[0]?.id,
+        form: {
+          ...prev.form,
+          delivery: {
+            id: firstDelivery?.id,
+            zone_id: firstDelivery?.zoneList[0]?.zoneId
+          },
+          payment: {
+            id: firstDelivery?.availablePaymentList[0]?.id
+          }
+        }
+
       }));
 
       setFormState((prev) => ({
@@ -143,19 +162,14 @@ function useCart() {
   return useQuery({
     queryKey: [QUERY_KEYS.Cart],
     queryFn: async () => {
+      const { form: { delivery: { id: deliveryId, zone_id: zoneId }, coupon_code: couponCode } } = cartState;
+
       const formData = new FormData();
+      formData.append('form[delivery][id]', deliveryId);
+      formData.append('form[coupon_code]', couponCode);
+      formData.append('form[delivery][zone_id]', zoneId);
 
-      formData.append('form[delivery][id]', cartState['form[delivery][id]']);
 
-      if (cartState['form[coupon_code]']) {
-        formData.append('form[coupon_code]', cartState['form[coupon_code]']);
-      }
-      if (cartState['form[delivery][zone_id]']) {
-        formData.append(
-          'form[delivery][zone_id]',
-          cartState['form[delivery][zone_id]']
-        );
-      }
       cartState?.cartItems?.forEach((item) =>
         formData.append(
           `form[quantity][${item.GOODS_MOD_ID}]`,
@@ -164,15 +178,16 @@ function useCart() {
       );
 
       const { data } = await axios.post(`/cart`, formData, {
-        // const { data } = await axios.post(`/order/stage/confirm`, formData, {
         responseType: 'text',
         params: {
           only_body: 1,
           hash: window.HASH,
         },
       });
+
       let couponData;
-      if (cartState['form[coupon_code]']) {
+
+      if (couponCode) {
         const { data } = await axios.post(`/order/stage/confirm`, formData, {
           responseType: 'text',
           params: {
@@ -200,7 +215,7 @@ function useCart() {
         }));
       }
     },
-    enabled: Boolean(cartState['form[delivery][id]']),
+    enabled: Boolean(cartState?.form?.delivery?.id),
   });
 }
 
@@ -312,11 +327,13 @@ function getCurrentMinOrderPrice(cartData = {}) {
 
 function Cart() {
   const isCartEmpty = useCheckCartEmpty();
-  const [cartState, setCartState] = useCartState();
+  const [cartState] = useCartState();
+
   const {
-    ['form[delivery][id]']: deliveryId,
-    ['form[delivery][zone_id]']: zoneId,
-    ['form[coupon_code]']: couponCode,
+    form: { delivery: {
+      id: deliveryId,
+      zone_id: zoneId
+    }, coupon_code: couponCode }
   } = cartState;
 
   const { data: quickFormData } = useQuickFormData();
@@ -415,7 +432,7 @@ function Cart() {
           </label>
 
           {deletedItemsArray?.length &&
-          !(deletedItemsArray?.length === cartItems?.length) ? (
+            !(deletedItemsArray?.length === cartItems?.length) ? (
             <button
               className="button"
               onClick={() => {
@@ -583,7 +600,7 @@ function CartItem({ item, refetchCart, checked, changeDeletedItemHandler }) {
   const handleRemoveItem = () => {
     deleteCartItemMutation.mutate(GOODS_MOD_ID);
   };
-  const handlePaste = () => {};
+  const handlePaste = () => { };
 
   if (deleteCartItemMutation.isSuccess) {
     return null;
@@ -786,12 +803,18 @@ function useFormValidation() {
 }
 function OrderForm() {
   const [cartState, setCartState] = useCartState();
+
   const {
-    ['form[delivery][id]']: deliveryId,
-    ['form[delivery][zone_id]']: zoneId,
-    ['form[payment][id]']: paymentId,
-    ['form[coupon_code]']: couponCode,
+    form: {
+      delivery: {
+        id: deliveryId,
+        zone_id: zoneId
+      },
+      payment: { id: paymentId },
+      coupon_code: couponCode
+    }
   } = cartState;
+
   const { data: cartData = {}, refetch: refetchCart } = useCart();
   const [formState, setFormState] = useFormState();
   const { data: quickFormData, isLoading: isLoadingDelivery } =
@@ -826,41 +849,39 @@ function OrderForm() {
   const handleChange = (event) => {
     const { name, value, id } = event.target;
 
+    // Разбиваем строку "form[contact][person]" на массив ключей ["form", "contact", "person"]
+    const keys = name.split(/\[|\]/).filter(Boolean);
+
+    const fieldData = keys.reduceRight((acc, key, index) => {
+      const isLast = index === keys.length - 1;
+
+      return { [key]: isLast ? value : acc };
+    }, {});
+
+    const setStateAction = (prev) => {
+      const newData = Utils.mergeWith(
+        { ...prev },
+        fieldData,
+        Utils.customizer
+      );
+
+      return newData;
+    }
+
     if (id === 'deliveryId' || id === 'deliveryZoneId' || id === 'couponCode') {
       const [firstZone] =
         deliveries?.find(({ id }) => id === value)?.zoneList || [];
 
-      setCartState((prev) => {
-        const zoneObj =
-          id === 'deliveryId' && firstZone?.zoneId
-            ? { 'form[delivery][zone_id]': firstZone.zoneId }
-            : {};
+      if (id === 'deliveryId') {
+        fieldData.form.delivery.zone_id = firstZone?.zoneId;
+      }
 
-        return {
-          ...prev,
-          ...zoneObj,
-          [name]: value,
-        };
-      });
+
+      setCartState(setStateAction);
+
     } else {
-      // Разбиваем строку "form[contact][person]" на массив ключей ["form", "contact", "person"]
-      const keys = name.split(/\[|\]/).filter(Boolean);
 
-      const fieldData = keys.reduceRight((acc, key, index) => {
-        const isLast = index === keys.length - 1;
-
-        return { [key]: isLast ? value : acc };
-      }, {});
-
-      setFormState((prev) => {
-        const newData = Utils.mergeWith(
-          { ...prev },
-          fieldData,
-          Utils.customizer
-        );
-
-        return newData;
-      });
+      setFormState(setStateAction);
     }
 
     validateElement(event.target);
@@ -869,8 +890,14 @@ function OrderForm() {
   const handleCouponBtn = () => {
     refetchCart();
   };
+
   const handleResetCouponBtn = () => {
-    setCartState((prev) => ({ ...prev, 'form[coupon_code]': undefined }));
+    setCartState((prev) => ({
+      ...prev, form: {
+        ...prev.form,
+        coupon_code: undefined
+      }
+    }));
     refetchCart();
   };
   const { cartDiscount = [] } = cartData;
@@ -1081,10 +1108,9 @@ function OrderForm() {
 
             <select
               id="paymentId"
-              onChange={handleChange}
               name="form[payment][id]"
               className="quickform__select"
-              value={paymentId}
+              defaultValue={paymentId}
             >
               {deliveries
                 .filter((el) => el.id === deliveryId)
@@ -1276,8 +1302,8 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                       <option
                         key={id}
                         value={id}
-                        // selected={id === ORDER_FORM_DELIVERY_COUNTRY_ID}
-                        //  {% IF country_list.ID=ORDER_FORM_DELIVERY_COUNTRY_ID %}selected="selected"{% ENDIF %}
+                      // selected={id === ORDER_FORM_DELIVERY_COUNTRY_ID}
+                      //  {% IF country_list.ID=ORDER_FORM_DELIVERY_COUNTRY_ID %}selected="selected"{% ENDIF %}
                       >
                         {name}
                       </option>
@@ -1525,7 +1551,7 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                             <option
                               key={HOUR_INT}
                               value={HOUR_INT}
-                              // selected={SELECTED ? 'selected' : ''}
+                            // selected={SELECTED ? 'selected' : ''}
                             >
                               {HOUR}
                             </option>
@@ -1550,7 +1576,7 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                             <option
                               key={HOUR_INT}
                               value={HOUR_INT}
-                              // selected={SELECTED ? 'selected' : ''}
+                            // selected={SELECTED ? 'selected' : ''}
                             >
                               {HOUR}
                             </option>
