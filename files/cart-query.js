@@ -253,10 +253,14 @@ function useClearCartItemsMutation(options) {
   return useMutation({
     mutationFn: async (itemsIdArray) => {
       const formData = new FormData();
-      formData.append('ajax_q', 1); //TODO : add to axios params
+
       itemsIdArray.forEach((id) => formData.append('id[]', id));
 
-      const response = await axios.post(`/cart/delete/`, formData);
+      const response = await axios.post(`/cart/delete/`, formData, {
+        params: {
+          ajax_q: 1,
+        },
+      });
 
       return response.status;
     },
