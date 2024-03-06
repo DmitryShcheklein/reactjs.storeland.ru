@@ -95,9 +95,20 @@
     {      
       "ID": "{favorites_goods.ID}",
       "MAX_PRICE_NOW_ID": "{favorites_goods.MAX_PRICE_NOW_ID}",
-      "MIN_PRICE_NOW_ID": "{favorites_goods.MIN_PRICE_NOW_ID}"
+      "MIN_PRICE_NOW_ID": {favorites_goods.MIN_PRICE_NOW_ID}
     }
   {% IFNOT favorites_goods.last %},{% ENDIF %}
+  {% ENDFOR %}
+  {% ENDIF %}
+  ],
+  "compareGoods": [  
+  {% IFNOT compare_goods_empty %}
+  {% FOR compare_goods %}
+    {      
+      "ID": "{compare_goods.ID}",
+      "MIN_PRICE_NOW_ID": {compare_goods.MIN_PRICE_NOW_ID}
+    }
+  {% IFNOT compare_goods.last %},{% ENDIF %}
   {% ENDFOR %}
   {% ENDIF %}
   ],

@@ -3183,6 +3183,30 @@ body.modal-open {overflow: hidden}
 .cart-info__cart .cart__delete-all:hover .cart__delete-all-icon .icon {fill: #6053c7}
 .cart-info__cart .cart__delete-all:hover .cart__delete-all-icon {border-color: #6053c7}
 
+#cartCompare {
+  display: flex;
+  gap: 5px;  
+  align-items: center;
+  font-size: 15px;
+  max-height: 20px;
+}
+#cartCompare .icon {
+  width: 20px;
+  height: 20px;
+  fill: #cfd5e9;
+  margin-right: 11px;
+  flex-shrink: 0;
+  margin: 0;
+}
+#cartCompare._added .icon,
+#cartCompare._added {
+  fill: #6053c7;
+  color: #6053c7;
+}
+
+#cartCompare .icon:hover {
+  color: #6053c7;
+}
 ._inCart {
   pointer-events: none;
   opacity: .5;
