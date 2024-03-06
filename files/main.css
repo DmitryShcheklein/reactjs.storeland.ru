@@ -3183,7 +3183,10 @@ body.modal-open {overflow: hidden}
 .cart-info__cart .cart__delete-all:hover .cart__delete-all-icon .icon {fill: #6053c7}
 .cart-info__cart .cart__delete-all:hover .cart__delete-all-icon {border-color: #6053c7}
 
-
+._inCart {
+  pointer-events: none;
+  opacity: .5;
+}
 /* Купон */
 .coupon {position: relative;    margin-bottom: 30px;}
 .coupon .coupon__clear {position: absolute;display: flex;align-items: center;z-index: 1;font-size: 26px;top: 0;right: 105px;height: 100%;padding: 0 10px;cursor: pointer;opacity: 0;visibility: hidden;-webkit-transition: all .3s;transition: all .3s;color: #898989;}

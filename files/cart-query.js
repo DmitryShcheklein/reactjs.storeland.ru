@@ -78,15 +78,14 @@ function useCartState(options) {
       form: {
         delivery: {
           id: undefined,
-          zone_id: undefined
-        }
-        ,
+          zone_id: undefined,
+        },
         payment: {
-          id: undefined
+          id: undefined,
         },
         coupon_code: '',
-        isCouponSend: false
-      }
+        isCouponSend: false,
+      },
     },
     queryFn: () => initialData,
     enabled: false,
@@ -129,13 +128,12 @@ function useQuickFormData() {
           ...prev.form,
           delivery: {
             id: firstDelivery?.id,
-            zone_id: firstDelivery?.zoneList[0]?.zoneId
+            zone_id: firstDelivery?.zoneList[0]?.zoneId,
           },
           payment: {
-            id: firstDelivery?.availablePaymentList[0]?.id
-          }
-        }
-
+            id: firstDelivery?.availablePaymentList[0]?.id,
+          },
+        },
       }));
 
       setFormState((prev) => ({
@@ -163,7 +161,13 @@ function useCart() {
   return useQuery({
     queryKey: [QUERY_KEYS.Cart],
     queryFn: async () => {
-      const { form: { delivery: { id: deliveryId, zone_id: zoneId }, coupon_code: couponCode, isCouponSend } } = cartState;
+      const {
+        form: {
+          delivery: { id: deliveryId, zone_id: zoneId },
+          coupon_code: couponCode,
+          isCouponSend,
+        },
+      } = cartState;
 
       const formData = new FormData();
       formData.append('form[delivery][id]', deliveryId);
@@ -172,7 +176,6 @@ function useCart() {
       if (isCouponSend) {
         formData.append('form[coupon_code]', couponCode);
       }
-
 
       cartState?.cartItems?.forEach((item) =>
         formData.append(
@@ -334,10 +337,11 @@ function Cart() {
   const [cartState] = useCartState();
 
   const {
-    form: { delivery: {
-      id: deliveryId,
-      zone_id: zoneId
-    }, coupon_code: couponCode, isCouponSend }
+    form: {
+      delivery: { id: deliveryId, zone_id: zoneId },
+      coupon_code: couponCode,
+      isCouponSend,
+    },
   } = cartState;
 
   const { data: quickFormData } = useQuickFormData();
@@ -366,9 +370,13 @@ function Cart() {
     cartDiscount = [],
     cartRelatedGoods,
     recentlyViewedGoods,
+    goodsFromCategory,
   } = cartData;
 
   const recentlyViewedGoodsFiltered = recentlyViewedGoods?.filter(
+    (item) => !item.NB_GOODS_IN_CART
+  );
+  const goodsFromCategoryFiltered = goodsFromCategory?.filter(
     (item) => !item.NB_GOODS_IN_CART
   );
   const isCartItemsLength = cartItems?.length;
@@ -436,7 +444,7 @@ function Cart() {
           </label>
 
           {deletedItemsArray?.length &&
-            !(deletedItemsArray?.length === cartItems?.length) ? (
+          !(deletedItemsArray?.length === cartItems?.length) ? (
             <button
               className="button"
               onClick={() => {
@@ -537,6 +545,15 @@ function Cart() {
       />
 
       <br />
+
+      <GoodsList
+        title="Подарки"
+        goods={goodsFromCategory}
+        refetchCart={refetchCart}
+        inCart={goodsFromCategory?.some((item) => item.NB_GOODS_IN_CART)}
+      />
+
+      <br />
     </>
   );
 }
@@ -601,7 +618,7 @@ function CartItem({ item, refetchCart, checked, changeDeletedItemHandler }) {
   const handleRemoveItem = () => {
     deleteCartItemMutation.mutate(GOODS_MOD_ID);
   };
-  const handlePaste = () => { };
+  const handlePaste = () => {};
 
   if (deleteCartItemMutation.isSuccess) {
     return null;
@@ -807,13 +824,10 @@ function OrderForm() {
 
   const {
     form: {
-      delivery: {
-        id: deliveryId,
-        zone_id: zoneId
-      },
+      delivery: { id: deliveryId, zone_id: zoneId },
       payment: { id: paymentId },
-      coupon_code: couponCode
-    }
+      coupon_code: couponCode,
+    },
   } = cartState;
 
   const { data: cartData = {}, refetch: refetchCart } = useCart();
@@ -860,14 +874,10 @@ function OrderForm() {
     }, {});
 
     const setStateAction = (prev) => {
-      const newData = Utils.mergeWith(
-        { ...prev },
-        fieldData,
-        Utils.customizer
-      );
+      const newData = Utils.mergeWith({ ...prev }, fieldData, Utils.customizer);
 
       return newData;
-    }
+    };
 
     if (id === 'deliveryId' || id === 'deliveryZoneId' || id === 'couponCode') {
       const [firstZone] =
@@ -877,11 +887,8 @@ function OrderForm() {
         fieldData.form.delivery.zone_id = firstZone?.zoneId;
       }
 
-
       setCartState(setStateAction);
-
     } else {
-
       setFormState(setStateAction);
     }
 
@@ -890,10 +897,11 @@ function OrderForm() {
 
   const handleCouponBtn = () => {
     setCartState((prev) => ({
-      ...prev, form: {
+      ...prev,
+      form: {
         ...prev.form,
-        isCouponSend: true
-      }
+        isCouponSend: true,
+      },
     }));
   };
 
@@ -903,10 +911,9 @@ function OrderForm() {
       form: {
         ...prev.form,
         coupon_code: '',
-        isCouponSend: false
-      }
+        isCouponSend: false,
+      },
     }));
-
   };
   const { cartDiscount = [] } = cartData;
   const [cartDiscountObj] = cartDiscount;
@@ -1311,8 +1318,8 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                       <option
                         key={id}
                         value={id}
-                      // selected={id === ORDER_FORM_DELIVERY_COUNTRY_ID}
-                      //  {% IF country_list.ID=ORDER_FORM_DELIVERY_COUNTRY_ID %}selected="selected"{% ENDIF %}
+                        // selected={id === ORDER_FORM_DELIVERY_COUNTRY_ID}
+                        //  {% IF country_list.ID=ORDER_FORM_DELIVERY_COUNTRY_ID %}selected="selected"{% ENDIF %}
                       >
                         {name}
                       </option>
@@ -1560,7 +1567,7 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                             <option
                               key={HOUR_INT}
                               value={HOUR_INT}
-                            // selected={SELECTED ? 'selected' : ''}
+                              // selected={SELECTED ? 'selected' : ''}
                             >
                               {HOUR}
                             </option>
@@ -1585,7 +1592,7 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                             <option
                               key={HOUR_INT}
                               value={HOUR_INT}
-                            // selected={SELECTED ? 'selected' : ''}
+                              // selected={SELECTED ? 'selected' : ''}
                             >
                               {HOUR}
                             </option>
@@ -1654,7 +1661,7 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
   );
 }
 
-function GoodsList({ refetchCart, goods, title }) {
+function GoodsList({ refetchCart, goods, title, inCart }) {
   const [collapsed, setCollapsed] = useState(true);
 
   if (!goods?.length) {
@@ -1695,6 +1702,7 @@ function GoodsList({ refetchCart, goods, title }) {
                 key={item.GOODS_MOD_ID}
                 item={item}
                 refetchCart={refetchCart}
+                inCart={inCart}
               />
             );
           })}
@@ -1704,7 +1712,7 @@ function GoodsList({ refetchCart, goods, title }) {
   );
 }
 
-function GoodItem({ item, refetchCart }) {
+function GoodItem({ item, refetchCart, inCart }) {
   const [quantity, setQuantity] = useState(1);
   const handleDecrease = () => {
     if (quantity > 1) {
@@ -1744,7 +1752,11 @@ function GoodItem({ item, refetchCart }) {
   } = item;
 
   return (
-    <li key={GOODS_MOD_ID} style={{ position: 'relative' }}>
+    <li
+      className={classNames({ ['_inCart']: inCart })}
+      key={GOODS_MOD_ID}
+      style={{ position: 'relative' }}
+    >
       <form onSubmit={onSubmitHandler}>
         <input type="hidden" name="form[goods_mod_id]" value={GOODS_MOD_ID} />
 
