@@ -337,12 +337,12 @@ function useFavoritesGoodMutation(options) {
           let newFavoritesList;
 
           if (isFavorite) {
-            newFavoritesList = prev.compareGoods.filter(
+            newFavoritesList = prev.favoritesGoods.filter(
               (el) => el.ID !== goodsId
             );
           } else {
             newFavoritesList = [
-              ...prev.compareGoods,
+              ...prev.favoritesGoods,
               {
                 ID: goodsId,
                 GOODS_MOD_ID: currentModId
