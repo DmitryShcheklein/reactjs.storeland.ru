@@ -227,12 +227,9 @@ function useCart() {
 function useClearCartMutation(options) {
   return useMutation({
     mutationFn: async () => {
-      const response = await axios.get(`/cart/truncate/`);
-      const isOk = response.status === 200;
-      if (isOk) {
-        queryClient.setQueryData([QUERY_KEYS.Cart], {});
-      }
-      return isOk;
+      await axios.get(`/cart/truncate/`);
+
+      queryClient.setQueryData([QUERY_KEYS.Cart], {});
     },
     ...options,
   });
@@ -240,9 +237,7 @@ function useClearCartMutation(options) {
 function useClearCartItemMutation(options) {
   return useMutation({
     mutationFn: async (itemId) => {
-      const response = await axios.get(`/cart/delete/${itemId}`);
-
-      return response.status;
+      await axios.get(`/cart/delete/${itemId}`);
     },
     ...options,
   });
@@ -254,13 +249,11 @@ function useClearCartItemsMutation(options) {
 
       itemsIdArray.forEach((id) => formData.append('id[]', id));
 
-      const response = await axios.post(`/cart/delete/`, formData, {
+      await axios.post(`/cart/delete/`, formData, {
         params: {
           ajax_q: 1,
         },
       });
-
-      return response.status;
     },
     ...options,
   });
