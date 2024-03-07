@@ -258,7 +258,7 @@ function useClearCartItemsMutation(options) {
     ...options,
   });
 }
-function useCompareGoodMutation(options) {
+function useCompareGoodMutation() {
   const [_, setCartState] = useCartState();
 
   return useMutation({
@@ -300,11 +300,10 @@ function useCompareGoodMutation(options) {
         });
       }
     },
-    ...options,
   });
 }
 
-function useFavoritesGoodMutation(options) {
+function useFavoritesGoodMutation() {
   const [cartState, setCartState] = useCartState();
 
   return useMutation({
@@ -351,7 +350,6 @@ function useFavoritesGoodMutation(options) {
         });
       }
     },
-    ...options,
   });
 }
 function useCreateOrderMutation() {
