@@ -120,21 +120,25 @@
     {% ENDFOR %}
     {% ENDIF %}
   ],
-  "cartDiscount": [
+  "cartDiscount": 
+  {% IFNOT cart_discount_empty %}  
   {% FOR cart_discount %}
-  {% IF cart_discount.DISCOUNT_IS_ENABLED %}
+    {% IF cart_discount.DISCOUNT_IS_ENABLED %}
     {
       "DISCOUNT_TYPE": "{cart_discount.DISCOUNT_TYPE}",
       "DISCOUNT_NAME": "{cart_discount.DISCOUNT_NAME}",
       "DISCOUNT_VALUE": {cart_discount.DISCOUNT_VALUE},
       "IS_PERCENT": {% IF cart_discount.IS_PERCENT %}1{% ELSE %}0{% ENDIF %},
       "END_PRICE": "{cart_discount.END_PRICE}",
-      "DISCOUNT_IS_ENABLED": "{cart_discount.DISCOUNT_IS_ENABLED}",
+      "DISCOUNT_IS_ENABLED": {cart_discount.DISCOUNT_IS_ENABLED},
       "DISCOUNT_TYPE_DESCRIPTION": "{cart_discount.DISCOUNT_TYPE_DESCRIPTION}"
     }
     {% ENDIF %}
   {% ENDFOR %}
-  ],
+  {% ELSE %}
+    null  
+  {% ENDIF %}
+  ,
   "FORM_NOTICE": "{% IF FORM_NOTICE %}{FORM_NOTICE}{% ENDIF %}",
   "FORM_NOTICE_STATUS": "{% IF FORM_NOTICE_IS_GOOD %}success{% ELSE %}error{% ENDIF %}",
   "cartSum": "{% FOR cart_sum %}NOW: {cart_sum.NOW};DISCOUNT:{cart_sum.DISCOUNT};NOW_WITH_DELIVERY_AND_DISCOUNT:{cart_sum.NOW_WITH_DELIVERY_AND_DISCOUNT};{% ENDFOR %}"

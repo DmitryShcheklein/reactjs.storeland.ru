@@ -462,12 +462,12 @@ function Cart() {
     CART_SUM_NOW_WITH_DELIVERY,
     SETTINGS_STORE_ORDER_MIN_ORDER_PRICE,
     SETTINGS_STORE_ORDER_MIN_PRICE_WITHOUT_DELIVERY,
-    cartDiscount = [],
+    cartDiscount,
     cartRelatedGoods,
     recentlyViewedGoods,
     goodsFromCategory,
   } = cartData;
-
+  
   const recentlyViewedGoodsFiltered = recentlyViewedGoods?.filter(
     (item) => !item.NB_GOODS_IN_CART
   );
@@ -502,7 +502,6 @@ function Cart() {
       }
     });
   };
-  const [cartDiscountObj] = cartDiscount;
 
   if (isLoadingCart) {
     return <Preloader />;
@@ -612,15 +611,15 @@ function Cart() {
             </li>
           )}
 
-          {cartDiscountObj && (
+          {cartDiscount && (
             <li>
-              <h4>{cartDiscountObj.DISCOUNT_TYPE_DESCRIPTION}</h4>
+              <h4>{cartDiscount.DISCOUNT_TYPE_DESCRIPTION}</h4>
               <ul>
                 <li>
-                  {cartDiscountObj.DISCOUNT_VALUE}{' '}
-                  {cartDiscountObj.IS_PERCENT ? '%' : 'р.'}
+                  {cartDiscount.DISCOUNT_VALUE}{' '}
+                  {cartDiscount.IS_PERCENT ? '%' : 'р.'}
                 </li>
-                <li>{cartDiscountObj.END_PRICE}</li>
+                <li>{cartDiscount.END_PRICE}</li>
               </ul>
             </li>
           )}
@@ -1086,10 +1085,9 @@ function OrderForm() {
       },
     }));
   };
-  const { cartDiscount = [] } = cartData;
-  const [cartDiscountObj] = cartDiscount;
+  const { cartDiscount } = cartData;
   const isCouponEnabled =
-    cartDiscountObj?.DISCOUNT_TYPE === 'coupon' && isCouponSend;
+    cartDiscount?.DISCOUNT_TYPE === 'coupon' && isCouponSend;
   const isMinOrderPrice = Boolean(getCurrentMinOrderPrice(cartData));
 
   const isCartEmpty = useCheckCartEmpty();
@@ -1238,7 +1236,7 @@ function OrderForm() {
               <button
                 type="button"
                 className={classNames('coupon__clear', {
-                  [' _active']: isCouponEnabled,
+                  [' _active']: couponCode,
                 })}
                 title="Очистить купон"
                 onClick={handleResetCouponBtn}
