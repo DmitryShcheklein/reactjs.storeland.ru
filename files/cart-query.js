@@ -183,27 +183,33 @@ function useCart() {
         )
       );
 
-      const { data } = await axios.post(`/cart`, formData, {
+      const { data: cartPageDataString } = await axios.post(`/cart`, formData, {
         responseType: 'text',
         params: {
           only_body: 1,
           hash: window.HASH,
         },
       });
+      const cartPageData = JSON.parse(cartPageDataString);
 
-      let couponData;
-
+      let orderStepsPageData;
       if (isCouponSend && couponCode) {
-        const { data } = await axios.post(`/order/stage/confirm`, formData, {
-          responseType: 'text',
-          params: {
-            only_body: 1,
-            ajax_q: 1,
-          },
-        });
-        couponData = data;
+        const { cartRelatedGoods } = cartPageData;
+        const { data: stepsOrderDataString } = await axios.post(
+          `/order/stage/confirm`,
+          formData,
+          {
+            responseType: 'text',
+            params: {
+              only_body: 1,
+              ajax_q: 1,
+            },
+          }
+        );
+        orderStepsPageData = JSON.parse(stepsOrderDataString);
+        orderStepsPageData.cartRelatedGoods = cartRelatedGoods; // BUG: в пошаговом заказе нет массива сопутствующих
       }
-      const cardData = JSON.parse(couponData || data);
+      const cardData = orderStepsPageData || cartPageData;
 
       return cardData;
     },
@@ -992,6 +998,7 @@ function OrderForm() {
       delivery: { id: deliveryId, zone_id: zoneId },
       payment: { id: paymentId },
       coupon_code: couponCode,
+      isCouponSend,
     },
   } = cartState;
 
@@ -1081,7 +1088,8 @@ function OrderForm() {
   };
   const { cartDiscount = [] } = cartData;
   const [cartDiscountObj] = cartDiscount;
-  const isCouponEnabled = cartDiscountObj?.DISCOUNT_TYPE === 'coupon';
+  const isCouponEnabled =
+    cartDiscountObj?.DISCOUNT_TYPE === 'coupon' && isCouponSend;
   const isMinOrderPrice = Boolean(getCurrentMinOrderPrice(cartData));
 
   const isCartEmpty = useCheckCartEmpty();
