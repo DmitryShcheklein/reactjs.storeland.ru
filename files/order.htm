@@ -73,17 +73,53 @@
   {% ENDFOR %}
   {% ENDIF %}
   ],
+  "goodsFromCategory": [  
+  {% IFNOT goods_from_category_6037761_empty %}
+  {% FOR goods_from_category_6037761 %}    
+    {
+      "ID": "{goods_from_category_6037761.ID}",
+      "NB_GOODS_IN_CART": {goods_from_category_6037761.NB_GOODS_IN_CART},
+      "GOODS_NAME": "{goods_from_category_6037761.NAME}",
+      "GOODS_MOD_ID": "{goods_from_category_6037761.MIN_PRICE_NOW_ID}",
+      "ORDER_LINE_QUANTITY": 1,
+      "MIN_PRICE_NOW_WITHOUT_DISCOUNT": {goods_from_category_6037761.MIN_PRICE_NOW_WITHOUT_DISCOUNT},
+      "GOODS_IMAGE": "{% IF goods_from_category_6037761.IMAGE_EMPTY %}{ASSETS_IMAGES_PATH}no-photo-icon.png?design=conditer{% ELSE %}{goods_from_category_6037761.IMAGE_MEDIUM}{% ENDIF %}"
+    }    
+    {% IFNOT goods_from_category_6037761.last %},{% ENDIF %}
+  {% ENDFOR %}
+  {% ENDIF %}
+  ],
   "favoritesGoods": [  
   {% IFNOT favorites_goods_empty %}
   {% FOR favorites_goods %}
     {      
       "ID": "{favorites_goods.ID}",
       "MAX_PRICE_NOW_ID": "{favorites_goods.MAX_PRICE_NOW_ID}",
-      "MIN_PRICE_NOW_ID": "{favorites_goods.MIN_PRICE_NOW_ID}"
+      "MIN_PRICE_NOW_ID": {favorites_goods.MIN_PRICE_NOW_ID}
     }
   {% IFNOT favorites_goods.last %},{% ENDIF %}
   {% ENDFOR %}
   {% ENDIF %}
+  ],
+  "compareGoods": [  
+  {% IFNOT compare_goods_empty %}
+  {% FOR compare_goods %}
+    {      
+      "ID": "{compare_goods.ID}"
+    }
+  {% IFNOT compare_goods.last %},{% ENDIF %}
+  {% ENDFOR %}
+  {% ENDIF %}
+  ],
+  "goodsModInfo": [
+    {% IFNOT goods_mod_info_empty %}
+    {% FOR goods_mod_info %}
+      {      
+        "GOODS_MOD_ID": {goods_mod_info.GOODS_MOD_ID}
+      }
+    {% IFNOT goods_mod_info.last %},{% ENDIF %}
+    {% ENDFOR %}
+    {% ENDIF %}
   ],
   "cartDiscount": [
   {% FOR cart_discount %}
