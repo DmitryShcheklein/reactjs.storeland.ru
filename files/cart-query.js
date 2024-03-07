@@ -209,18 +209,16 @@ function useCart() {
       return cardData;
     },
     onSuccess(data = {}) {
-      const { cartItems } = data;
-      if (cartItems) {
-        setCartState((prev) => ({
-          ...prev,
-          cartItems: cartItems?.map(
-            ({ GOODS_MOD_ID, ORDER_LINE_QUANTITY }) => ({
-              GOODS_MOD_ID,
-              ORDER_LINE_QUANTITY,
-            })
-          ),
-        }));
-      }
+      const { cartItems, goodsModInfo } = data;
+
+      setCartState((prev) => ({
+        ...prev,
+        cartItems: cartItems?.map(({ GOODS_MOD_ID, ORDER_LINE_QUANTITY }) => ({
+          GOODS_MOD_ID,
+          ORDER_LINE_QUANTITY,
+        })),
+        compareGoods: goodsModInfo,
+      }));
     },
     enabled: Boolean(cartState?.form?.delivery?.id),
   });
@@ -267,7 +265,51 @@ function useClearCartItemsMutation(options) {
     ...options,
   });
 }
+function useCompareGoodMutation(options) {
+  const [_, setCartState] = useCartState();
 
+  return useMutation({
+    mutationFn: async ({ goodsModId, isInCompare }) => {
+      const { data } = await axios.post(
+        `/compare/${isInCompare ? 'delete' : 'add'}/`,
+        {},
+        {
+          params: {
+            id: goodsModId,
+            ajax_q: 1,
+          },
+        }
+      );
+
+      const isOk = data.status === 'ok';
+
+      if (isOk) {
+        setCartState((prev) => {
+          let newCompareList;
+
+          if (isInCompare) {
+            newCompareList = prev.compareGoods.filter(
+              (el) => el.GOODS_MOD_ID !== goodsModId
+            );
+          } else {
+            newCompareList = [
+              ...prev.compareGoods,
+              {
+                GOODS_MOD_ID: goodsModId
+              },
+            ];
+          }
+
+          return {
+            ...prev,
+            compareGoods: newCompareList,
+          };
+        });
+      }
+    },
+    ...options,
+  });
+}
 function useCreateOrderMutation() {
   return useMutation({
     mutationFn: async (form) => {
@@ -448,7 +490,7 @@ function Cart() {
           </label>
 
           {deletedItemsArray?.length &&
-          !(deletedItemsArray?.length === cartItems?.length) ? (
+            !(deletedItemsArray?.length === cartItems?.length) ? (
             <button
               className="button"
               onClick={() => {
@@ -474,7 +516,15 @@ function Cart() {
         </div>
 
         <form id="card">
-          <ul style={{ listStyle: 'none' }}>
+          <ul
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 10,
+              listStyle: 'none',
+              padding: 0
+            }}
+          >
             {cartItems?.map((item) => (
               <CartItem
                 item={item}
@@ -482,12 +532,19 @@ function Cart() {
                 refetchCart={refetchCart}
                 checked={deletedItemsArray.includes(item.GOODS_MOD_ID)}
                 changeDeletedItemHandler={changeDeletedItemHandler}
+                isLogin={quickFormData.CLIENT_IS_LOGIN}
               />
             ))}
           </ul>
         </form>
 
-        <ul>
+        <ul style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 10,
+          listStyle: 'none',
+          padding: 0
+        }}>
           <li>Товаров: {CART_COUNT_TOTAL} шт.</li>
           <li>Сумма товаров: {CART_SUM_NOW}</li>
           <li>
@@ -562,8 +619,15 @@ function Cart() {
   );
 }
 
-function CartItem({ item, refetchCart, checked, changeDeletedItemHandler }) {
+function CartItem({
+  item,
+  refetchCart,
+  checked,
+  changeDeletedItemHandler,
+  isLogin,
+}) {
   const [cartState, setCartState] = useCartState();
+  const { compareGoods } = cartState;
   const {
     GOODS_ID,
     GOODS_MOD_ID,
@@ -575,6 +639,9 @@ function CartItem({ item, refetchCart, checked, changeDeletedItemHandler }) {
     GOODS_MOD_ART_NUMBER,
     distinctiveProperties,
   } = item;
+
+  const isInCompare = Boolean(compareGoods?.find((el) => el.GOODS_MOD_ID === GOODS_MOD_ID));
+  const compareGoodMutation = useCompareGoodMutation();
   const deleteCartItemMutation = useClearCartItemMutation({
     onSuccess: () => {
       refetchCart();
@@ -622,7 +689,7 @@ function CartItem({ item, refetchCart, checked, changeDeletedItemHandler }) {
   const handleRemoveItem = () => {
     deleteCartItemMutation.mutate(GOODS_MOD_ID);
   };
-  const handlePaste = () => {};
+  const handlePaste = () => { };
 
   if (deleteCartItemMutation.isSuccess) {
     return null;
@@ -635,7 +702,7 @@ function CartItem({ item, refetchCart, checked, changeDeletedItemHandler }) {
       data-mod-id={GOODS_MOD_ID}
     >
       {deleteCartItemMutation.isLoading && <Preloader />}
-      <div style={{ display: 'flex', gap: 20 }}>
+      <div className="cart__good">
         <div>
           <input
             type="checkbox"
@@ -683,11 +750,40 @@ function CartItem({ item, refetchCart, checked, changeDeletedItemHandler }) {
             <strong>Цена:{ORDER_LINE_PRICE_NOW / ORDER_LINE_QUANTITY}</strong>{' '}
             {/* BUG: бек отдаёт неверную цену товара при скидке по сумме заказа */}
           </div>
+          <div style={{ display: 'flex', gap: 10, marginTop: 5 }}>
+            <button
+              id="cartCompare"
+              className={classNames({
+                ['_added']: isInCompare,
+              })}
+              type="button"
+              onClick={() => {
+                compareGoodMutation.mutate({
+                  goodsModId: GOODS_MOD_ID,
+                  isInCompare,
+                });
+              }}
+            >
+              <svg className="icon _compare">
+                <use xlinkHref="/design/sprite.svg#compare"></use>
+              </svg>
+              <span>{isInCompare ? 'В сравнении' : 'Сравнить'}</span>
+            </button>
+            {Boolean(isLogin) && (
+              <button id="cartCompare" type="button">
+                <svg className="icon _compare">
+                  <use xlinkHref="/design/sprite.svg#favorites"></use>
+                </svg>
+                <span>В избранное</span>
+              </button>
+            )}
+          </div>
         </div>
-        <div>
+        <div style={{ display: 'flex', gap: 20 }}>
           <a href={GOODS_URL}>
             <img width="80" src={GOODS_IMAGE} />
           </a>
+
           <div className="qty">
             <div className="qty__wrap">
               <button
@@ -1322,8 +1418,8 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                       <option
                         key={id}
                         value={id}
-                        // selected={id === ORDER_FORM_DELIVERY_COUNTRY_ID}
-                        //  {% IF country_list.ID=ORDER_FORM_DELIVERY_COUNTRY_ID %}selected="selected"{% ENDIF %}
+                      // selected={id === ORDER_FORM_DELIVERY_COUNTRY_ID}
+                      //  {% IF country_list.ID=ORDER_FORM_DELIVERY_COUNTRY_ID %}selected="selected"{% ENDIF %}
                       >
                         {name}
                       </option>
@@ -1571,7 +1667,7 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                             <option
                               key={HOUR_INT}
                               value={HOUR_INT}
-                              // selected={SELECTED ? 'selected' : ''}
+                            // selected={SELECTED ? 'selected' : ''}
                             >
                               {HOUR}
                             </option>
@@ -1596,7 +1692,7 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                             <option
                               key={HOUR_INT}
                               value={HOUR_INT}
-                              // selected={SELECTED ? 'selected' : ''}
+                            // selected={SELECTED ? 'selected' : ''}
                             >
                               {HOUR}
                             </option>
