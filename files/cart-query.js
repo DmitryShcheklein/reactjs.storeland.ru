@@ -209,7 +209,7 @@ function useCart() {
       return cardData;
     },
     onSuccess(data = {}) {
-      const { cartItems, compareGoods } = data;
+      const { cartItems, goodsModInfo } = data;
 
       setCartState((prev) => ({
         ...prev,
@@ -217,7 +217,7 @@ function useCart() {
           GOODS_MOD_ID,
           ORDER_LINE_QUANTITY,
         })),
-        compareGoods,
+        compareGoods: goodsModInfo,
       }));
     },
     enabled: Boolean(cartState?.form?.delivery?.id),
@@ -266,20 +266,16 @@ function useClearCartItemsMutation(options) {
   });
 }
 function useCompareGoodMutation(options) {
-  const [cartState, setCartState] = useCartState();
+  const [_, setCartState] = useCartState();
 
   return useMutation({
-    mutationFn: async ({ goodsId, isInCompare }) => {
-      const currentGoodModId = cartState.compareGoods.find(
-        (el) => el.ID === goodsId
-      )?.MIN_PRICE_NOW_ID;
-
+    mutationFn: async ({ goodsModId, isInCompare }) => {
       const { data } = await axios.post(
         `/compare/${isInCompare ? 'delete' : 'add'}/`,
         {},
         {
           params: {
-            id: currentGoodModId,
+            id: goodsModId,
             ajax_q: 1,
           },
         }
@@ -293,14 +289,13 @@ function useCompareGoodMutation(options) {
 
           if (isInCompare) {
             newCompareList = prev.compareGoods.filter(
-              (el) => el.ID !== goodsId
+              (el) => el.GOODS_MOD_ID !== goodsModId
             );
           } else {
             newCompareList = [
               ...prev.compareGoods,
               {
-                ID: goodsId,
-                MIN_PRICE_NOW_ID: currentGoodModId,
+                GOODS_MOD_ID: goodsModId
               },
             ];
           }
@@ -638,8 +633,7 @@ function CartItem({
     distinctiveProperties,
   } = item;
 
-  const isInCompare = Boolean(compareGoods?.find((el) => el.ID === GOODS_ID));
-
+  const isInCompare = Boolean(compareGoods?.find((el) => el.GOODS_MOD_ID === GOODS_MOD_ID));
   const compareGoodMutation = useCompareGoodMutation();
   const deleteCartItemMutation = useClearCartItemMutation({
     onSuccess: () => {
@@ -758,7 +752,7 @@ function CartItem({
               type="button"
               onClick={() => {
                 compareGoodMutation.mutate({
-                  goodsId: GOODS_ID,
+                  goodsModId: GOODS_MOD_ID,
                   isInCompare,
                 });
               }}

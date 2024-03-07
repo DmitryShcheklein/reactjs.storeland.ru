@@ -105,12 +105,21 @@
   {% IFNOT compare_goods_empty %}
   {% FOR compare_goods %}
     {      
-      "ID": "{compare_goods.ID}",
-      "MIN_PRICE_NOW_ID": {compare_goods.MIN_PRICE_NOW_ID}
+      "ID": "{compare_goods.ID}"
     }
   {% IFNOT compare_goods.last %},{% ENDIF %}
   {% ENDFOR %}
   {% ENDIF %}
+  ],
+  "goodsModInfo": [
+    {% IFNOT goods_mod_info_empty %}
+    {% FOR goods_mod_info %}
+      {      
+        "GOODS_MOD_ID": {goods_mod_info.GOODS_MOD_ID}
+      }
+    {% IFNOT goods_mod_info.last %},{% ENDIF %}
+    {% ENDFOR %}
+    {% ENDIF %}
   ],
   "cartDiscount": [
   {% FOR cart_discount %}
