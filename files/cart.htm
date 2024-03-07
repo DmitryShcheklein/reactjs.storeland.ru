@@ -18,7 +18,7 @@
   "cartItems": [
   {% FOR cart_items %}
     {
-      "GOODS_ID": "{cart_items.GOODS_ID}",
+      "GOODS_ID": {cart_items.GOODS_ID},
       "GOODS_NAME": "{cart_items.GOODS_NAME}",
       "GOODS_MOD_ID": {cart_items.GOODS_MOD_ID},
       "ORDER_LINE_QUANTITY": {cart_items.ORDER_LINE_QUANTITY},
@@ -93,9 +93,8 @@
   {% IFNOT favorites_goods_empty %}
   {% FOR favorites_goods %}
     {      
-      "ID": "{favorites_goods.ID}",
-      "MAX_PRICE_NOW_ID": "{favorites_goods.MAX_PRICE_NOW_ID}",
-      "MIN_PRICE_NOW_ID": {favorites_goods.MIN_PRICE_NOW_ID}
+      "ID": {favorites_goods.ID},      
+      "GOODS_MOD_ID": {favorites_goods.MIN_PRICE_NOW_ID}
     }
   {% IFNOT favorites_goods.last %},{% ENDIF %}
   {% ENDFOR %}

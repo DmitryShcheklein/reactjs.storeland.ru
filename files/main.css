@@ -3189,6 +3189,7 @@ body.modal-open {overflow: hidden}
 .cart-info__cart .cart__delete-all:hover .cart__delete-all-icon .icon {fill: #6053c7}
 .cart-info__cart .cart__delete-all:hover .cart__delete-all-icon {border-color: #6053c7}
 
+#favoritesCompare,
 #cartCompare {
   display: flex;
   gap: 5px;  
@@ -3196,6 +3197,7 @@ body.modal-open {overflow: hidden}
   font-size: 15px;
   max-height: 20px;
 }
+#favoritesCompare .icon ,
 #cartCompare .icon {
   width: 20px;
   height: 20px;
@@ -3204,12 +3206,15 @@ body.modal-open {overflow: hidden}
   flex-shrink: 0;
   margin: 0;
 }
+#favoritesCompare._added .icon,
+#favoritesCompare._added ,
 #cartCompare._added .icon,
 #cartCompare._added {
   fill: #6053c7;
   color: #6053c7;
 }
 
+#favoritesCompare .icon:hover ,
 #cartCompare .icon:hover {
   color: #6053c7;
 }

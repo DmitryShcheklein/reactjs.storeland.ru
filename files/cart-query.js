@@ -209,7 +209,7 @@ function useCart() {
       return cardData;
     },
     onSuccess(data = {}) {
-      const { cartItems, goodsModInfo } = data;
+      const { cartItems, goodsModInfo, favoritesGoods } = data;
 
       setCartState((prev) => ({
         ...prev,
@@ -218,6 +218,7 @@ function useCart() {
           ORDER_LINE_QUANTITY,
         })),
         compareGoods: goodsModInfo,
+        favoritesGoods
       }));
     },
     enabled: Boolean(cartState?.form?.delivery?.id),
@@ -271,7 +272,7 @@ function useCompareGoodMutation(options) {
   return useMutation({
     mutationFn: async ({ goodsModId, isInCompare }) => {
       const { data } = await axios.post(
-        `/compare/${isInCompare ? 'delete' : 'add'}/`,
+        `/compare/${isInCompare ? 'delete' : 'add'}`,
         {},
         {
           params: {
@@ -303,6 +304,55 @@ function useCompareGoodMutation(options) {
           return {
             ...prev,
             compareGoods: newCompareList,
+          };
+        });
+      }
+    },
+    ...options,
+  });
+}
+
+function useFavoritesGoodMutation(options) {
+  const [cartState, setCartState] = useCartState();
+
+  return useMutation({
+    mutationFn: async ({ goodsId, goodsModId, isFavorite }) => {
+      const { favoritesGoods } = cartState;
+      const currentModId = favoritesGoods.find(el => el.ID === goodsId)?.GOODS_MOD_ID || goodsModId
+      const { data } = await axios.post(
+        `/favorites/${isFavorite ? 'delete' : 'add'}`,
+        {},
+        {
+          params: {
+            id: currentModId,
+            ajax_q: 1,
+          },
+        }
+      );
+
+      const isOk = data.status === 'ok';
+
+      if (isOk) {
+        setCartState((prev) => {
+          let newFavoritesList;
+
+          if (isFavorite) {
+            newFavoritesList = prev.compareGoods.filter(
+              (el) => el.ID !== goodsId
+            );
+          } else {
+            newFavoritesList = [
+              ...prev.compareGoods,
+              {
+                ID: goodsId,
+                GOODS_MOD_ID: currentModId
+              },
+            ];
+          }
+
+          return {
+            ...prev,
+            favoritesGoods: newFavoritesList,
           };
         });
       }
@@ -627,7 +677,7 @@ function CartItem({
   isLogin,
 }) {
   const [cartState, setCartState] = useCartState();
-  const { compareGoods } = cartState;
+  const { compareGoods, favoritesGoods } = cartState;
   const {
     GOODS_ID,
     GOODS_MOD_ID,
@@ -639,6 +689,8 @@ function CartItem({
     GOODS_MOD_ART_NUMBER,
     distinctiveProperties,
   } = item;
+  const favoritesGoodMutation = useFavoritesGoodMutation()
+  const isFavorite = Boolean(favoritesGoods?.find((el) => el.ID === GOODS_ID));
 
   const isInCompare = Boolean(compareGoods?.find((el) => el.GOODS_MOD_ID === GOODS_MOD_ID));
   const compareGoodMutation = useCompareGoodMutation();
@@ -769,14 +821,24 @@ function CartItem({
               </svg>
               <span>{isInCompare ? 'В сравнении' : 'Сравнить'}</span>
             </button>
-            {Boolean(isLogin) && (
-              <button id="cartCompare" type="button">
+            {isLogin ? (
+              <button id="favoritesCompare" type="button"
+                className={classNames({
+                  ['_added']: isFavorite,
+                })}
+                onClick={() => {
+                  favoritesGoodMutation.mutate({
+                    goodsId: GOODS_ID,
+                    goodsModId: GOODS_MOD_ID,
+                    isFavorite
+                  })
+                }}>
                 <svg className="icon _compare">
                   <use xlinkHref="/design/sprite.svg#favorites"></use>
                 </svg>
-                <span>В избранное</span>
+                <span>{isFavorite ? 'В избранном' : 'В избранное'}</span>
               </button>
-            )}
+            ) : null}
           </div>
         </div>
         <div style={{ display: 'flex', gap: 20 }}>
