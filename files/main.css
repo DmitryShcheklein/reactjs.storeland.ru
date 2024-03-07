@@ -2910,6 +2910,12 @@ body.modal-open {overflow: hidden}
   .cart-tab:last-child {margin-bottom: 0;}
 }
 /*** Корзина ***/
+.cart__good {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
 .empty-cart{
   margin:  0 auto;
   padding: 30px;
