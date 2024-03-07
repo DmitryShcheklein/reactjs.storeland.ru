@@ -43,7 +43,7 @@ function App() {
   );
 }
 
-function useFormState(options) {
+function useFormState() {
   const INITIAL_FORM_DATA = {
     form: {
       contact: {
@@ -64,32 +64,31 @@ function useFormState(options) {
     initialData: INITIAL_FORM_DATA,
     queryFn: () => initialData,
     enabled: false,
-    ...options,
   });
 
   return [query.data, (value) => queryClient.setQueryData([key], value)];
 }
 
-function useCartState(options) {
+function useCartState() {
+  const INITIAL_FORM_DATA = {
+    form: {
+      delivery: {
+        id: undefined,
+        zone_id: undefined,
+      },
+      payment: {
+        id: undefined,
+      },
+      coupon_code: '',
+      isCouponSend: false,
+    },
+  };
   const key = QUERY_KEYS.CartState;
   const query = useQuery({
     queryKey: [key],
-    initialData: {
-      form: {
-        delivery: {
-          id: undefined,
-          zone_id: undefined,
-        },
-        payment: {
-          id: undefined,
-        },
-        coupon_code: '',
-        isCouponSend: false,
-      },
-    },
+    initialData: INITIAL_FORM_DATA,
     queryFn: () => initialData,
     enabled: false,
-    ...options,
   });
 
   return [query.data, (value) => queryClient.setQueryData([key], value)];
