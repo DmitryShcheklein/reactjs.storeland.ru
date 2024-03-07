@@ -218,7 +218,7 @@ function useCart() {
           ORDER_LINE_QUANTITY,
         })),
         compareGoods: goodsModInfo,
-        favoritesGoods
+        favoritesGoods,
       }));
     },
     enabled: Boolean(cartState?.form?.delivery?.id),
@@ -296,7 +296,7 @@ function useCompareGoodMutation(options) {
             newCompareList = [
               ...prev.compareGoods,
               {
-                GOODS_MOD_ID: goodsModId
+                GOODS_MOD_ID: goodsModId,
               },
             ];
           }
@@ -318,7 +318,9 @@ function useFavoritesGoodMutation(options) {
   return useMutation({
     mutationFn: async ({ goodsId, goodsModId, isFavorite }) => {
       const { favoritesGoods } = cartState;
-      const currentModId = favoritesGoods.find(el => el.ID === goodsId)?.GOODS_MOD_ID || goodsModId
+      const currentModId =
+        favoritesGoods.find((el) => el.ID === goodsId)?.GOODS_MOD_ID ||
+        goodsModId;
       const { data } = await axios.post(
         `/favorites/${isFavorite ? 'delete' : 'add'}`,
         {},
@@ -345,7 +347,7 @@ function useFavoritesGoodMutation(options) {
               ...prev.favoritesGoods,
               {
                 ID: goodsId,
-                GOODS_MOD_ID: currentModId
+                GOODS_MOD_ID: currentModId,
               },
             ];
           }
@@ -448,6 +450,7 @@ function Cart() {
     isSuccess: isSuccessCart,
     isLoading: isLoadingCart,
     isFetching: isFetchingCart,
+    isFetched: isFetchedCart,
   } = useCart();
 
   const {
@@ -505,7 +508,10 @@ function Cart() {
   };
   const [cartDiscountObj] = cartDiscount;
 
-  if (isCartEmpty) {
+  if (isLoadingCart) {
+    return <Preloader />;
+  }
+  if (isCartEmpty || !isFetchedCart) {
     return null;
   }
 
@@ -540,7 +546,7 @@ function Cart() {
           </label>
 
           {deletedItemsArray?.length &&
-            !(deletedItemsArray?.length === cartItems?.length) ? (
+          !(deletedItemsArray?.length === cartItems?.length) ? (
             <button
               className="button"
               onClick={() => {
@@ -572,7 +578,7 @@ function Cart() {
               flexDirection: 'column',
               gap: 10,
               listStyle: 'none',
-              padding: 0
+              padding: 0,
             }}
           >
             {cartItems?.map((item) => (
@@ -588,13 +594,15 @@ function Cart() {
           </ul>
         </form>
 
-        <ul style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 10,
-          listStyle: 'none',
-          padding: 0
-        }}>
+        <ul
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 10,
+            listStyle: 'none',
+            padding: 0,
+          }}
+        >
           <li>Товаров: {CART_COUNT_TOTAL} шт.</li>
           <li>Сумма товаров: {CART_SUM_NOW}</li>
           <li>
@@ -689,10 +697,12 @@ function CartItem({
     GOODS_MOD_ART_NUMBER,
     distinctiveProperties,
   } = item;
-  const favoritesGoodMutation = useFavoritesGoodMutation()
+  const favoritesGoodMutation = useFavoritesGoodMutation();
   const isFavorite = Boolean(favoritesGoods?.find((el) => el.ID === GOODS_ID));
 
-  const isInCompare = Boolean(compareGoods?.find((el) => el.GOODS_MOD_ID === GOODS_MOD_ID));
+  const isInCompare = Boolean(
+    compareGoods?.find((el) => el.GOODS_MOD_ID === GOODS_MOD_ID)
+  );
   const compareGoodMutation = useCompareGoodMutation();
   const deleteCartItemMutation = useClearCartItemMutation({
     onSuccess: () => {
@@ -741,7 +751,7 @@ function CartItem({
   const handleRemoveItem = () => {
     deleteCartItemMutation.mutate(GOODS_MOD_ID);
   };
-  const handlePaste = () => { };
+  const handlePaste = () => {};
 
   if (deleteCartItemMutation.isSuccess) {
     return null;
@@ -822,7 +832,9 @@ function CartItem({
               <span>{isInCompare ? 'В сравнении' : 'Сравнить'}</span>
             </button>
             {isLogin ? (
-              <button id="favoritesCompare" type="button"
+              <button
+                id="favoritesCompare"
+                type="button"
                 className={classNames({
                   ['_added']: isFavorite,
                 })}
@@ -830,9 +842,10 @@ function CartItem({
                   favoritesGoodMutation.mutate({
                     goodsId: GOODS_ID,
                     goodsModId: GOODS_MOD_ID,
-                    isFavorite
-                  })
-                }}>
+                    isFavorite,
+                  });
+                }}
+              >
                 <svg className="icon _compare">
                   <use xlinkHref="/design/sprite.svg#favorites"></use>
                 </svg>
@@ -992,10 +1005,9 @@ function OrderForm() {
     },
   } = cartState;
 
-  const { data: cartData = {}, refetch: refetchCart } = useCart();
+  const { data: cartData = {}, isFetched: isFetchedCart } = useCart();
   const [formState, setFormState] = useFormState();
-  const { data: quickFormData, isLoading: isLoadingDelivery } =
-    useQuickFormData();
+  const { data: quickFormData } = useQuickFormData();
   const { deliveries, CLIENT_IS_LOGIN, ORDER_DISCOUNT_COUPON_IS_ENABLED } =
     quickFormData;
   const createOrderMutation = useCreateOrderMutation();
@@ -1080,16 +1092,12 @@ function OrderForm() {
   const { cartDiscount = [] } = cartData;
   const [cartDiscountObj] = cartDiscount;
   const isCouponEnabled = cartDiscountObj?.DISCOUNT_TYPE === 'coupon';
-
   const isMinOrderPrice = Boolean(getCurrentMinOrderPrice(cartData));
+
   const isCartEmpty = useCheckCartEmpty();
 
-  if (isCartEmpty) {
+  if (isCartEmpty || !isFetchedCart) {
     return null;
-  }
-
-  if (isLoadingDelivery) {
-    return <div>Загружаю варианты доставки...</div>;
   }
 
   return (
@@ -1366,10 +1374,10 @@ function Preloader() {
   );
 }
 function useCheckCartEmpty() {
-  const { data: cartData, isSuccess, isFetching } = useCart();
+  const { data: cartData, isFetched } = useCart();
   const isCartEmpty =
-    window.CART_IS_EMPTY || (!cartData?.CART_COUNT_TOTAL && isSuccess);
-  // console.log('isCartEmpty', isCartEmpty);
+    window.CART_IS_EMPTY || (!cartData?.CART_COUNT_TOTAL && isFetched);
+
   return isCartEmpty;
 }
 function EmptyCart() {
@@ -1480,8 +1488,8 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                       <option
                         key={id}
                         value={id}
-                      // selected={id === ORDER_FORM_DELIVERY_COUNTRY_ID}
-                      //  {% IF country_list.ID=ORDER_FORM_DELIVERY_COUNTRY_ID %}selected="selected"{% ENDIF %}
+                        // selected={id === ORDER_FORM_DELIVERY_COUNTRY_ID}
+                        //  {% IF country_list.ID=ORDER_FORM_DELIVERY_COUNTRY_ID %}selected="selected"{% ENDIF %}
                       >
                         {name}
                       </option>
@@ -1729,7 +1737,7 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                             <option
                               key={HOUR_INT}
                               value={HOUR_INT}
-                            // selected={SELECTED ? 'selected' : ''}
+                              // selected={SELECTED ? 'selected' : ''}
                             >
                               {HOUR}
                             </option>
@@ -1754,7 +1762,7 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                             <option
                               key={HOUR_INT}
                               value={HOUR_INT}
-                            // selected={SELECTED ? 'selected' : ''}
+                              // selected={SELECTED ? 'selected' : ''}
                             >
                               {HOUR}
                             </option>
