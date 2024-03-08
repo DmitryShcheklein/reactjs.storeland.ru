@@ -611,7 +611,7 @@ function Cart() {
             </li>
           )}
 
-          {cartDiscount && (
+          {cartDiscount.DISCOUNT_VALUE && (
             <li>
               <h4>{cartDiscount.DISCOUNT_TYPE_DESCRIPTION}</h4>
               <ul>
