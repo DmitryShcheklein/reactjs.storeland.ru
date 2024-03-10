@@ -475,16 +475,12 @@ function Cart() {
     cartDiscount,
     cartRelatedGoods,
     recentlyViewedGoods,
-    goodsFromCategory,
+    goodsFromCategory6037761,
   } = cartData;
 
   const recentlyViewedGoodsFiltered = recentlyViewedGoods?.filter(
     (item) => !item.NB_GOODS_IN_CART
   );
-  const goodsFromCategoryFiltered = goodsFromCategory?.filter(
-    (item) => !item.NB_GOODS_IN_CART
-  );
-  const isCartItemsLength = cartItems?.length;
 
   useEffect(() => {
     if (deliveryId || zoneId || isCouponSend) {
@@ -672,9 +668,9 @@ function Cart() {
 
       <GoodsList
         title="Подарки"
-        goods={goodsFromCategory}
+        goods={goodsFromCategory6037761}
         refetchCart={refetchCart}
-        inCart={goodsFromCategory?.some((item) => item.NB_GOODS_IN_CART)}
+        inCart={goodsFromCategory6037761?.some((item) => item.NB_GOODS_IN_CART)}
       />
 
       <br />
