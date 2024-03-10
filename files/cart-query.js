@@ -219,10 +219,15 @@ function useCart() {
       return cardData;
     },
     onSuccess(data = {}) {
-      const { cartItems, goodsModInfo, favoritesGoods } = data;
+      const { cartItems, goodsModInfo, favoritesGoods, cartDiscount } = data;
+      const isCouponEnabled = cartDiscount?.DISCOUNT_TYPE === 'coupon';
 
       setCartState((prev) => ({
         ...prev,
+        form: {
+          ...prev.form,
+          isCouponSend: isCouponEnabled,
+        },
         cartItems: cartItems?.map(({ GOODS_MOD_ID, ORDER_LINE_QUANTITY }) => ({
           GOODS_MOD_ID,
           ORDER_LINE_QUANTITY,
