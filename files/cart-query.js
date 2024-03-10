@@ -695,7 +695,7 @@ function CartItem({
     GOODS_DONT_PUT_MORE_THAN_AVAILABLE,
     distinctiveProperties,
   } = item;
-  console.log(GOODS_MOD_REST_VALUE, GOODS_DONT_PUT_MORE_THAN_AVAILABLE);
+  
   const favoritesGoodMutation = useFavoritesGoodMutation();
   const isFavorite = Boolean(favoritesGoods?.find((el) => el.ID === GOODS_ID));
 
@@ -711,7 +711,7 @@ function CartItem({
   const [inputValue, setInputValue] = useState(ORDER_LINE_QUANTITY);
 
   useEffect(() => {
-    if (inputValue !== ORDER_LINE_QUANTITY) {
+    if (inputValue && inputValue !== ORDER_LINE_QUANTITY) {
       setCartState((prev) => ({
         ...prev,
         cartItems: prev?.cartItems?.map((el) => {
@@ -733,8 +733,11 @@ function CartItem({
   }, [inputValue]);
 
   const handleBlur = (event) => {
-    const { value, min } = event.target;
-    const numericValue = Math.max(Number(value), Number(min));
+    const { value, min, max } = event.target;
+    const numericValue = Math.min(
+      Math.max(Number(value), Number(min)),
+      max ? Number(max) : Infinity
+    );
 
     setInputValue(numericValue);
   };
@@ -806,6 +809,8 @@ function CartItem({
           ) : null}
           <div>
             <strong>Кол-во:{ORDER_LINE_QUANTITY}</strong>
+            <br />
+            <strong>В наличии:{GOODS_MOD_REST_VALUE}</strong>
           </div>
           <div>
             <strong>Цена:{ORDER_LINE_PRICE_NOW / ORDER_LINE_QUANTITY}</strong>{' '}
@@ -875,6 +880,11 @@ function CartItem({
               <input
                 name={`form[quantity][${GOODS_MOD_ID}]`}
                 min="1"
+                max={
+                  GOODS_DONT_PUT_MORE_THAN_AVAILABLE
+                    ? GOODS_MOD_REST_VALUE
+                    : undefined
+                }
                 pattern="[0-9]*"
                 inputMode="numeric"
                 type="number"
@@ -890,6 +900,10 @@ function CartItem({
                 onClick={() => {
                   setInputValue(inputValue + 1);
                 }}
+                disabled={
+                  inputValue === GOODS_MOD_REST_VALUE &&
+                  GOODS_DONT_PUT_MORE_THAN_AVAILABLE
+                }
               >
                 <svg className="icon">
                   <use xlinkHref="/design/sprite.svg#plus-icon"></use>
