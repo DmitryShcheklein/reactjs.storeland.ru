@@ -467,7 +467,7 @@ function Cart() {
     recentlyViewedGoods,
     goodsFromCategory,
   } = cartData;
-  
+
   const recentlyViewedGoodsFiltered = recentlyViewedGoods?.filter(
     (item) => !item.NB_GOODS_IN_CART
   );
@@ -687,11 +687,15 @@ function CartItem({
     GOODS_NAME,
     ORDER_LINE_PRICE_NOW,
     ORDER_LINE_QUANTITY = 1,
-    GOODS_IMAGE,
+    GOODS_MOD_REST_VALUE,
+    GOODS_IMAGE_ICON,
+    GOODS_IMAGE_EMPTY_URL,
     GOODS_URL,
     GOODS_MOD_ART_NUMBER,
+    GOODS_DONT_PUT_MORE_THAN_AVAILABLE,
     distinctiveProperties,
   } = item;
+  console.log(GOODS_MOD_REST_VALUE, GOODS_DONT_PUT_MORE_THAN_AVAILABLE);
   const favoritesGoodMutation = useFavoritesGoodMutation();
   const isFavorite = Boolean(favoritesGoods?.find((el) => el.ID === GOODS_ID));
 
@@ -707,21 +711,21 @@ function CartItem({
   const [inputValue, setInputValue] = useState(ORDER_LINE_QUANTITY);
 
   useEffect(() => {
-    setCartState((prev) => ({
-      ...prev,
-      cartItems: prev?.cartItems?.map((el) => {
-        if (el.GOODS_MOD_ID === GOODS_MOD_ID) {
-          return {
-            ...el,
-            ORDER_LINE_QUANTITY: inputValue,
-          };
-        }
-
-        return el;
-      }),
-    }));
-
     if (inputValue !== ORDER_LINE_QUANTITY) {
+      setCartState((prev) => ({
+        ...prev,
+        cartItems: prev?.cartItems?.map((el) => {
+          if (el.GOODS_MOD_ID === GOODS_MOD_ID) {
+            return {
+              ...el,
+              ORDER_LINE_QUANTITY: inputValue,
+            };
+          }
+
+          return el;
+        }),
+      }));
+
       window.Utils.debounce(() => {
         refetchCart();
       }, 300)();
@@ -851,7 +855,7 @@ function CartItem({
         </div>
         <div style={{ display: 'flex', gap: 20 }}>
           <a href={GOODS_URL}>
-            <img width="80" src={GOODS_IMAGE} />
+            <img width="80" src={GOODS_IMAGE_ICON || GOODS_IMAGE_EMPTY_URL} />
           </a>
 
           <div className="qty">
