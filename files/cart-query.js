@@ -156,6 +156,11 @@ function useQuickFormData() {
 
 function useCart() {
   const [cartState, setCartState] = useCartState();
+  const {
+    form: {
+      delivery: { id: deliveryId },
+    },
+  } = cartState;
 
   return useQuery({
     queryKey: [QUERY_KEYS.Cart],
@@ -226,7 +231,7 @@ function useCart() {
         favoritesGoods,
       }));
     },
-    enabled: Boolean(cartState?.form?.delivery?.id),
+    enabled: Boolean(deliveryId),
   });
 }
 
@@ -695,7 +700,7 @@ function CartItem({
     GOODS_DONT_PUT_MORE_THAN_AVAILABLE,
     distinctiveProperties,
   } = item;
-  
+
   const favoritesGoodMutation = useFavoritesGoodMutation();
   const isFavorite = Boolean(favoritesGoods?.find((el) => el.ID === GOODS_ID));
 
