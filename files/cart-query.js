@@ -2064,3 +2064,104 @@ function AirDatepickerReact(props) {
 
   return <input readOnly ref={$input} {...props} />;
 }
+
+const containerHeader = document.getElementById('root-header-actions');
+const rootHeader = createRoot(containerHeader);
+
+rootHeader.render(
+  <QueryClientProvider client={queryClient}>
+    <HeaderActions />
+  </QueryClientProvider>
+);
+
+function HeaderActions() {
+  const { data: cartData = {}, isFetched } = useCart();
+  const [cartState] = useCartState();
+  const { compareGoods, favoritesGoods } = cartState;
+  const {
+    CLIENT_IS_LOGIN,
+    CURRENCY_CHAR_CODE,
+    CART_COUNT_TOTAL,
+    CART_SUM_NOW,
+  } = cartData;
+
+  return (
+    <>
+      {/* Сравнение */}
+      <div className={`compare-header header-actions__item`}>
+        <a
+          href={'/compare'}
+          title="Перейти к Сравнению"
+          className="compare-header__link"
+        >
+          <div className="icon-wrap header-actions__icon-wrap">
+            <svg className="icon _compare" width="30px" height="30px">
+              <use xlinkHref="/design/sprite.svg#compare"></use>
+            </svg>
+            <span className="compare-header__counter icon-counter">
+              <span className="num">{compareGoods?.length}</span>
+              <span></span>
+            </span>
+          </div>
+        </a>
+      </div>
+
+      <div className={`favorites-header  header-actions__item`}>
+        <a
+          href={CLIENT_IS_LOGIN ? '/user/favorites' : '/user/register'}
+          title="Перейти к Избранному"
+          className="favorites-header__link"
+        >
+          <div className="icon-wrap header-actions__icon-wrap">
+            <svg className="icon _favorites" width="30px" height="30px">
+              <use xlinkHref="/design/sprite.svg#favorites"></use>
+            </svg>
+            <span className="favorites-header__counter icon-counter">
+              <span className="num">{favoritesGoods?.length}</span>
+              <span></span>
+            </span>
+          </div>
+        </a>
+      </div>
+
+      {/* Корзина */}
+      <div className={`cart-header`}>
+        <a
+          href={'/cart'}
+          title="Перейти в Корзину"
+          className="cart-header__link"
+        >
+          <div className="cart-header__wrap">
+            <div className="icon-wrap header-actions__icon-wrap _cart">
+              <svg className="icon _cart" width="30px" height="30px">
+                <use xlinkHref="/design/sprite.svg#cart"></use>
+              </svg>
+              <span className="cart-header__counter icon-counter">
+                <span className="num">{CART_COUNT_TOTAL}</span>
+                <span></span>
+              </span>
+            </div>
+            <div className="cart-header__info">
+              <div className="cart-header__total-wrap">
+                {isFetched && (
+                  <span
+                    className={`cart-header__cart-sum price ${CURRENCY_CHAR_CODE}`}
+                  >
+                    {CART_SUM_NOW ? (
+                      <span>
+                        <span className="num">{CART_SUM_NOW}</span>{' '}
+                        <span>руб.</span>
+                      </span>
+                    ) : (
+                      <span className="num">Корзина пуста</span>
+                    )}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+    </>
+  );
+}

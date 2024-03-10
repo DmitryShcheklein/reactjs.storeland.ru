@@ -204,7 +204,9 @@
               </div>
               <!-- /Каталог -->
             </div>
-
+            {% IF MOD_LNAME = cart  %}
+            <div id="root-header-actions" class="header-actions"></div>
+            {% ELSE %}  
             <div class="header-actions">
               <!-- Логин -->
               <div style="display: none;" class="login-header header-actions__login {% IF CLIENT_IS_LOGIN %}_isLogin{% ENDIF %}" >
@@ -290,6 +292,7 @@
                 </a>
               </div>
             </div>
+            {% ENDIF %}
           </div>
         </div>
       </div>
