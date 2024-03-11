@@ -2016,6 +2016,7 @@ function AirDatepickerReact(props) {
         // inline: true,
         autoClose: true,
         minDate: new Date(),
+        buttons: ['clear'],
         position({ $datepicker, $target, $pointer, done }) {
           const popper = createPopper($target, $datepicker, {
             placement: 'bottom',
