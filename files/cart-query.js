@@ -1242,33 +1242,32 @@ function OrderForm() {
         )}
         {ORDER_DISCOUNT_COUPON_IS_ENABLED && (
           <div className="coupon">
-            <div
-              className="coupon__box"
-              style={{ display: 'flex', gap: 20, alignItems: 'center' }}
-            >
-              <input
-                id="couponCode"
-                className="input"
-                name="form[coupon_code]"
-                value={couponCode}
-                onChange={handleChange}
-                maxLength="255"
-                type="text"
-                placeholder="Купон (123456)"
-                readOnly={isCouponEnabled}
-              />
-              <button
-                type="button"
-                className={classNames('coupon__clear', {
-                  [' _active']: couponCode,
-                })}
-                title="Очистить купон"
-                onClick={handleResetCouponBtn}
-              >
-                <svg className="icon _close">
-                  <use xlinkHref="/design/sprite.svg#close"></use>
-                </svg>
-              </button>
+            <div className="coupon__box" style={{ display: 'flex' }}>
+              <div style={{ position: 'relative', width: '100%' }}>
+                <input
+                  id="couponCode"
+                  className="input"
+                  name="form[coupon_code]"
+                  value={couponCode}
+                  onChange={handleChange}
+                  maxLength="255"
+                  type="text"
+                  placeholder="Купон (123456)"
+                  readOnly={isCouponEnabled}
+                />
+                <button
+                  type="button"
+                  className={classNames('coupon__clear', {
+                    [' _active']: couponCode,
+                  })}
+                  title="Очистить купон"
+                  onClick={handleResetCouponBtn}
+                >
+                  <svg className="icon _close">
+                    <use xlinkHref="/design/sprite.svg#close"></use>
+                  </svg>
+                </button>
+              </div>
               <button
                 disabled={!couponCode || isCouponEnabled}
                 onClick={handleCouponBtn}
