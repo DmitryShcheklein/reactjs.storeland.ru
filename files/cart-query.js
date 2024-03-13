@@ -150,7 +150,7 @@ function useQuickFormData() {
         },
       }));
     },
-    enabled: !Boolean(window.CART_IS_EMPTY),
+    enabled: !window.CART_IS_EMPTY,
   });
 }
 
@@ -2098,10 +2098,11 @@ function HeaderActions() {
             <svg className="icon _compare" width="30px" height="30px">
               <use xlinkHref="/design/sprite.svg#compare"></use>
             </svg>
-            <span className="compare-header__counter icon-counter">
-              <span className="num">{compareGoods?.length}</span>
-              <span></span>
-            </span>
+            {compareGoods?.length && (
+              <span className="compare-header__counter icon-counter">
+                <span className="num">{compareGoods?.length}</span>
+              </span>
+            )}
           </div>
         </a>
       </div>
@@ -2116,10 +2117,11 @@ function HeaderActions() {
             <svg className="icon _favorites" width="30px" height="30px">
               <use xlinkHref="/design/sprite.svg#favorites"></use>
             </svg>
-            <span className="favorites-header__counter icon-counter">
-              <span className="num">{favoritesGoods?.length}</span>
-              <span></span>
-            </span>
+            {favoritesGoods?.length && (
+              <span className="favorites-header__counter icon-counter">
+                <span className="num">{favoritesGoods?.length}</span>
+              </span>
+            )}
           </div>
         </a>
       </div>
@@ -2136,14 +2138,15 @@ function HeaderActions() {
               <svg className="icon _cart" width="30px" height="30px">
                 <use xlinkHref="/design/sprite.svg#cart"></use>
               </svg>
-              <span className="cart-header__counter icon-counter">
-                <span className="num">{CART_COUNT_TOTAL}</span>
-                <span></span>
-              </span>
+              {CART_COUNT_TOTAL && (
+                <span className="cart-header__counter icon-counter">
+                  <span className="num">{CART_COUNT_TOTAL}</span>
+                </span>
+              )}
             </div>
             <div className="cart-header__info">
               <div className="cart-header__total-wrap">
-                {isFetched && (
+                {isFetched && !window.CART_IS_EMPTY && (
                   <span
                     className={`cart-header__cart-sum price ${CURRENCY_CHAR_CODE}`}
                   >
