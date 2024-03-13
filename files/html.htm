@@ -12,7 +12,8 @@
   <script src="{ASSETS_JS_PATH}axios.min.js" defer></script>
   <script src="{ASSETS_JS_PATH}react.development.js" defer></script>
   <script src="{ASSETS_JS_PATH}react-dom.development.js" defer></script>
-  <script src="{ASSETS_JS_PATH}babel.min.js" defer></script>  
+  <!-- <script src="{ASSETS_JS_PATH}babel.min.js" defer></script>   -->
+  <script src="https://unpkg.com/@babel/standalone@7.24.0/babel.js" defer></script>  
   <!-- <script src="{ASSETS_JS_PATH}react-redux.min.js"></script> -->
   <!-- <script src="{ASSETS_JS_PATH}redux-toolkit.umd.min.js"></script> -->
   <!-- <script src="{ASSETS_JS_PATH}react-query.production.js" defer></script> -->
@@ -562,14 +563,15 @@
               
               <!-- Центральный блок-->
               {% IF MOD_LNAME = cart  %}
-              <div class="col-center col">                
+              <div class="col-center col">    
+         
                 <div id="root-cart"></div>
                 <script>window.HASH = '{HASH}'</script>
                 <script>window.CART_IS_EMPTY = {% IF cart_count_empty %}true{% ELSE %}false{% ENDIF %}</script>
                 <!-- <script type="text/babel" type="module" src="/design/react.js"></script> -->
                 <script type="text/babel" data-type="module" type="module" src="/design/cart-query.js" defer></script>
-                <!-- <script type="text/babel" data-type="module" type="module" src="/design/components_EmptyCart.js"></script>
-                <script type="text/babel" data-type="module" type="module" src="/design/components_CartApp.js"></script> -->
+                <!-- <script type="text/babel" data-type="module" src="/design/components_EmptyCart.js"></script> -->
+                <!-- <script type="text/babel" data-type="module" src="/design/components_CartApp.js"></script> -->
                 <!-- <script type="text/babel" type="module" src="/design/counter.js"></script> -->                
                 <pre>
                   <!-- {print_r} -->

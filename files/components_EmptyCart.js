@@ -1,11 +1,11 @@
-export const EmptyCart = () => {
-  //   const { data: cartData, isSuccess } = useCart();
-  //   const isCartEmpty =
-  //     window.CART_IS_EMPTY || (!cartData?.CART_COUNT_TOTAL && isSuccess);
+const EmptyCart = () => {
+  const { data: cartData, isSuccess } = useCart();
+  const isCartEmpty =
+    window.CART_IS_EMPTY || (!cartData?.CART_COUNT_TOTAL && isSuccess);
 
-  //   if (!isCartEmpty) {
-  //     return null;
-  //   }
+  if (!isCartEmpty) {
+    return null;
+  }
 
   return (
     <div className="empty-cart">
@@ -17,3 +17,5 @@ export const EmptyCart = () => {
     </div>
   );
 };
+
+window.EmptyCart = EmptyCart;

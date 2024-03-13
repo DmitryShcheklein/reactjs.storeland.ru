@@ -1,3 +1,6 @@
+// import { EmptyCart } from '/design/components_EmptyCart.js';
+const EmptyCart = window.EmptyCart;
+
 const { useState, useEffect, useRef } = window.React;
 const {
   useQuery,
@@ -36,6 +39,7 @@ function App() {
   return (
     <>
       <EmptyCart />
+      123
       {/* 
         <Cart />
         <OrderForm /> */}
