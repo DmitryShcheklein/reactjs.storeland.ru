@@ -1,7 +1,7 @@
+import { useCheckCartEmpty } from '/design/Hooks_cart.js';
+
 const EmptyCart = () => {
-  const { data: cartData, isSuccess } = useCart();
-  const isCartEmpty =
-    window.CART_IS_EMPTY || (!cartData?.CART_COUNT_TOTAL && isSuccess);
+  const isCartEmpty = useCheckCartEmpty();
 
   if (!isCartEmpty) {
     return null;
