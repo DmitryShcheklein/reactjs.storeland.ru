@@ -20,8 +20,7 @@ root.render(
 function App() {
   return (
     <>
-      123
-      {/* <EmptyCart /> */}
+      <EmptyCart />
       <Cart />
       {/* <OrderForm /> */}
     </>

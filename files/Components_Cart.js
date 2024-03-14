@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'React';
 import { Utils } from '/design/Helpers_Utils.js';
 import { GoodsList } from '/design/Components_CartGoodsList.js';
-import { useCheckCartEmpty, useCartState, useQuickFormData, useCart, useFavoritesGoodMutation, useClearCartItemMutation, useClearCartMutation, useClearCartItemsMutation, useCompareGoodMutation } from '/design/Hooks_Cart.js';
+import { useCheckCartEmpty, useCartState, useCart, useFavoritesGoodMutation, useClearCartItemMutation, useClearCartMutation, useClearCartItemsMutation, useCompareGoodMutation, getCurrentMinOrderPrice } from '/design/Hooks_Cart.js';
+import { useQuickFormData } from '/design/Hooks_OrderForm.js';
 
 export const Cart = () => {
   const isCartEmpty = useCheckCartEmpty();

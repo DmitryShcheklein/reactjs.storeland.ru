@@ -1,4 +1,4 @@
-import { useAddCartMutation } from '/design/Hooks_cart.js';
+import { useAddCartMutation } from '/design/Hooks_Cart.js';
 import { useState } from 'React';
 
 export function GoodsList({ refetchCart, goods, title, inCart }) {

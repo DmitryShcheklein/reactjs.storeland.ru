@@ -1,6 +1,7 @@
 import { queryClient, QUERY_KEYS } from '/design/Hooks_Main.js';
 import {
-  useQuery
+  useQuery,
+  useMutation
 } from 'ReactQuery';
 
 export function useCartState() {
@@ -271,4 +272,23 @@ export function useAddCartMutation(options) {
     },
     ...options,
   });
+}
+
+export function getCurrentMinOrderPrice(cartData = {}) {
+  const {
+    SETTINGS_STORE_ORDER_MIN_PRICE_WITHOUT_DELIVERY,
+    SETTINGS_STORE_ORDER_MIN_ORDER_PRICE,
+    CART_SUM_NOW,
+    CART_SUM_NOW_WITH_DELIVERY,
+  } = cartData;
+
+  let result;
+
+  if (SETTINGS_STORE_ORDER_MIN_PRICE_WITHOUT_DELIVERY) {
+    result = SETTINGS_STORE_ORDER_MIN_ORDER_PRICE - CART_SUM_NOW;
+  } else {
+    result = SETTINGS_STORE_ORDER_MIN_ORDER_PRICE - CART_SUM_NOW_WITH_DELIVERY;
+  }
+
+  return Math.max(result, 0);
 }

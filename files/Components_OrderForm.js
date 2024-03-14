@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'React';
 import {
-  useCheckCartEmpty, useCartState, useQuickFormData, useCart,
+  useCheckCartEmpty, useCartState, useCart, getCurrentMinOrderPrice
 } from '/design/Hooks_Cart.js';
 import {
-  useCreateOrderMutation, useFormState
+  useCreateOrderMutation, useFormState, useQuickFormData
 } from '/design/Hooks_OrderForm.js';
 import {
   Utils

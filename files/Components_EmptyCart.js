@@ -1,4 +1,4 @@
-import { useCheckCartEmpty } from '/design/Hooks_cart.js';
+import { useCheckCartEmpty } from '/design/Hooks_Cart.js';
 
 const EmptyCart = () => {
   const isCartEmpty = useCheckCartEmpty();
