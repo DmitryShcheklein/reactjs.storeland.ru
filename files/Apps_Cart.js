@@ -1,10 +1,14 @@
-const { useState, useEffect, useRef, useCallback } = window.React;
-const queryClient = window.queryClient;
-const { ReactQueryDevtools } = window.ReactQueryDevtools;
-const { QueryClientProvider } = window.ReactQuery;
+import { EmptyCart } from '/design/Components_EmptyCart-copy.js'
+import { Test } from '/design/Components_Test.js'
+import { queryClient } from '/design/Hooks_cart.js'
+// import { useState, useEffect, useRef, useCallback } from 'React';
+import { ReactQueryDevtools } from 'ReactQueryDevtools';
+import { QueryClientProvider } from 'ReactQuery';
+
+
 const container = document.getElementById('root-cart');
-const { createRoot } = window.ReactDOM;
-const root = createRoot(container);
+
+const root = ReactDOM.createRoot(container);
 
 root.render(
   <QueryClientProvider client={queryClient}>
@@ -13,11 +17,13 @@ root.render(
   </QueryClientProvider>
 );
 
-const EmptyCart = window.EmptyCart;
+
 
 function App() {
   return (
     <>
+      123
+      <Test />
       <EmptyCart />
       {/* <Cart /> */}
       {/* <OrderForm /> */}
