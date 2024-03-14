@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'React';
 import { GoodsList } from '/design/Components_CartGoodsList.js';
-import { useCheckCartEmpty, useCartState, useQuickFormData, useCart, useFavoritesGoodMutation, useClearCartItemMutation, useClearCartMutation, useClearCartItemsMutation, useCompareGoodMutation } from '/design/Hooks_cart.js';
+import { useCheckCartEmpty, useCartState, useQuickFormData, useCart, useFavoritesGoodMutation, useClearCartItemMutation, useClearCartMutation, useClearCartItemsMutation, useCompareGoodMutation } from '/design/Hooks_Cart.js';
 
 export const Cart = () => {
   const isCartEmpty = useCheckCartEmpty();
