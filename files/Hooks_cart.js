@@ -6,7 +6,7 @@ import {
   QueryClientProvider,
 } from 'ReactQuery';
 
-const queryClient = new QueryClient({
+export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false, // default: true
@@ -22,7 +22,7 @@ const QUERY_KEYS = {
 };
 
 
-function useFormState() {
+export function useFormState() {
   const INITIAL_FORM_DATA = {
     form: {
       contact: {
@@ -48,7 +48,7 @@ function useFormState() {
   return [query.data, (value) => queryClient.setQueryData([key], value)];
 }
 
-function useCartState() {
+export function useCartState() {
   const INITIAL_FORM_DATA = {
     form: {
       delivery: {
@@ -73,7 +73,7 @@ function useCartState() {
   return [query.data, (value) => queryClient.setQueryData([key], value)];
 }
 
-function useQuickFormData() {
+export function useQuickFormData() {
   const [, setFormState] = useFormState();
   const [, setCartState] = useCartState();
 
@@ -133,7 +133,7 @@ function useQuickFormData() {
   });
 }
 
-function useCart() {
+export function useCart() {
   const [cartState, setCartState] = useCartState();
   const {
     form: {
@@ -218,11 +218,163 @@ function useCart() {
     enabled: Boolean(deliveryId),
   });
 }
-function useCheckCartEmpty() {
+
+export function useCheckCartEmpty() {
   const { data: cartData, isFetched } = useCart();
   const isCartEmpty =
     window.CART_IS_EMPTY || (!cartData?.CART_COUNT_TOTAL && isFetched);
 
   return isCartEmpty;
 }
-export { queryClient, useCheckCartEmpty, useCart }
+
+
+export function useClearCartMutation(options) {
+  return useMutation({
+    mutationFn: async () => {
+      await axios.get(`/cart/truncate/`);
+
+      queryClient.setQueryData([QUERY_KEYS.Cart], {});
+    },
+    ...options,
+  });
+}
+export function useClearCartItemMutation(options) {
+  return useMutation({
+    mutationFn: async (itemId) => {
+      await axios.get(`/cart/delete/${itemId}`);
+    },
+    ...options,
+  });
+}
+export function useClearCartItemsMutation(options) {
+  return useMutation({
+    mutationFn: async (itemsIdArray) => {
+      const formData = new FormData();
+
+      itemsIdArray.forEach((id) => formData.append('id[]', id));
+
+      await axios.post(`/cart/delete/`, formData, {
+        params: {
+          ajax_q: 1,
+        },
+      });
+    },
+    ...options,
+  });
+}
+export function useCompareGoodMutation() {
+  const [_, setCartState] = useCartState();
+
+  return useMutation({
+    mutationFn: async ({ goodsModId, isInCompare }) => {
+      const { data } = await axios.post(
+        `/compare/${isInCompare ? 'delete' : 'add'}`,
+        {},
+        {
+          params: {
+            id: goodsModId,
+            ajax_q: 1,
+          },
+        }
+      );
+
+      const isOk = data.status === 'ok';
+
+      if (isOk) {
+        setCartState((prev) => {
+          let newCompareList;
+
+          if (isInCompare) {
+            newCompareList = prev.compareGoods.filter(
+              (el) => el.GOODS_MOD_ID !== goodsModId
+            );
+          } else {
+            newCompareList = [
+              ...prev.compareGoods,
+              {
+                GOODS_MOD_ID: goodsModId,
+              },
+            ];
+          }
+
+          return {
+            ...prev,
+            compareGoods: newCompareList,
+          };
+        });
+      }
+    },
+  });
+}
+
+export function useFavoritesGoodMutation() {
+  const [cartState, setCartState] = useCartState();
+
+  return useMutation({
+    mutationFn: async ({ goodsId, goodsModId, isFavorite }) => {
+      const { favoritesGoods } = cartState;
+      const currentModId =
+        favoritesGoods.find((el) => el.ID === goodsId)?.GOODS_MOD_ID ||
+        goodsModId;
+      const { data } = await axios.post(
+        `/favorites/${isFavorite ? 'delete' : 'add'}`,
+        {},
+        {
+          params: {
+            id: currentModId,
+            ajax_q: 1,
+          },
+        }
+      );
+
+      const isOk = data.status === 'ok';
+
+      if (isOk) {
+        setCartState((prev) => {
+          let newFavoritesList;
+
+          if (isFavorite) {
+            newFavoritesList = prev.favoritesGoods.filter(
+              (el) => el.ID !== goodsId
+            );
+          } else {
+            newFavoritesList = [
+              ...prev.favoritesGoods,
+              {
+                ID: goodsId,
+                GOODS_MOD_ID: currentModId,
+              },
+            ];
+          }
+
+          return {
+            ...prev,
+            favoritesGoods: newFavoritesList,
+          };
+        });
+      }
+    },
+  });
+}
+
+
+export function useAddCartMutation(options) {
+  return useMutation({
+    mutationFn: async (form) => {
+      const formData = new FormData(form);
+
+      for (const pair of formData.entries()) {
+        // console.log(pair[0] + ', ' + pair[1]);formData
+      }
+      const response = await axios.post(`/cart/add/`, formData, {
+        params: {
+          ajax_q: 1,
+          hash: window.HASH,
+        },
+      });
+      // console.log(response);
+      return response;
+    },
+    ...options,
+  });
+}
