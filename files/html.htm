@@ -68,38 +68,7 @@
   <link rel="stylesheet" href="{ASSETS_STYLES_PATH}main.css?design=conditer">
   
 </head>
-<!-- <script>
-  window.onload = ()=>{
-    axios.get('https://suggest-maps.yandex.ru/v1/suggest?apikey=ed0d2062-286e-4d1c-af19-7f7f0a67740a&text=Варшав')
-  }
-</script> -->
-<!-- <body>
-  <div id="map" style="width: 600px; height: 400px"></div>
-<script>
-  let map;
 
-  main();
-  async function main() {
-      // Промис `ymaps3.ready` будет зарезолвлен, когда загрузятся все компоненты API
-      await ymaps3.ready;
-
-      // Создание карты
-      map = new ymaps3.YMap(document.getElementById('map'), {
-          location: {
-              // Координаты центра карты
-              // Порядок по умолчанию: «долгота, широта»
-              center: [55.205247, 25.077816],
-
-              // Уровень масштабирования
-              // Допустимые значения: от 0 (весь мир) до 21.
-              zoom: 10
-          }
-      });
-
-      // Добавляем слой для отображения схематической карты
-      map.addChild(new ymaps3.YMapDefaultSchemeLayer());
-  }
-</script> -->
   <main class="wrapper {% IF index_page %}_index{% ENDIF %} {% IF MOD_LNAME= cart %}_cart{% ENDIF %} nojs">
     <!-- Сообщение для инвалидов -->
     <noscript>
