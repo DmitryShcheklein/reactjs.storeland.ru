@@ -547,7 +547,7 @@ function Cart() {
           </label>
 
           {deletedItemsArray?.length &&
-          !(deletedItemsArray?.length === cartItems?.length) ? (
+            !(deletedItemsArray?.length === cartItems?.length) ? (
             <button
               className="button"
               onClick={() => {
@@ -759,7 +759,7 @@ function CartItem({
   const handleRemoveItem = () => {
     deleteCartItemMutation.mutate(GOODS_MOD_ID);
   };
-  const handlePaste = () => {};
+  const handlePaste = () => { };
 
   if (deleteCartItemMutation.isSuccess) {
     return null;
@@ -1507,8 +1507,8 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                       <option
                         key={id}
                         value={id}
-                        // selected={id === ORDER_FORM_DELIVERY_COUNTRY_ID}
-                        //  {% IF country_list.ID=ORDER_FORM_DELIVERY_COUNTRY_ID %}selected="selected"{% ENDIF %}
+                      // selected={id === ORDER_FORM_DELIVERY_COUNTRY_ID}
+                      //  {% IF country_list.ID=ORDER_FORM_DELIVERY_COUNTRY_ID %}selected="selected"{% ENDIF %}
                       >
                         {name}
                       </option>
@@ -1756,7 +1756,7 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                             <option
                               key={HOUR_INT}
                               value={HOUR_INT}
-                              // selected={SELECTED ? 'selected' : ''}
+                            // selected={SELECTED ? 'selected' : ''}
                             >
                               {HOUR}
                             </option>
@@ -1781,7 +1781,7 @@ function Adresses({ quickFormData, handleChange, formErrors }) {
                             <option
                               key={HOUR_INT}
                               value={HOUR_INT}
-                              // selected={SELECTED ? 'selected' : ''}
+                            // selected={SELECTED ? 'selected' : ''}
                             >
                               {HOUR}
                             </option>
@@ -2098,11 +2098,11 @@ function HeaderActions() {
             <svg className="icon _compare" width="30px" height="30px">
               <use xlinkHref="/design/sprite.svg#compare"></use>
             </svg>
-            {compareGoods?.length && (
+            {compareGoods?.length ? (
               <span className="compare-header__counter icon-counter">
                 <span className="num">{compareGoods?.length}</span>
               </span>
-            )}
+            ) : null}
           </div>
         </a>
       </div>
@@ -2117,11 +2117,11 @@ function HeaderActions() {
             <svg className="icon _favorites" width="30px" height="30px">
               <use xlinkHref="/design/sprite.svg#favorites"></use>
             </svg>
-            {favoritesGoods?.length && (
+            {favoritesGoods?.length ? (
               <span className="favorites-header__counter icon-counter">
                 <span className="num">{favoritesGoods?.length}</span>
               </span>
-            )}
+            ) : null}
           </div>
         </a>
       </div>
@@ -2138,11 +2138,11 @@ function HeaderActions() {
               <svg className="icon _cart" width="30px" height="30px">
                 <use xlinkHref="/design/sprite.svg#cart"></use>
               </svg>
-              {CART_COUNT_TOTAL && (
+              {CART_COUNT_TOTAL ? (
                 <span className="cart-header__counter icon-counter">
                   <span className="num">{CART_COUNT_TOTAL}</span>
                 </span>
-              )}
+              ) : null}
             </div>
             <div className="cart-header__info">
               <div className="cart-header__total-wrap">
