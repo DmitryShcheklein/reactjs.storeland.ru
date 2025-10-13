@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  @@include('./_head.html')
+</head>
+
+<body>
+  @@include('./_root.html')
+
+  <section class="hero is-fullheight">
+    <!-- Шапка -->
+    @@include('./components/header/header.html')
+    <!-- /END Шапка -->
+
+    <main class="hero-body is-align-items-start">
+      <div class="container">
+
+      <!-- Главная страница-->
+      {% IF index_page %}
+        @@include('./pages/index/index.html')
+      {% ENDIF %}
+
+      <!-- Основная часть -->
+      {% IFNOT index_page %}
+        <!-- Хлебные крошки -->
+        @@include('./components/breadcrumbs/breadcrumbs.html')
+        <!-- /END Хлебные крошки -->
+
+        {% IF MOD_LNAME = goods || MOD_LNAME = cart || MOD_LNAME = feedback %}
+          {BODY}
+        {% ELSE %}
+          <div class="columns">
+
+            <!-- Левый блок -->
+            <div class="column is-one-quarter">
+              @@include('./components/sidebar/sidebar.html')
+            </div>
+            <!-- Основной контент -->
+            <div class="column">
+              <!-- Заголовок страницы -->
+              @@include('./components/page-title/page-title.html')
+              <!-- /END Заголовок страницы -->
+
+              {BODY}
+            </div>
+          </div>
+        {% ENDIF %}
+      {% ENDIF %}
+
+      </div>
+    </main>
+    <!-- /END Основная часть -->
+
+    <!-- Подвал -->
+    @@include('./components/footer/footer.html')
+    <!-- /END Подвал -->
+  </section>
+
+  <!-- SEO -->
+  @@include('./components/SEO/index.html')
+  <!-- /END SEO -->
+
+  <!-- Скрипты -->
+  @@include('./_scripts.html')
+  <!-- /END Скрипты -->
+
+</body>
+
+</html>

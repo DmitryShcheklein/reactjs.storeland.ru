@@ -1,0 +1,237 @@
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Главная",
+      "item": "{INDEX_PAGE_URL}"
+    }
+    {% IF MOD_LNAME=cart %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "{% IF cart_items_empty %}Корзина покупок пуста{% ELSE %}Корзина{% ENDIF %}",
+      "item": "{CART_URL}"
+    }
+    {% ELSEIF MOD_LNAME=user && ACT=login %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Войти или зарегистрироваться"
+    }
+    {% ELSEIF MOD_LNAME=user && ACT=change %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Восстановление пароля",
+      "item": "{USER_RECOVERY_URL}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Активация нового пароля"
+    }
+    {% ELSEIF MOD_LNAME=user && ACT=recovery %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Восстановление пароля"
+    }
+    {% ELSEIF MOD_LNAME=user && ACT=favorites %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Сохраненные товары"
+    }
+    {% ELSEIF MOD_LNAME=user && ACT=history_info %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Личный кабинет",
+      "item": "{USER_SETTINGS_URL}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Мои заказы",
+      "item": "{USER_HISTORY_LIST_URL}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "name": "Карточка заказа"
+    }
+    {% ELSEIF MOD_LNAME=user && ACT=history_list %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Личный кабинет",
+      "item": "{USER_SETTINGS_URL}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Мои заказы"
+    }
+    {% ELSEIF MOD_LNAME=user && ACT=settings %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Личный кабинет"
+    }
+    {% ELSEIF MOD_LNAME=user && ACT=register %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Регистрация клиента"
+    }
+    {% ELSEIF MOD_LNAME=order && ACT=stage %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Корзина",
+      "item": "{CART_URL}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Оформление заказа"
+    }
+    {% ELSEIF MOD_LNAME=search %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Поиск"
+    }
+    {% ELSEIF MOD_LNAME=discount && ACT=index && ID %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Акции магазина",
+      "item": "{DISCOUNT_URL}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "{PROMOTIONAL_CAMPAIGN_NAME}"
+    }
+    {% ELSEIF MOD_LNAME=discount && ACT=index %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Акции магазина"
+    }
+    {% ELSEIF MOD_LNAME=order && ACT=info %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Корзина",
+      "item": "{CART_URL}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Оформление заказа",
+      "item": "{CART_URL}"
+    }
+    {% ELSEIF MOD_LNAME=feedback && ACT=index %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Связь с администрацией"
+    }
+    {% ELSEIF CURRENT_URL=NEWS_SHOP_URL || CURRENT_URL=NEWS_ARTICLES_URL || CURRENT_URL=NEWS_MASS_MEDIA_URL || CURRENT_URL=NEWS_ALL_URL %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "{NEWS_SECTION_NAME}"
+    }
+    {% ELSEIF MOD_LNAME=news %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "{NEWS_SECTION_NAME}",
+      "item": "{NEWS_SECTION_URL}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "{NEWS_TITLE}"
+    }
+    {% ELSEIF MOD_LNAME=compare %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Список сравнения"
+    }
+    {% ELSEIF MOD_LNAME=page %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "{PAGE_NAME}"
+    }
+    {% ELSEIF MOD_LNAME= %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Внутренняя ошибка сервера"
+    }
+    {% ELSEIF MOD_LNAME=callback %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Заказ обратного звонка"
+    }
+    {% ELSEIF MOD_LNAME=goods %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Каталог",
+      "item": "{CATALOG_URL}"
+    }
+    {% FOR upper_navigation %},
+    {
+      "@type": "ListItem",
+      "position": {upper_navigation.LEVEL | plus('3')},
+      "name": "{upper_navigation.NAME}",
+      "item": "{upper_navigation.URL}"
+    }
+    {% ENDFOR %}
+    ,{
+      "@type": "ListItem",
+      "position": {% FOR upper_navigation %}{%IF upper_navigation.last%}{upper_navigation.index | plus("3")}{%ENDIF%}{%ENDFOR%},
+      "name": "{GOODS_NAME}"
+    }
+    {% ELSEIF MOD_LNAME=catalog %}
+    {% IF IS_FULL_CATALOG %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Каталог"
+    }
+    {% ELSE %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Каталог",
+      "item": "{CATALOG_URL}"
+    }
+    {% FOR upper_navigation %}
+    {% IF upper_navigation.CURRENT_PARENT %},
+    {
+      "@type": "ListItem",
+      "position": {upper_navigation.index | plus("2")},
+      "name": "{upper_navigation.NAME}",
+      "item": "{upper_navigation.URL}"
+    }
+    {% ENDIF %}
+    {% ENDFOR upper_navigation %}
+    {% ENDIF %}
+    {% ENDIF %}
+  ]
+}
+</script>
+    

@@ -1,0 +1,21 @@
+<!-- Если отключен JS -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => document.body.classList.remove('is-nojs'));
+  window.onload = () => document.body.classList.remove('is-loading');
+</script>
+<style>
+  .nojs .preloader {
+    display: none;
+  }
+</style>
+
+<!-- Сообщение для инвалидов -->
+<noscript>
+    <div class="noscript"> 
+      <div class="noscript-inner"> 
+        <h4><strong>Мы заметили, что у Вас выключен JavaScript.</strong></h4>
+        <h5>Необходимо включить его для корректной работы сайта.</h5>
+      </div> 
+    </div>
+</noscript>
+<!-- /END Сообщение для инвалидов -->

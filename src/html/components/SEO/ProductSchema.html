@@ -1,0 +1,30 @@
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "{@@goods_array.NAME}",
+  "sku": "{@@goods_array.ART_NUMBER}",
+  "image": "{% IF @@goods_array.IMAGE_EMPTY %}{ASSETS_IMAGES_PATH}no-photo.png?design=@@DESIGN_NAME{% ELSE %}{@@goods_array.IMAGE_MEDIUM}{% ENDIF %}",
+  "description": "{@@goods_array.DESCRIPTION_SHORT}",
+  {% IFNOT SETTINGS_OPINION_DISABLE %}
+  {% IF @@goods_array.OPINION_RATING_VALUE %}
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "{@@goods_array.OPINION_RATING_VALUE}",
+    "reviewCount": "{@@goods_array.OPINION_RATING_CNT_ALL}",
+    "bestRating": "10",
+    "worstRating": "1"
+  },
+  {% ENDIF %}
+  {% ENDIF %}
+  "offers": {
+    "@type": "AggregateOffer",
+    "priceCurrency": "{CURRENCY_CHAR_CODE}",
+    "lowPrice": "{@@goods_array.MIN_PRICE_NOW}",
+    "highPrice": "{@@goods_array.MAX_PRICE_NOW}",
+    "offerCount": "{% FOR mods %}{% IF @@goods_array.mods.last %}{@@goods_array.mods.length}{% ENDIF %}{% ENDFOR %}",
+    "availability": "{% IF @@goods_array.MAX_REST_VALUE>0 %}http://schema.org/InStock{% ELSE %}http://schema.org/OutOfStock{% ENDIF %}",
+    "priceValidUntil": "{@@goods_array.MAX_DISCOUNT_EXPIRED_AT | date('Y-m-d')}"
+  }
+}
+</script> 

@@ -1,0 +1,18 @@
+{% IF goods_empty %}
+<div class="notification is-warning">
+  <p>Нет товаров в акции, видимо, они еще не были добавлены администратором либо были удалены с
+    сайта.</p>
+</div>
+{% ENDIF %}
+
+{% IFNOT goods_empty %}
+<div class="container">
+  {% IF GOODS_VIEW_TYPE=1 %}
+  <div class="columns is-multiline">
+    {% FOR goods %}
+    @@include('../../components/product-card/product-card.html', {"goods_array": "goods"})
+    {% ENDFOR %}
+  </div>
+  {% ENDIF %}
+</div>
+{% ENDIF %}

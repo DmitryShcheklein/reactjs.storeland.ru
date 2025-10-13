@@ -1,0 +1,107 @@
+<nav class="breadcrumb has-succeeds-separator" aria-label="breadcrumbs">
+  <div class="container">
+    <ul>
+      <li><a href="{INDEX_PAGE_URL}">Главная</a></li>
+
+      {% IF MOD_LNAME=cart %}
+        <li class="is-active"><a aria-current="page">
+          {% IF cart_items_empty %}Корзина покупок пуста{% ELSE %}Корзина{% ENDIF %}
+        </a></li>
+
+      {% ELSEIF MOD_LNAME=catalog %}
+        {% IF IS_FULL_CATALOG %}
+          <li class="is-active"><a href="{CATALOG_URL}" aria-current="page">Каталог</a></li>
+        {% ELSE %}
+          <li><a href="{CATALOG_URL}">Каталог</a></li>
+          {% FOR upper_navigation %}
+            <li class="{% IF upper_navigation.CURRENT %}is-active{% ENDIF %}">
+              <a href="{upper_navigation.URL}" {% IF upper_navigation.CURRENT %}aria-current="page"{% ENDIF %}>
+                {upper_navigation.NAME}
+              </a>
+            </li>
+          {% ENDFOR %}
+        {% ENDIF %}
+
+      {% ELSEIF MOD_LNAME=goods %}
+        <li><a href="{CATALOG_URL}">Каталог</a></li>
+        {% FOR upper_navigation %}
+          <li><a href="{upper_navigation.URL}">{upper_navigation.NAME}</a></li>
+        {% ENDFOR %}
+        <li class="is-active"><a href="{GOODS_URL}" aria-current="page">{GOODS_NAME}</a></li>
+
+      {% ELSEIF MOD_LNAME=user %}
+        {% IF ACT=login %}
+          <li class="is-active"><a aria-current="page">Войти или зарегистрироваться</a></li>
+        {% ELSEIF ACT=register %}
+          <li class="is-active"><a aria-current="page">Регистрация</a></li>
+        {% ELSEIF ACT=settings %}
+          <li class="is-active"><a aria-current="page">Личный кабинет</a></li>
+        {% ELSEIF ACT=favorites %}
+          <li class="is-active"><a aria-current="page">Избранные товары</a></li>
+        {% ELSEIF ACT=history_list %}
+          <li><a href="{USER_SETTINGS_URL}">Личный кабинет</a></li>
+          <li class="is-active"><a aria-current="page">Мои заказы</a></li>
+        {% ELSEIF ACT=history_info %}
+          <li><a href="{USER_SETTINGS_URL}">Личный кабинет</a></li>
+          <li><a href="{USER_HISTORY_LIST_URL}">Мои заказы</a></li>
+          <li class="is-active"><a aria-current="page">Карточка заказа</a></li>
+        {% ELSEIF ACT=change %}
+          <li><a href="{USER_SETTINGS_URL}">Личный кабинет</a></li>
+          <li class="is-active"><a aria-current="page">Восстановление пароля</a></li>
+        {% ELSEIF ACT=recovery %}
+          <li><a href="{USER_SETTINGS_URL}">Личный кабинет</a></li>
+          <li class="is-active"><a aria-current="page">Восстановление пароля</a></li>
+        {% ENDIF %}
+
+      {% ELSEIF MOD_LNAME=order %}
+        {% IF ACT=stage %}
+          <li><a href="{CART_URL}">Корзина</a></li>
+          <li class="is-active"><a aria-current="page">Оформление заказа</a></li>
+        {% ELSEIF ACT=info %}
+          <li><a href="{CART_URL}">Корзина</a></li>
+          <li><a href="{CART_URL}">Оформление заказа</a></li>
+          <li class="is-active"><a aria-current="page">
+            Заказ {% IF ORDER_NUM %}№{ORDER_NUM}{% ENDIF %} успешно оформлен
+          </a></li>
+        {% ENDIF %}
+
+      {% ELSEIF MOD_LNAME=search %}
+        <li class="is-active"><a aria-current="page">Поиск</a></li>
+
+      {% ELSEIF MOD_LNAME=compare %}
+        <li class="is-active"><a aria-current="page">Список сравнения</a></li>
+
+      {% ELSEIF MOD_LNAME=feedback %}
+        <li class="is-active"><a aria-current="page">Контакты</a></li>
+
+      {% ELSEIF MOD_LNAME=news %}
+        <li><a href="{NEWS_SECTION_URL}">{NEWS_SECTION_NAME}</a></li>
+        {% IF NEWS_TITLE %}
+          <li class="is-active"><a href="{CURRENT_URL}" aria-current="page">{NEWS_TITLE}</a></li>
+        {% ENDIF %}
+
+      {% ELSEIF MOD_LNAME=page %}
+        <li class="is-active"><a href="{CURRENT_URL}" aria-current="page">{PAGE_NAME}</a></li>
+
+      {% ELSEIF MOD_LNAME=discount %}
+        {% IF ACT=index && ID %}
+          <li><a href="{DISCOUNT_URL}">Акции магазина</a></li>
+          <li class="is-active"><a aria-current="page">{PROMOTIONAL_CAMPAIGN_NAME}</a></li>
+        {% ELSEIF ACT=index %}
+          <li class="is-active"><a aria-current="page">Акции магазина</a></li>
+        {% ENDIF %}
+
+      {% ELSEIF MOD_LNAME=callback %}
+        <li class="is-active"><a aria-current="page">Заказ обратного звонка</a></li>
+
+      {% ELSEIF MOD_LNAME= %}
+        <li class="is-active"><a aria-current="page">Внутренняя ошибка сервера</a></li>
+
+      {% ELSEIF CURRENT_URL=NEWS_SHOP_URL || CURRENT_URL=NEWS_ARTICLES_URL || CURRENT_URL=NEWS_MASS_MEDIA_URL || CURRENT_URL=NEWS_ALL_URL %}
+        <li><a href="{NEWS_SECTION_URL}">{NEWS_SECTION_NAME}</a></li>
+        <li class="is-active"><a href="{CURRENT_URL}" aria-current="page">{NEWS_TITLE}</a></li>
+
+      {% ENDIF %}
+    </ul>
+  </div>
+</nav>

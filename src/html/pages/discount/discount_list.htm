@@ -1,0 +1,37 @@
+{% IF promotion_campaign_empty %}
+  <article class="message is-warning">
+    <div class="message-body">
+      Акций в нашем магазине пока не проводилось
+    </div>
+  </article>
+{% ELSE %}
+<!-- Список акций -->
+<div class="columns is-multiline">
+    {% FOR promotion_campaign %}
+    <div class="column is-one-third {% IFNOT promotion_campaign.IS_WORK %}has-background-grey-lighter{% ENDIF %}" data-id="{promotion_campaign.ID}">
+        <div class="card">
+            <a class="card-content px-2 py-2 is-flex is-flex-direction-column" href="{promotion_campaign.URL | url_amp}" title="{promotion_campaign.NAME}">
+                <div class="title is-4">{promotion_campaign.NAME}</div>
+                <div class="subtitle is-6">-{promotion_campaign.PERCENTAGE}%</div>
+            </a>
+        </div>
+
+        {% IF promotion_campaign.DESCRIPTION_SHORT %}
+        <div class="content">
+            <span>{promotion_campaign.DESCRIPTION_SHORT}</span>
+        </div>
+        {% ENDIF %}
+
+        <div class="content">
+            {% IF promotion_campaign.IS_WORK %}
+            <span>Акция продлится до </span>
+            <strong>{promotion_campaign.EXPIRED_TIME | date('m.d.Y')}</strong>
+            {% ELSE %}
+            <strong>Акция завершена</strong>
+            {% ENDIF %}
+        </div>
+
+    </div>
+    {% ENDFOR promotion_campaign %}
+</div>
+{% ENDIF %}

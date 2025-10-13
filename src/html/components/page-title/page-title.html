@@ -1,0 +1,67 @@
+<h1 class="title">
+  {% IF MOD_LNAME=user %}
+    {% IF ACT=login %}
+      Войти или зарегистрироваться
+    {% ELSEIF ACT=change %}
+      Активация нового пароля
+    {% ELSEIF ACT=recovery %}
+      Восстановление пароля
+    {% ELSEIF ACT=favorites %}
+      Избранные товары
+    {% ELSEIF ACT=history_list %}
+      Мои заказы
+    {% ELSEIF ACT=settings %}
+      Личный кабинет
+    {% ELSEIF ACT=register %}
+      Регистрация клиента
+    {% ELSEIF ACT=history_info %}
+      Карточка заказа
+    {% ENDIF %}
+  {% ELSEIF MOD_LNAME=order %}
+    {% IF ACT=info %}
+      Заказ {% IF ORDER_NUM %}№{ORDER_NUM}{% ENDIF %}
+    {% ELSEIF ACT=stage %}
+      Оформление заказа. Шаг {ORDER_STAGE_NUM} из 4
+    {% ENDIF %}
+  {% ELSEIF MOD_LNAME=search %}
+    Результат поиска по запросу: {% IFNOT search_query_empty %}&laquo;{SEARCH_QUERY}&raquo;{% ENDIF %}
+    {% IFNOT search_query_empty %} <span>({GOODS_PAGES_RESULTS} товар{GOODS_PAGES_RESULTS | gen_word_end("","а","ов")} найд{GOODS_PAGES_RESULTS | gen_word_end("ен","ено","ено")} по запросу)</span>{% ENDIF %}
+  {% ELSEIF MOD_LNAME=discount && ACT=index && ID %}
+    {PROMOTIONAL_CAMPAIGN_NAME} <span class="result">{GOODS_PAGES_RESULTS} товар{GOODS_PAGES_RESULTS | gen_word_end("","а","ов")}</span>
+  {% ELSEIF MOD_LNAME=discount && ACT=index %}
+    Акции {% IF PROMOTION_CAMPAIGN_PAGES_RESULTS %}<span class="result">{PROMOTION_CAMPAIGN_PAGES_RESULTS} акци{PROMOTION_CAMPAIGN_PAGES_RESULTS | gen_word_end("я","и","ий")}</span>{% ENDIF %}
+  {% ELSEIF MOD_LNAME=feedback %}
+    Связь с администрацией
+  {% ELSEIF CURRENT_URL=NEWS_SHOP_URL || CURRENT_URL=NEWS_ARTICLES_URL || CURRENT_URL=NEWS_MASS_MEDIA_URL %}
+    {NEWS_SECTION_NAME}
+  {% ELSEIF MOD_LNAME=news %}
+    {PAGE_TITLE}
+  {% ELSEIF MOD_LNAME=compare %}
+    {% IF compare_list_empty %}Ваш список сравнения пуст{% ELSE %}Сравнение товаров{% ENDIF %}
+  {% ELSEIF MOD_LNAME=page %}
+    {PAGE_NAME}
+  {% ELSEIF MOD_LNAME=callback %}
+    Заказ обратного звонка
+  {% ELSEIF MOD_LNAME=cart %}
+    {% IF cart_items_empty %}
+      Корзина покупок пуста
+    {% ELSE %}
+      Корзина
+    {% ENDIF %}
+  {% ELSEIF MOD_LNAME=catalog %}
+    {% IF IS_FULL_CATALOG %}
+      Каталог
+    {% ELSE %}
+      {% IF GOODS_PAGES_RESULTS = 0 %}
+        {CATEGORY_NAME}
+      {% ELSE %}
+        {CATEGORY_NAME}
+      {% ENDIF %}
+    {% ENDIF %}
+    {% IF GOODS_PAGES_RESULTS > 0 %}
+      <span class="result">{GOODS_PAGES_RESULTS} товар{GOODS_PAGES_RESULTS | gen_word_end("","а","ов")}</span>
+    {% ENDIF %}
+  {% ELSE %}
+    {PAGE_TITLE}
+  {% ENDIF %}
+</h1>

@@ -1,0 +1,60 @@
+<div class="column is-4">
+  <div class="card">
+    <form action="{CART_ADD_GOODS_MODIFICATION_URL | url_amp}" method="post" class="product-form-{@@goods_array.MIN_PRICE_NOW_ID} goodsListForm">
+      <input type="hidden" name="hash" value="{HASH}" />
+      <input type="hidden" name="form[goods_from]" value="{@@goods_array.GOODS_FROM}" />
+      <input type="hidden" name="form[goods_mod_id]" value="{@@goods_array.MIN_PRICE_NOW_ID}" />
+      
+      <div class="card-image">
+        <a href="{@@goods_array.URL_MIN_PRICE_NOW | url_amp}" title="{@@goods_array.NAME}">
+          <figure class="image is-4by3">
+            <img
+              {% IF @@goods_array.IMAGE_EMPTY %}
+                src="{ASSETS_IMAGES_PATH}no-photo-small.png?design=@@DESIGN_NAME"
+              {% ELSE %}
+                src="{@@goods_array.IMAGE_MEDIUM}"
+              {% ENDIF %}
+              style="object-fit: contain;" 
+              alt="{@@goods_array.NAME}"
+              >
+          </figure>
+        </a>
+      </div>
+      
+      <div class="card-content">
+        <p class="title is-6 mb-2" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+          <a href="{@@goods_array.URL_MIN_PRICE_NOW | url_amp}" title="{@@goods_array.NAME}">
+            {@@goods_array.NAME}
+          </a>
+        </p>
+        
+        <p class="subtitle is-6">
+          <span>{@@goods_array.MIN_PRICE_NOW | money_format}</span> 
+        </p>
+        
+        {% IF @@goods_array.MAX_REST_VALUE=0 && SETTINGS_GOODS_DONT_PUT_TO_CART_MORE_THAN_AVAILABLE %}
+          <button class="button is-primary is-fullwidth" disabled>
+            <span>Нет в наличии</span>
+          </button>
+        {% ELSE %}
+          <div class="buttons">
+            <a class="button is-primary is-fullwidth add-cart quick" 
+               href="{CART_ADD_GOODS_MODIFICATION_URL | url_amp}?hash={HASH | url_amp}&amp;form%5Bgoods_from%5D={@@goods_array.GOODS_FROM}&amp;form%5Bgoods_mod_id%5D={@@goods_array.MIN_PRICE_NOW_ID}"
+               rel="nofollow">
+              <span class="icon">
+                <i class="icon-cart"></i>
+              </span>
+              <span>В корзину</span>
+            </a>
+            <a class="button is-info is-fullwidth quick-buy">
+              <span class="icon">
+                <i class="icon-flash"></i>
+              </span>
+              <span>Купить в 1 клик</span>
+            </a>
+          </div>
+        {% ENDIF %}
+      </div>
+    </form>
+  </div>
+</div>

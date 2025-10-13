@@ -1,0 +1,29 @@
+<aside class="sidebar">
+	<div class="menu">
+		<p class="menu-label">Каталог</p>
+		<ul class="menu-list">
+			{% FOR catalog_full %}
+			{% IF catalog_full.HIDE %}{continue}{% ENDIF %}
+				{% IFNOT catalog_full.LEVEL = 0 && catalog_full.FIRST %}
+				<ul data-level="{catalog_full.LEVEL}" data-parent-id="{catalog_full.PARENT_ID}">
+				{% ENDIF %}
+				<li data-level="{catalog_full.LEVEL}" 
+					data-id="{catalog_full.ID}" 
+					data-parent-id="{catalog_full.PARENT_ID}">
+					<a class="{% IF catalog_full.CURRENT %}is-active{% ENDIF %}" 
+					   href="{catalog_full.URL}">
+						{catalog_full.NAME}
+						{% IF catalog_full.ISSET_VISIBLE_SUB %}
+						<span class="icon is-small">
+							<i class="icon-arrow-down"></i>
+						</span>
+						{% ENDIF %}
+					</a>
+					{% IF catalog_full.ISSET_SUB=0 %}
+				</li>{% ENDIF %}
+				{% IF catalog_full.LAST %}{% FOR out %}</li>{% IFNOT catalog_full.out.LAST %}
+			</ul>{% ENDIF out.LAST %}{% ENDFOR out %}{% ENDIF LAST %}
+			{% ENDFOR catalog_full %}
+		</ul>
+	</div>
+</aside>

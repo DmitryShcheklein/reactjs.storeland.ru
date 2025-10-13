@@ -1,0 +1,112 @@
+<!-- Форма карточки товара -->
+<div class="product-view mb-6">
+  <div class="container">
+    <div class="columns is-multiline">
+      <!-- Название товара -->
+      <div class="column is-12">
+        <h1 class="title is-2">{GOODS_NAME}</h1>
+      </div>
+
+      <!-- Артикул и наличие -->
+      <div class="column is-12">
+        <div class="tags">
+          {% IF GOODS_MOD_ART_NUMBER %}
+          <span class="tag is-light">Артикул: {GOODS_MOD_ART_NUMBER}</span>
+          {% ENDIF %}
+          
+          <span class="tag {% IF GOODS_MOD_REST_VALUE>0 %}is-success{% ELSE %}is-danger{% ENDIF %}">
+            {% IF GOODS_MOD_REST_VALUE>0 %}В наличии{% ELSE %}Нет в наличии{% ENDIF %}
+          </span>
+        </div>
+      </div>
+
+      <!-- Изображение товара -->
+      <div class="column is-5">
+        <figure class="image">
+          <a href="{GOODS_IMAGE_LARGE}">
+            <img src="{% IF GOODS_IMAGE_EMPTY %}{ASSETS_IMAGES_PATH}no-photo-medium.png{%ELSE%}{GOODS_IMAGE_MEDIUM}{% ENDIF %}" alt="{GOODS_NAME}">
+          </a>
+        </figure>
+      </div>
+
+      <!-- Блок с ценой и формой заказа -->
+      <div class="column is-7">
+        <div class="box">
+          <!-- Цена -->
+          <div class="price-box mb-4">
+            {% IF GOODS_MOD_PRICE_NOW_WITHOUT_DISCOUNT>GOODS_MOD_PRICE_NOW %}
+              <p class="has-text-grey is-size-5 has-text-line-through">{GOODS_MOD_PRICE_NOW_WITHOUT_DISCOUNT | money_format}</p>
+            {% ENDIF %}
+            <p class="title is-3 has-text-primary">{GOODS_MOD_PRICE_NOW | money_format}</p>
+          </div>
+
+          <!-- Форма заказа -->
+          <form action="{CART_ADD_GOODS_MODIFICATION_URL}" method="post">
+            <input type="hidden" name="hash" value="{HASH}" />
+            <input type="hidden" name="form[goods_from]" value="{GOODS_FROM}" />
+            <!-- По этому значению производится заказ товара -->
+            <input id="goods_mod_id" type="hidden" name="form[goods_mod_id]" value="{GOODS_MOD_ID}" />
+
+            <!-- Модификации -->
+            <div class="modifications mb-5" {% IF GOODS_NO_CHOISE_IN_PROPERTIES_FOR_MODIFICATIONS %}style="display:none;"{% ENDIF %}>
+              {% FOR goods_modifications_properties %}
+                <div class="field">
+                  <label class="label">{goods_modifications_properties.NAME}:</label>
+                  <div class="control">
+                    <div class="select is-fullwidth">
+                      <select name="form[properties][]" onchange="(()=>{
+                            const value = this.value;
+                            const element = document.getElementById(value);
+                            goods_mod_id.value = element.children[0].value;
+                        })()">
+                        {% FOR values %}
+                          <option value="{goods_modifications_properties.values.ID}" {% IF goods_modifications_properties.values.SELECTED %}selected="selected"{% ENDIF %}>
+                            {goods_modifications_properties.values.NAME}
+                          </option>
+                        {% ENDFOR %}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              {% ENDFOR %}
+
+            <!-- Данные по модификациям для текущей товарной позиции -->
+            {% FOR goods_modifications %}
+                <div id="{goods_modifications.PROPERTIES_SLUG}">
+                    <input type="hidden" name="id" value="{goods_modifications.ID}" />
+                    <input type="hidden" name="art_number" value="{goods_modifications.ART_NUMBER}" />
+                    <input type="hidden" name="goods_mod_image_id" value="{goods_modifications.GOODS_MOD_IMAGE_ID}" />
+                    <input type="hidden" name="price_now" value="{goods_modifications.PRICE_NOW}" />
+                    <input type="hidden" name="price_old" value="{% IF goods_modifications.PRICE_NOW_WITHOUT_DISCOUNT>goods_modifications.PRICE_NOW %}{goods_modifications.PRICE_NOW_WITHOUT_DISCOUNT}{% ELSE %}{goods_modifications.PRICE_OLD}{% ENDIF %}" />
+                    
+                    <input type="hidden" name="rest_value" value="{goods_modifications.REST_VALUE}" />
+                    <input type="hidden" name="measure_id" value="{goods_modifications.MEASURE_ID}" />
+                    <input type="hidden" name="measure_name" value="{goods_modifications.MEASURE_NAME}" />
+                    <input type="hidden" name="measure_desc" value="{goods_modifications.MEASURE_DESC}" />
+                    <input type="hidden" name="measure_precision" value="{goods_modifications.MEASURE_PRECISION}" />
+                    <input type="hidden" name="is_has_in_compare_list" value="{goods_modifications.IS_HAS_IN_COMPARE_LIST}" />                    
+                </div>
+            {% ENDFOR %}
+            </div>
+
+            <!-- Количество и кнопка добавления в корзину -->
+            <div class="field is-grouped mt-4">
+              <div class="control mr-2">
+                <input type="number" name="form[goods_mod_quantity]" class="input" value="1" min="1">
+              </div>
+              <div class="control">
+                <button type="submit" class="button is-primary">
+                  <span class="icon">
+                    <i class="icon-cart"></i>
+                  </span>
+                  <span>В корзину</span>
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /END Форма карточки товара -->

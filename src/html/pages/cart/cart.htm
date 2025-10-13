@@ -1,0 +1,168 @@
+{% IF cart_items_empty %}
+<div class="notification is-warning">
+  Корзина покупок пуста. Вы можете выбрать нужный товар из <a href="{CATALOG_URL}">каталога</a>.
+</div>
+{% ELSE %}
+
+<!-- Заголовок страницы -->
+@@include('../../components/page-title/page-title.html')
+<!-- /END Заголовок страницы -->
+
+<div class="columns">
+  <!-- Корзина: Элементы -->
+  <div class="column is-8">
+    <form action="{CART_URL}" method="post">
+      <input type="hidden" name="fast_order" value="1" />
+      <input type="hidden" name="hash" value="{HASH}" />
+
+      <!-- Товары -->
+      {% FOR cart_items %}
+      <div class="box mb-4" data-id="{cart_items.GOODS_ID}" data-mod-id="{cart_items.GOODS_MOD_ID}">
+        <div class="columns is-vcentered">
+          <!-- Изображение -->
+          <div class="column is-2">
+            <figure class="image">
+              <a href="{cart_items.GOODS_URL}">
+                <img src="{% IF cart_items.GOODS_IMAGE_EMPTY %}{ASSETS_IMAGES_PATH}no-photo.png?design=THEMENAME{% ELSE %}{cart_items.GOODS_IMAGE_ICON}{% ENDIF %}" alt="{cart_items.GOODS_NAME}">
+              </a>
+            </figure>
+          </div>
+
+          <!-- Информация о товаре -->
+          <div class="column is-4">
+            <a href="{cart_items.GOODS_URL}" class="has-text-weight-medium is-size-5">{cart_items.GOODS_NAME}</a>
+            
+            {% IF cart_items.GOODS_MOD_ART_NUMBER %}
+            <div class="mt-2">
+              <span class="has-text-grey">Артикул: </span>
+              <span>{cart_items.GOODS_MOD_ART_NUMBER}</span>
+            </div>
+            {% ENDIF %}
+
+            {% FOR distinctive_properties %}
+            <div class="mt-1">
+              <span class="has-text-grey">{cart_items.distinctive_properties.NAME}: </span>
+              <span>{cart_items.distinctive_properties.VALUE}</span>
+            </div>
+            {% ENDFOR %}
+          </div>
+
+          <!-- Количество -->
+          <div class="column is-2">
+            <div class="field">
+              <input class="input" 
+                     type="number" 
+                     name="form[quantity][{cart_items.GOODS_MOD_ID}]" 
+                     {% IF SETTINGS_GOODS_DONT_PUT_TO_CART_MORE_THAN_AVAILABLE %}max="{cart_items.GOODS_MOD_REST_VALUE}"{% ENDIF %}
+                     min="1" 
+                     value="{cart_items.ORDER_LINE_QUANTITY}"
+              />
+            </div>
+          </div>
+
+          <!-- Цена -->
+          <div class="column is-2 has-text-right">
+            {% IF cart_items.ORDER_LINE_PRICE_OLD > cart_items.ORDER_LINE_PRICE_NOW %}
+            <p class="has-text-grey is-size-6 has-text-line-through">{cart_items.ORDER_LINE_PRICE_OLD | money_format}</p>
+            {% ENDIF %}
+            <p class="has-text-weight-bold is-size-5">{cart_items.ORDER_LINE_PRICE_NOW | money_format}</p>
+          </div>
+
+          <!-- Удалить -->
+          <div class="column is-2 has-text-right">
+            <a href="{cart_items.ORDER_LINE_DELETE_URL}" class="button is-light">
+              <span class="icon">
+                <i class="icon-delete"></i>
+              </span>
+            </a>
+          </div>
+        </div>
+      </div>
+      {% ENDFOR %}
+
+      <!-- Кнопки управления -->
+      <div class="buttons">
+        <a href="{CATALOG_URL}" class="button">
+          <span class="icon">
+            <i class="icon-chevron_left"></i>
+          </span>
+          <span>Вернуться к покупкам</span>
+        </a>
+        <button type="submit" class="button">
+          <span class="icon">
+            <i class="icon-reload"></i>
+          </span>
+          <span>Пересчитать</span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Корзина: Итоговый блок -->
+  <div class="column is-4">
+    <div class="box">
+
+      <!-- Итоги -->
+      <div class="content">
+        <p>
+          <span>Ваша корзина:</span>
+          <span class="has-text-weight-bold">{CART_COUNT_TOTAL}</span>
+          <span>товар{CART_COUNT_TOTAL | gen_word_end("","а","ов")}</span>
+        </p>
+
+        <div class="is-flex is-justify-content-space-between mb-2">
+          <span>Сумма заказа:</span>
+          <span class="has-text-weight-bold">{CART_SUM_NOW | money_format}</span>
+        </div>
+
+        {% FOR cart_discount %}
+          {% IF cart_discount.DISCOUNT_IS_ENABLED %}
+          <div class="is-flex is-justify-content-space-between mb-2">
+            <span>{cart_discount.DISCOUNT_NAME}:</span>
+            <span class="has-text-weight-bold">
+              {% IF cart_discount.IS_PERCENT %}
+                {cart_discount.DISCOUNT_VALUE}%
+              {% ELSE %}
+                {cart_discount.DISCOUNT_VALUE | money_format}
+              {% ENDIF %}
+            </span>
+          </div>
+          {% ENDIF %}
+        {% ENDFOR %}
+
+        <div class="is-flex is-justify-content-space-between mb-2">
+          <span>Доставка:</span>
+          <span class="has-text-weight-bold">{CART_SUM_DELIVERY | money_format}</span>
+        </div>
+
+        <hr>
+
+        <div class="is-flex is-justify-content-space-between is-size-5">
+          <strong>Итого:</strong>
+          <strong>{CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT | money_format}</strong>
+        </div>
+      </div>
+
+      <!-- Промокод -->
+      <div class="field has-addons mt-4">
+        <div class="control is-expanded">
+          <input class="input" type="text" name="form[coupon_code]" value="{ORDER_FORM_COUPON_CODE}" placeholder="Промокод">
+        </div>
+        <div class="control">
+          <button class="button is-info">Применить</button>
+        </div>
+      </div>
+
+      <!-- Оформление заказа -->
+      <div class="mt-5">
+        <button class="button is-primary is-fullwidth {% IF SETTINGS_STORE_ORDER_MIN_ORDER_PRICE %}is-disabled{% ENDIF %}" {% IF SETTINGS_STORE_ORDER_MIN_ORDER_PRICE %}disabled{% ENDIF %}>
+          Оформить заказ
+        </button>
+        <div class="has-text-centered mt-4">
+          <a href="{CART_TRUNCATE_URL}" class="has-text-grey is-size-7">Очистить корзину</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% ENDIF %}

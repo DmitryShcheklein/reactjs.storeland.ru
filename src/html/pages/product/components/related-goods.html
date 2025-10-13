@@ -1,0 +1,10 @@
+{% IFNOT related_goods_empty %}
+<section class="section py-0 px-0 mb-6">
+    <h2 class="title is-4">Сопутствующие товары</h2>
+    <div class="columns is-multiline">
+        {% FOR related_goods %}
+            @@include('../../../components/product-card/product-card.html', {"goods_array": "related_goods"})
+        {% ENDFOR %}
+    </div>
+</section>
+{% ENDIF %} 

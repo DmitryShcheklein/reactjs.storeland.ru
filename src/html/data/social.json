@@ -1,0 +1,68 @@
+[
+  {
+    "name": "telegram",
+    "title": "Telegram.com",
+    "link": "https://www.telegram.com/",
+    "isHide": false
+  },
+  {
+    "name": "viber",
+    "title": "Viber.com",
+    "link": "https://viber.com/",
+    "isHide": false
+  },
+  {
+    "name": "whatsapp",
+    "title": "Whatsapp.com",
+    "link": "https://whatsapp.com/",
+    "isHide": false
+  },
+  {
+    "name": "odnoklassniki",
+    "title": "Odnoklassniki",
+    "link": "https://ok.ru/",
+    "isHide": false
+  },
+  {
+    "name": "vk",
+    "title": "VK.com",
+    "link": "https://vk.com/",
+    "isHide": false
+  },
+  {
+    "name": "youtube",
+    "title": "YouTube.com",
+    "link": "https://youtube.com/",
+    "isHide": false
+  },
+  {
+    "name": "tiktok",
+    "title": "tiktok.com",
+    "link": "https://tiktok.com/",
+    "isHide": true
+  },
+  {
+    "name": "instagram",
+    "title": "Instagram.com",
+    "link": "https://www.instagram.com/",
+    "isHide": true
+  },
+  {
+    "name": "facebook",
+    "title": "FaceBook.com",
+    "link": "https://www.facebook.com/",
+    "isHide": true
+  },
+  {
+    "name": "twitter",
+    "title": "Twitter.com",
+    "link": "https://twitter.com/",
+    "isHide": true
+  },
+  {
+    "name": "skype",
+    "title": "Skype.com",
+    "link": "https://skype.com/",
+    "isHide": true
+  }
+]

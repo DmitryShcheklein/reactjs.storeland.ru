@@ -1,0 +1,5 @@
+{
+  "watch": ["gulpfile.js", "gulp-config/**/*.js"],
+  "exec": "gulp",
+  "ext": "js"
+}
