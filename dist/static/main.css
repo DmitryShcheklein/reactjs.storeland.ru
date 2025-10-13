@@ -1,0 +1,48 @@
+/**************************************/
+/*** Основные переменные шаблона ***/
+/**************************************/
+:root {--color-black: #333333;--color-white: #ffffff;--color-border: #ced0d6;--color-gray: #666666;--color-lightgray: #ced0d6;--color-darkgray: #444b5b;--color-primary: #70c062;--color-secondary: #7879f1;--color-tertiary: #ffd968;--color-yellow: #ffd968;--color-red: #ff383e;--color-bg: #f1f1f1;--color-shadow: rgba(201, 208, 230, 0.2);--white-shadow: rgba(255, 255, 255, 0.7);scrollbar-color: var(--color-lightgray) var(--color-bg);scrollbar-width: thin;}
+*,*:before,*:after {box-sizing: border-box;}
+html {font-size: 100%;-webkit-text-size-adjust: 100%;-ms-text-size-adjust: 100%;-webkit-font-smoothing: antialiased;}
+body {position: relative;font-family: "Open Sans",sans-serif;font-size: 14px;line-height: 1.2;font-weight: 400;color: #2e2e2e;overflow-x: hidden;margin: 0;padding: 0;}
+body {background-color: var(--color-white);}
+/* Тёмная тема */
+@media (prefers-color-scheme: dark) {
+body {background-color: var(--bulma-scheme-main);/* background-color: pink; */}
+}
+/** Кнопка. Вторичная **/
+.button-secondary {background: var(--color-darkgray);}
+@media (hover: hover) and (pointer: fine) {
+.button-secondary:hover {background: var(--color-secondary);}
+}
+@media (hover: none) and (pointer: coarse) {
+.button-secondary:focus {background: var(--color-secondary);}
+}
+@media (hover: hover) and (pointer: fine) {
+.swiper-button-next:hover,.swiper-button-prev:hover {color: var(--color-gray);background: transparent;}
+}
+@media all and (max-width: 1439px) {
+.swiper-button-next {right: 8px;}
+.swiper-button-prev {left: 8px;}
+}
+@media all and (max-width: 1023px) {
+.swiper-button-next,.swiper-button-prev {top: calc(50% - 12px);width: 24px;height: 24px;line-height: 24px;font-size: 24px;}
+}
+@media all and (min-width: 480px) {
+.swiper-pagination {display: none;}
+}
+@media all and (max-width: 479px) {
+.swiper-button-next,.swiper-button-prev {display: none;}
+}
+/* Подвал. Соц сети */
+.vk {color: #4B729F;}
+.odnoklassniki {color: #FFC107;}
+.youtube {color: #E53935;}
+.telegram {color: #039BE5;}
+.tiktok {color: #000000;}
+.viber {color: #665CAC;}
+.whatsapp {color: #4CAF50;}
+.instagram {color: #E4405F;}
+.facebook {color: #1877F2;}
+.twitter {color: #1DA1F2;}
+.skype {color: #00AFF0;}

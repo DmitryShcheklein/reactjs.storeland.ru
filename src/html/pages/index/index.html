@@ -1,27 +1,3 @@
-<!-- Хиты продаж -->
-{% IFNOT index_page_favorites_goods_empty %}
-<section class="section py-0 px-0 mb-6">
-    <h2 class="title is-4">Хиты продаж</h2>
-    <div class="columns is-multiline">
-        {% FOR index_page_favorites_goods %}
-            @@include('../../components/product-card/product-card.html', {"goods_array": "index_page_favorites_goods"})
-        {% ENDFOR %}
-    </div>
-</section>
-{% ENDIF %}
-
-<!-- Новинки -->
-{% IFNOT index_page_new_goods_empty %}
-<section class="section py-0 px-0 mb-6">
-    <h2 class="title is-4">Новинки</h2>
-    <div class="columns is-multiline">
-        {% FOR index_page_new_goods %}
-            @@include('../../components/product-card/product-card.html', {"goods_array": "index_page_new_goods"})
-        {% ENDFOR %}
-    </div>
-</section>
-{% ENDIF %}
-
 <!-- Товары на главной -->
 {% IFNOT index_page_goods_empty %}
 <section class="section py-0 px-0 mb-6">
@@ -33,13 +9,3 @@
     </div>
 </section>
 {% ENDIF %}
-
-<!-- Заголовок страницы и текст -->
-<section class="section py-0 px-0 mb-6">
-    <h1 class="title is-3">{PAGE_TITLE}</h1>
-    <p class="subtitle is-5">{BODY}</p>
-</section>
-
-<!-- Преимущества -->
-@@include('./features/features.html')
-<!-- /Преимущества -->

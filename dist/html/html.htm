@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <title>{PAGE_TITLE}</title>
+<meta name="description" content="{PAGE_META_DESCRIPTION}">
+<meta name="keywords" content="{PAGE_META_KEYWORDS}">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="format-detection" content="telephone=no">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="icon" href="{ASSETS_IMAGES_PATH}favicon.ico?design=sample" type="image/x-icon">
+<link rel="shortcut icon" href="{ASSETS_IMAGES_PATH}favicon.ico?design=sample" type="image/x-icon">
+
+<!-- Open Graph -->
+<meta property="og:title" content="{PAGE_TITLE}">
+<meta property="og:description" content="{PAGE_META_DESCRIPTION}">
+<meta property="og:image" content="{% IF MOD_LNAME=goods %}{GOODS_IMAGE_MEDIUM}{% ELSE %}{INDEX_PAGE_URL}design/logo.png{% ENDIF %}">
+<meta property="og:url" content="{INDEX_PAGE_URL}">
+<meta property="og:site_name" content="{SETTINGS_STORE_NAME}">
+<meta property="og:type" content="website">
+
+<!-- SEO параметр определяющий главную страницу для фильтрации её дублей -->
+{% IF PAGE_CANONICAL %}
+<link rel="canonical" href="{PAGE_CANONICAL}">
+{% ENDIF %}
+
+<!-- Подключаемые Иконки -->
+<link rel="stylesheet" type="text/css" href="/design/icomoon.css?design=sample" />
+
+<!-- Основные Стили для всех страниц -->
+<link rel="stylesheet" type="text/css" href="{ASSETS_STYLES_PATH}default.css?design=sample">
+<link rel="stylesheet" type="text/css" href="{ASSETS_JS_PATH}main.css?design=sample">
+
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css"
+>
+
+<!-- Подключаемые скрипты -->
+<script src="{ASSETS_JS_PATH}jquery.min.js?design=sample"></script>
+  </head>
+
+  <body>
+    <section class="hero is-fullheight">
+      <!-- Шапка -->
+      <header class="hero-head header">
+    <nav class="navbar">
+      <div class="container">
+        <div class="navbar-brand">
+          <a class="navbar-item" href="/">
+            <strong>{SETTINGS_STORE_NAME}</strong>
+          </a>
+        </div>
+        <div class="navbar-menu">
+          <div class="navbar-end">
+            <a class="navbar-item" href="/">Главная</a>
+            <a class="navbar-item" href="/catalog">Каталог</a>
+            <a class="navbar-item" href="/feedback">Контакты</a>
+            <a class="navbar-item" href="/cart">Корзина</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+</header>
+      <!-- /END Шапка -->
+
+      <main class="hero-body is-align-items-start">
+        <div class="container">
+          <!-- Главная страница-->
+          {% IF index_page %} <!-- Товары на главной -->
+{% IFNOT index_page_goods_empty %}
+<section class="section py-0 px-0 mb-6">
+    <h2 class="title is-4">Товары на главной</h2>
+    <div class="columns is-multiline">
+        {% FOR index_page_goods %}
+            <div class="column is-4">
+  <div class="card">
+    <form action="{CART_ADD_GOODS_MODIFICATION_URL | url_amp}" method="post" class="product-form-{index_page_goods.MIN_PRICE_NOW_ID} goodsListForm">
+      <input type="hidden" name="hash" value="{HASH}" />
+      <input type="hidden" name="form[goods_from]" value="{index_page_goods.GOODS_FROM}" />
+      <input type="hidden" name="form[goods_mod_id]" value="{index_page_goods.MIN_PRICE_NOW_ID}" />
+      
+      <div class="card-image">
+        <a href="{index_page_goods.URL_MIN_PRICE_NOW | url_amp}" title="{index_page_goods.NAME}">
+          <figure class="image is-4by3">
+            <img
+              {% IF index_page_goods.IMAGE_EMPTY %}
+                src="{ASSETS_IMAGES_PATH}no-photo-small.png?design=sample"
+              {% ELSE %}
+                src="{index_page_goods.IMAGE_MEDIUM}"
+              {% ENDIF %}
+              style="object-fit: contain;" 
+              alt="{index_page_goods.NAME}"
+              >
+          </figure>
+        </a>
+      </div>
+      
+      <div class="card-content">
+        <p class="title is-6 mb-2" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+          <a href="{index_page_goods.URL_MIN_PRICE_NOW | url_amp}" title="{index_page_goods.NAME}">
+            {index_page_goods.NAME}
+          </a>
+        </p>
+        
+        <p class="subtitle is-6">
+          <span>{index_page_goods.MIN_PRICE_NOW | money_format}</span> 
+        </p>
+        
+        {% IF index_page_goods.MAX_REST_VALUE=0 && SETTINGS_GOODS_DONT_PUT_TO_CART_MORE_THAN_AVAILABLE %}
+          <button class="button is-primary is-fullwidth" disabled>
+            <span>Нет в наличии</span>
+          </button>
+        {% ELSE %}
+          <div class="buttons">
+            <a class="button is-primary is-fullwidth add-cart quick" 
+               href="{CART_ADD_GOODS_MODIFICATION_URL | url_amp}?hash={HASH | url_amp}&amp;form%5Bgoods_from%5D={index_page_goods.GOODS_FROM}&amp;form%5Bgoods_mod_id%5D={index_page_goods.MIN_PRICE_NOW_ID}"
+               rel="nofollow">
+              <span class="icon">
+                <i class="icon-cart"></i>
+              </span>
+              <span>В корзину</span>
+            </a>
+            <a class="button is-info is-fullwidth quick-buy">
+              <span class="icon">
+                <i class="icon-flash"></i>
+              </span>
+              <span>Купить в 1 клик</span>
+            </a>
+          </div>
+        {% ENDIF %}
+      </div>
+    </form>
+  </div>
+</div>
+
+        {% ENDFOR %}
+    </div>
+</section>
+{% ENDIF %} {% ENDIF %}
+
+          <!-- Основная часть -->
+          {% IFNOT index_page %}
+          <!-- Хлебные крошки -->
+          <nav class="breadcrumb has-succeeds-separator" aria-label="breadcrumbs">
+  <div class="container">
+    <ul>
+      <li><a href="{INDEX_PAGE_URL}">Главная</a></li>
+
+      {% IF MOD_LNAME=cart %}
+        <li class="is-active"><a aria-current="page">
+          {% IF cart_items_empty %}Корзина покупок пуста{% ELSE %}Корзина{% ENDIF %}
+        </a></li>
+
+      {% ELSEIF MOD_LNAME=catalog %}
+        {% IF IS_FULL_CATALOG %}
+          <li class="is-active"><a href="{CATALOG_URL}" aria-current="page">Каталог</a></li>
+        {% ELSE %}
+          <li><a href="{CATALOG_URL}">Каталог</a></li>
+          {% FOR upper_navigation %}
+            <li class="{% IF upper_navigation.CURRENT %}is-active{% ENDIF %}">
+              <a href="{upper_navigation.URL}" {% IF upper_navigation.CURRENT %}aria-current="page"{% ENDIF %}>
+                {upper_navigation.NAME}
+              </a>
+            </li>
+          {% ENDFOR %}
+        {% ENDIF %}
+
+      {% ELSEIF MOD_LNAME=goods %}
+        <li><a href="{CATALOG_URL}">Каталог</a></li>
+        {% FOR upper_navigation %}
+          <li><a href="{upper_navigation.URL}">{upper_navigation.NAME}</a></li>
+        {% ENDFOR %}
+        <li class="is-active"><a href="{GOODS_URL}" aria-current="page">{GOODS_NAME}</a></li>
+
+      {% ELSEIF MOD_LNAME=user %}
+        {% IF ACT=login %}
+          <li class="is-active"><a aria-current="page">Войти или зарегистрироваться</a></li>
+        {% ELSEIF ACT=register %}
+          <li class="is-active"><a aria-current="page">Регистрация</a></li>
+        {% ELSEIF ACT=settings %}
+          <li class="is-active"><a aria-current="page">Личный кабинет</a></li>
+        {% ELSEIF ACT=favorites %}
+          <li class="is-active"><a aria-current="page">Избранные товары</a></li>
+        {% ELSEIF ACT=history_list %}
+          <li><a href="{USER_SETTINGS_URL}">Личный кабинет</a></li>
+          <li class="is-active"><a aria-current="page">Мои заказы</a></li>
+        {% ELSEIF ACT=history_info %}
+          <li><a href="{USER_SETTINGS_URL}">Личный кабинет</a></li>
+          <li><a href="{USER_HISTORY_LIST_URL}">Мои заказы</a></li>
+          <li class="is-active"><a aria-current="page">Карточка заказа</a></li>
+        {% ELSEIF ACT=change %}
+          <li><a href="{USER_SETTINGS_URL}">Личный кабинет</a></li>
+          <li class="is-active"><a aria-current="page">Восстановление пароля</a></li>
+        {% ELSEIF ACT=recovery %}
+          <li><a href="{USER_SETTINGS_URL}">Личный кабинет</a></li>
+          <li class="is-active"><a aria-current="page">Восстановление пароля</a></li>
+        {% ENDIF %}
+
+      {% ELSEIF MOD_LNAME=order %}
+        {% IF ACT=stage %}
+          <li><a href="{CART_URL}">Корзина</a></li>
+          <li class="is-active"><a aria-current="page">Оформление заказа</a></li>
+        {% ELSEIF ACT=info %}
+          <li><a href="{CART_URL}">Корзина</a></li>
+          <li><a href="{CART_URL}">Оформление заказа</a></li>
+          <li class="is-active"><a aria-current="page">
+            Заказ {% IF ORDER_NUM %}№{ORDER_NUM}{% ENDIF %} успешно оформлен
+          </a></li>
+        {% ENDIF %}
+
+      {% ELSEIF MOD_LNAME=search %}
+        <li class="is-active"><a aria-current="page">Поиск</a></li>
+
+      {% ELSEIF MOD_LNAME=compare %}
+        <li class="is-active"><a aria-current="page">Список сравнения</a></li>
+
+      {% ELSEIF MOD_LNAME=feedback %}
+        <li class="is-active"><a aria-current="page">Контакты</a></li>
+
+      {% ELSEIF MOD_LNAME=news %}
+        <li><a href="{NEWS_SECTION_URL}">{NEWS_SECTION_NAME}</a></li>
+        {% IF NEWS_TITLE %}
+          <li class="is-active"><a href="{CURRENT_URL}" aria-current="page">{NEWS_TITLE}</a></li>
+        {% ENDIF %}
+
+      {% ELSEIF MOD_LNAME=page %}
+        <li class="is-active"><a href="{CURRENT_URL}" aria-current="page">{PAGE_NAME}</a></li>
+
+      {% ELSEIF MOD_LNAME=discount %}
+        {% IF ACT=index && ID %}
+          <li><a href="{DISCOUNT_URL}">Акции магазина</a></li>
+          <li class="is-active"><a aria-current="page">{PROMOTIONAL_CAMPAIGN_NAME}</a></li>
+        {% ELSEIF ACT=index %}
+          <li class="is-active"><a aria-current="page">Акции магазина</a></li>
+        {% ENDIF %}
+
+      {% ELSEIF MOD_LNAME=callback %}
+        <li class="is-active"><a aria-current="page">Заказ обратного звонка</a></li>
+
+      {% ELSEIF MOD_LNAME= %}
+        <li class="is-active"><a aria-current="page">Внутренняя ошибка сервера</a></li>
+
+      {% ELSEIF CURRENT_URL=NEWS_SHOP_URL || CURRENT_URL=NEWS_ARTICLES_URL || CURRENT_URL=NEWS_MASS_MEDIA_URL || CURRENT_URL=NEWS_ALL_URL %}
+        <li><a href="{NEWS_SECTION_URL}">{NEWS_SECTION_NAME}</a></li>
+        <li class="is-active"><a href="{CURRENT_URL}" aria-current="page">{NEWS_TITLE}</a></li>
+
+      {% ENDIF %}
+    </ul>
+  </div>
+</nav>
+          <!-- /END Хлебные крошки -->
+
+          {% IF MOD_LNAME = goods || MOD_LNAME = cart || MOD_LNAME = feedback %}
+          {BODY} {% ELSE %}
+          <div class="columns">
+            <!-- Левый блок -->
+            <div class="column is-one-quarter">
+              <aside class="sidebar">
+	<div class="menu">
+		<p class="menu-label">Каталог</p>
+		<ul class="menu-list">
+			{% FOR catalog_full %}
+			{% IF catalog_full.HIDE %}{continue}{% ENDIF %}
+				{% IFNOT catalog_full.LEVEL = 0 && catalog_full.FIRST %}
+				<ul data-level="{catalog_full.LEVEL}" data-parent-id="{catalog_full.PARENT_ID}">
+				{% ENDIF %}
+				<li data-level="{catalog_full.LEVEL}" 
+					data-id="{catalog_full.ID}" 
+					data-parent-id="{catalog_full.PARENT_ID}">
+					<a class="{% IF catalog_full.CURRENT %}is-active{% ENDIF %}" 
+					   href="{catalog_full.URL}">
+						{catalog_full.NAME}
+						{% IF catalog_full.ISSET_VISIBLE_SUB %}
+						<span class="icon is-small">
+							<i class="icon-arrow-down"></i>
+						</span>
+						{% ENDIF %}
+					</a>
+					{% IF catalog_full.ISSET_SUB=0 %}
+				</li>{% ENDIF %}
+				{% IF catalog_full.LAST %}{% FOR out %}</li>{% IFNOT catalog_full.out.LAST %}
+			</ul>{% ENDIF out.LAST %}{% ENDFOR out %}{% ENDIF LAST %}
+			{% ENDFOR catalog_full %}
+		</ul>
+	</div>
+</aside>
+            </div>
+            <!-- Основной контент -->
+            <div class="column">
+              <!-- Заголовок страницы -->
+              <h1 class="title">
+  {% IF MOD_LNAME=user %}
+    {% IF ACT=login %}
+      Войти или зарегистрироваться
+    {% ELSEIF ACT=change %}
+      Активация нового пароля
+    {% ELSEIF ACT=recovery %}
+      Восстановление пароля
+    {% ELSEIF ACT=favorites %}
+      Избранные товары
+    {% ELSEIF ACT=history_list %}
+      Мои заказы
+    {% ELSEIF ACT=settings %}
+      Личный кабинет
+    {% ELSEIF ACT=register %}
+      Регистрация клиента
+    {% ELSEIF ACT=history_info %}
+      Карточка заказа
+    {% ENDIF %}
+  {% ELSEIF MOD_LNAME=order %}
+    {% IF ACT=info %}
+      Заказ {% IF ORDER_NUM %}№{ORDER_NUM}{% ENDIF %}
+    {% ELSEIF ACT=stage %}
+      Оформление заказа. Шаг {ORDER_STAGE_NUM} из 4
+    {% ENDIF %}
+  {% ELSEIF MOD_LNAME=search %}
+    Результат поиска по запросу: {% IFNOT search_query_empty %}&laquo;{SEARCH_QUERY}&raquo;{% ENDIF %}
+    {% IFNOT search_query_empty %} <span>({GOODS_PAGES_RESULTS} товар{GOODS_PAGES_RESULTS | gen_word_end("","а","ов")} найд{GOODS_PAGES_RESULTS | gen_word_end("ен","ено","ено")} по запросу)</span>{% ENDIF %}
+  {% ELSEIF MOD_LNAME=discount && ACT=index && ID %}
+    {PROMOTIONAL_CAMPAIGN_NAME} <span class="result">{GOODS_PAGES_RESULTS} товар{GOODS_PAGES_RESULTS | gen_word_end("","а","ов")}</span>
+  {% ELSEIF MOD_LNAME=discount && ACT=index %}
+    Акции {% IF PROMOTION_CAMPAIGN_PAGES_RESULTS %}<span class="result">{PROMOTION_CAMPAIGN_PAGES_RESULTS} акци{PROMOTION_CAMPAIGN_PAGES_RESULTS | gen_word_end("я","и","ий")}</span>{% ENDIF %}
+  {% ELSEIF MOD_LNAME=feedback %}
+    Связь с администрацией
+  {% ELSEIF CURRENT_URL=NEWS_SHOP_URL || CURRENT_URL=NEWS_ARTICLES_URL || CURRENT_URL=NEWS_MASS_MEDIA_URL %}
+    {NEWS_SECTION_NAME}
+  {% ELSEIF MOD_LNAME=news %}
+    {PAGE_TITLE}
+  {% ELSEIF MOD_LNAME=compare %}
+    {% IF compare_list_empty %}Ваш список сравнения пуст{% ELSE %}Сравнение товаров{% ENDIF %}
+  {% ELSEIF MOD_LNAME=page %}
+    {PAGE_NAME}
+  {% ELSEIF MOD_LNAME=callback %}
+    Заказ обратного звонка
+  {% ELSEIF MOD_LNAME=cart %}
+    {% IF cart_items_empty %}
+      Корзина покупок пуста
+    {% ELSE %}
+      Корзина
+    {% ENDIF %}
+  {% ELSEIF MOD_LNAME=catalog %}
+    {% IF IS_FULL_CATALOG %}
+      Каталог
+    {% ELSE %}
+      {% IF GOODS_PAGES_RESULTS = 0 %}
+        {CATEGORY_NAME}
+      {% ELSE %}
+        {CATEGORY_NAME}
+      {% ENDIF %}
+    {% ENDIF %}
+    {% IF GOODS_PAGES_RESULTS > 0 %}
+      <span class="result">{GOODS_PAGES_RESULTS} товар{GOODS_PAGES_RESULTS | gen_word_end("","а","ов")}</span>
+    {% ENDIF %}
+  {% ELSE %}
+    {PAGE_TITLE}
+  {% ENDIF %}
+</h1>
+
+              <!-- /END Заголовок страницы -->
+
+              {BODY}
+            </div>
+          </div>
+          {% ENDIF %} {% ENDIF %}
+        </div>
+      </main>
+      <!-- /END Основная часть -->
+
+      <!-- Подвал -->
+      <footer class="footer hero-foot" data-theme="dark">
+  <div class="container">
+
+    <div class="columns">
+      <div class="column">
+        <h3 class="title has-text-white">Контакты</h3>
+        <address class="has-text-white">
+          {% IF SETTINGS_STORE_REGION %}<div><b>Адрес</b> <span>{SETTINGS_STORE_REGION}</span></div>{% ENDIF %}
+          {% IF SETTINGS_STORE_WORK_TIME %}<div><b>Режим работы</b> <time>{SETTINGS_STORE_WORK_TIME}</time></div>{% ENDIF %}
+          {% IF SETTINGS_STORE_PHONE_NUMBER1 %}<div><b>Телефон 1</b> <a href="tel:{SETTINGS_STORE_PHONE_COUNTRY_CODE1}{SETTINGS_STORE_PHONE_CITY_CODE1}{SETTINGS_STORE_PHONE_NUMBER1}">{SETTINGS_STORE_PHONE_COUNTRY_CODE1}({SETTINGS_STORE_PHONE_CITY_CODE1}){SETTINGS_STORE_PHONE_NUMBER1}</a></div>{% ENDIF %}
+          {% IF SETTINGS_STORE_PHONE_NUMBER2 %}<div><b>Телефон 2</b> <a href="tel:{SETTINGS_STORE_PHONE_COUNTRY_CODE2}{SETTINGS_STORE_PHONE_CITY_CODE2}{SETTINGS_STORE_PHONE_NUMBER2}">{SETTINGS_STORE_PHONE_COUNTRY_CODE2}({SETTINGS_STORE_PHONE_CITY_CODE2}){SETTINGS_STORE_PHONE_NUMBER2}</a></div>{% ENDIF %}
+          {% IF SETTINGS_STORE_PHONE_NUMBER3 %}<div><b>Факс</b> <a href="tel:{SETTINGS_STORE_PHONE_COUNTRY_CODE3}{SETTINGS_STORE_PHONE_CITY_CODE3}{SETTINGS_STORE_PHONE_NUMBER3}">{SETTINGS_STORE_PHONE_COUNTRY_CODE3}({SETTINGS_STORE_PHONE_CITY_CODE3}){SETTINGS_STORE_PHONE_NUMBER3}</a></div>{% ENDIF %}
+          {% IF SETTINGS_STORE_EMAIL_MAIN %}<div><b>Email</b> <a href="mailto:{SETTINGS_STORE_EMAIL_MAIN}">{SETTINGS_STORE_EMAIL_MAIN}</a></div>{% ENDIF %}
+          {% IF SETTINGS_STORE_SKYPE %}<div><b>Skype</b> <a href="skype:{SETTINGS_STORE_SKYPE}?call">{SETTINGS_STORE_SKYPE}</a></div>{% ENDIF %}
+        </address>
+      </div>
+
+      <div class="column">
+        <h3 class="title has-text-white">Давайте дружить</h3>
+        <div class="columns">
+          <div class="column is-half">
+            <div class="is-flex is-justify-content-space-between is-size-4">
+    <a class="telegram " href="https://www.telegram.com/" title="Telegram.com" target="_blank">
+    <i class="icon-telegram"></i>
+</a><a class="viber " href="https://viber.com/" title="Viber.com" target="_blank">
+    <i class="icon-viber"></i>
+</a><a class="whatsapp " href="https://whatsapp.com/" title="Whatsapp.com" target="_blank">
+    <i class="icon-whatsapp"></i>
+</a><a class="odnoklassniki " href="https://ok.ru/" title="Odnoklassniki" target="_blank">
+    <i class="icon-odnoklassniki"></i>
+</a><a class="vk " href="https://vk.com/" title="VK.com" target="_blank">
+    <i class="icon-vk"></i>
+</a><a class="youtube " href="https://youtube.com/" title="YouTube.com" target="_blank">
+    <i class="icon-youtube"></i>
+</a><a class="tiktok is-hidden" href="https://tiktok.com/" title="tiktok.com" target="_blank">
+    <i class="icon-tiktok"></i>
+</a><a class="instagram is-hidden" href="https://www.instagram.com/" title="Instagram.com" target="_blank">
+    <i class="icon-instagram"></i>
+</a><a class="facebook is-hidden" href="https://www.facebook.com/" title="FaceBook.com" target="_blank">
+    <i class="icon-facebook"></i>
+</a><a class="twitter is-hidden" href="https://twitter.com/" title="Twitter.com" target="_blank">
+    <i class="icon-twitter"></i>
+</a><a class="skype is-hidden" href="https://skype.com/" title="Skype.com" target="_blank">
+    <i class="icon-skype"></i>
+</a>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Подвал. Копирайт -->
+    <div class="content has-text-centered is-size-7 has-text-white">
+      <div>&copy;{DATE_YEAR} {SETTINGS_STORE_NAME}. Все права защищены.</div>
+      <div>{SETTINGS_STORE_ORG_NAME}.</div>
+      <div>{COPYRIGHT_FOR_DESIGN_THEMENAME}</div>
+      <div style="display: none;">{SETTINGS_STORE_HTML_CODE}</div>
+    </div>
+
+  </div>
+</footer>
+      <!-- /END Подвал -->
+    </section>
+
+    <!-- SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "{SETTINGS_STORE_ORG_NAME}",
+      {% IF SETTINGS_STORE_REGION %}
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "{SETTINGS_STORE_REGION}"
+      },
+      {% ENDIF %}
+      {% IF SETTINGS_STORE_PHONE_NUMBER1 || SETTINGS_STORE_PHONE_NUMBER2 %}
+      "telephone": [
+        {% IF SETTINGS_STORE_PHONE_NUMBER1 %}
+        "{SETTINGS_STORE_PHONE_COUNTRY_CODE1}{SETTINGS_STORE_PHONE_CITY_CODE1}{SETTINGS_STORE_PHONE_NUMBER1}"
+        {% IF SETTINGS_STORE_PHONE_NUMBER2 %},{% ENDIF %}
+        {% ENDIF %}
+
+        {% IF SETTINGS_STORE_PHONE_NUMBER2 %}
+        "{SETTINGS_STORE_PHONE_COUNTRY_CODE2}{SETTINGS_STORE_PHONE_CITY_CODE2}{SETTINGS_STORE_PHONE_NUMBER2}"
+        {% ENDIF %}
+      ]
+      {% IF SETTINGS_STORE_PHONE_NUMBER3 || SETTINGS_STORE_EMAIL_MAIN%},{% ENDIF %}
+      {% ENDIF %}
+      {% IF SETTINGS_STORE_PHONE_NUMBER3 %}
+      "faxNumber": "{SETTINGS_STORE_PHONE_COUNTRY_CODE3}{SETTINGS_STORE_PHONE_CITY_CODE3}{SETTINGS_STORE_PHONE_NUMBER3}",
+      {% ENDIF %}
+      {% IF SETTINGS_STORE_EMAIL_MAIN %}
+      "email": "{SETTINGS_STORE_EMAIL_MAIN}"
+      {% ENDIF %}
+    }
+</script>
+
+{% IFNOT index_page %}
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Главная",
+      "item": "{INDEX_PAGE_URL}"
+    }
+    {% IF MOD_LNAME=cart %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "{% IF cart_items_empty %}Корзина покупок пуста{% ELSE %}Корзина{% ENDIF %}",
+      "item": "{CART_URL}"
+    }
+    {% ELSEIF MOD_LNAME=user && ACT=login %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Войти или зарегистрироваться"
+    }
+    {% ELSEIF MOD_LNAME=user && ACT=change %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Восстановление пароля",
+      "item": "{USER_RECOVERY_URL}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Активация нового пароля"
+    }
+    {% ELSEIF MOD_LNAME=user && ACT=recovery %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Восстановление пароля"
+    }
+    {% ELSEIF MOD_LNAME=user && ACT=favorites %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Сохраненные товары"
+    }
+    {% ELSEIF MOD_LNAME=user && ACT=history_info %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Личный кабинет",
+      "item": "{USER_SETTINGS_URL}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Мои заказы",
+      "item": "{USER_HISTORY_LIST_URL}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "name": "Карточка заказа"
+    }
+    {% ELSEIF MOD_LNAME=user && ACT=history_list %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Личный кабинет",
+      "item": "{USER_SETTINGS_URL}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Мои заказы"
+    }
+    {% ELSEIF MOD_LNAME=user && ACT=settings %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Личный кабинет"
+    }
+    {% ELSEIF MOD_LNAME=user && ACT=register %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Регистрация клиента"
+    }
+    {% ELSEIF MOD_LNAME=order && ACT=stage %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Корзина",
+      "item": "{CART_URL}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Оформление заказа"
+    }
+    {% ELSEIF MOD_LNAME=search %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Поиск"
+    }
+    {% ELSEIF MOD_LNAME=discount && ACT=index && ID %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Акции магазина",
+      "item": "{DISCOUNT_URL}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "{PROMOTIONAL_CAMPAIGN_NAME}"
+    }
+    {% ELSEIF MOD_LNAME=discount && ACT=index %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Акции магазина"
+    }
+    {% ELSEIF MOD_LNAME=order && ACT=info %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Корзина",
+      "item": "{CART_URL}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Оформление заказа",
+      "item": "{CART_URL}"
+    }
+    {% ELSEIF MOD_LNAME=feedback && ACT=index %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Связь с администрацией"
+    }
+    {% ELSEIF CURRENT_URL=NEWS_SHOP_URL || CURRENT_URL=NEWS_ARTICLES_URL || CURRENT_URL=NEWS_MASS_MEDIA_URL || CURRENT_URL=NEWS_ALL_URL %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "{NEWS_SECTION_NAME}"
+    }
+    {% ELSEIF MOD_LNAME=news %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "{NEWS_SECTION_NAME}",
+      "item": "{NEWS_SECTION_URL}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "{NEWS_TITLE}"
+    }
+    {% ELSEIF MOD_LNAME=compare %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Список сравнения"
+    }
+    {% ELSEIF MOD_LNAME=page %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "{PAGE_NAME}"
+    }
+    {% ELSEIF MOD_LNAME= %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Внутренняя ошибка сервера"
+    }
+    {% ELSEIF MOD_LNAME=callback %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Заказ обратного звонка"
+    }
+    {% ELSEIF MOD_LNAME=goods %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Каталог",
+      "item": "{CATALOG_URL}"
+    }
+    {% FOR upper_navigation %},
+    {
+      "@type": "ListItem",
+      "position": {upper_navigation.LEVEL | plus('3')},
+      "name": "{upper_navigation.NAME}",
+      "item": "{upper_navigation.URL}"
+    }
+    {% ENDFOR %}
+    ,{
+      "@type": "ListItem",
+      "position": {% FOR upper_navigation %}{%IF upper_navigation.last%}{upper_navigation.index | plus("3")}{%ENDIF%}{%ENDFOR%},
+      "name": "{GOODS_NAME}"
+    }
+    {% ELSEIF MOD_LNAME=catalog %}
+    {% IF IS_FULL_CATALOG %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Каталог"
+    }
+    {% ELSE %},
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Каталог",
+      "item": "{CATALOG_URL}"
+    }
+    {% FOR upper_navigation %}
+    {% IF upper_navigation.CURRENT_PARENT %},
+    {
+      "@type": "ListItem",
+      "position": {upper_navigation.index | plus("2")},
+      "name": "{upper_navigation.NAME}",
+      "item": "{upper_navigation.URL}"
+    }
+    {% ENDIF %}
+    {% ENDFOR upper_navigation %}
+    {% ENDIF %}
+    {% ENDIF %}
+  ]
+}
+</script>
+    
+{% ENDIF %}
+
+{% IF index_page %}  
+    {% FOR index_page_new_goods %}
+      <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "{index_page_new_goods.NAME}",
+  "sku": "{index_page_new_goods.ART_NUMBER}",
+  "image": "{% IF index_page_new_goods.IMAGE_EMPTY %}{ASSETS_IMAGES_PATH}no-photo.png?design=sample{% ELSE %}{index_page_new_goods.IMAGE_MEDIUM}{% ENDIF %}",
+  "description": "{index_page_new_goods.DESCRIPTION_SHORT}",
+  {% IFNOT SETTINGS_OPINION_DISABLE %}
+  {% IF index_page_new_goods.OPINION_RATING_VALUE %}
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "{index_page_new_goods.OPINION_RATING_VALUE}",
+    "reviewCount": "{index_page_new_goods.OPINION_RATING_CNT_ALL}",
+    "bestRating": "10",
+    "worstRating": "1"
+  },
+  {% ENDIF %}
+  {% ENDIF %}
+  "offers": {
+    "@type": "AggregateOffer",
+    "priceCurrency": "{CURRENCY_CHAR_CODE}",
+    "lowPrice": "{index_page_new_goods.MIN_PRICE_NOW}",
+    "highPrice": "{index_page_new_goods.MAX_PRICE_NOW}",
+    "offerCount": "{% FOR mods %}{% IF index_page_new_goods.mods.last %}{index_page_new_goods.mods.length}{% ENDIF %}{% ENDFOR %}",
+    "availability": "{% IF index_page_new_goods.MAX_REST_VALUE>0 %}http://schema.org/InStock{% ELSE %}http://schema.org/OutOfStock{% ENDIF %}",
+    "priceValidUntil": "{index_page_new_goods.MAX_DISCOUNT_EXPIRED_AT | date('Y-m-d')}"
+  }
+}
+</script> 
+    {% ENDFOR %}  
+  
+    {% FOR index_page_goods %}
+      <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "{index_page_goods.NAME}",
+  "sku": "{index_page_goods.ART_NUMBER}",
+  "image": "{% IF index_page_goods.IMAGE_EMPTY %}{ASSETS_IMAGES_PATH}no-photo.png?design=sample{% ELSE %}{index_page_goods.IMAGE_MEDIUM}{% ENDIF %}",
+  "description": "{index_page_goods.DESCRIPTION_SHORT}",
+  {% IFNOT SETTINGS_OPINION_DISABLE %}
+  {% IF index_page_goods.OPINION_RATING_VALUE %}
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "{index_page_goods.OPINION_RATING_VALUE}",
+    "reviewCount": "{index_page_goods.OPINION_RATING_CNT_ALL}",
+    "bestRating": "10",
+    "worstRating": "1"
+  },
+  {% ENDIF %}
+  {% ENDIF %}
+  "offers": {
+    "@type": "AggregateOffer",
+    "priceCurrency": "{CURRENCY_CHAR_CODE}",
+    "lowPrice": "{index_page_goods.MIN_PRICE_NOW}",
+    "highPrice": "{index_page_goods.MAX_PRICE_NOW}",
+    "offerCount": "{% FOR mods %}{% IF index_page_goods.mods.last %}{index_page_goods.mods.length}{% ENDIF %}{% ENDFOR %}",
+    "availability": "{% IF index_page_goods.MAX_REST_VALUE>0 %}http://schema.org/InStock{% ELSE %}http://schema.org/OutOfStock{% ENDIF %}",
+    "priceValidUntil": "{index_page_goods.MAX_DISCOUNT_EXPIRED_AT | date('Y-m-d')}"
+  }
+}
+</script> 
+    {% ENDFOR %}  
+  
+    {% FOR index_page_favorites_goods %}
+      <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "{index_page_favorites_goods.NAME}",
+  "sku": "{index_page_favorites_goods.ART_NUMBER}",
+  "image": "{% IF index_page_favorites_goods.IMAGE_EMPTY %}{ASSETS_IMAGES_PATH}no-photo.png?design=sample{% ELSE %}{index_page_favorites_goods.IMAGE_MEDIUM}{% ENDIF %}",
+  "description": "{index_page_favorites_goods.DESCRIPTION_SHORT}",
+  {% IFNOT SETTINGS_OPINION_DISABLE %}
+  {% IF index_page_favorites_goods.OPINION_RATING_VALUE %}
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "{index_page_favorites_goods.OPINION_RATING_VALUE}",
+    "reviewCount": "{index_page_favorites_goods.OPINION_RATING_CNT_ALL}",
+    "bestRating": "10",
+    "worstRating": "1"
+  },
+  {% ENDIF %}
+  {% ENDIF %}
+  "offers": {
+    "@type": "AggregateOffer",
+    "priceCurrency": "{CURRENCY_CHAR_CODE}",
+    "lowPrice": "{index_page_favorites_goods.MIN_PRICE_NOW}",
+    "highPrice": "{index_page_favorites_goods.MAX_PRICE_NOW}",
+    "offerCount": "{% FOR mods %}{% IF index_page_favorites_goods.mods.last %}{index_page_favorites_goods.mods.length}{% ENDIF %}{% ENDFOR %}",
+    "availability": "{% IF index_page_favorites_goods.MAX_REST_VALUE>0 %}http://schema.org/InStock{% ELSE %}http://schema.org/OutOfStock{% ENDIF %}",
+    "priceValidUntil": "{index_page_favorites_goods.MAX_DISCOUNT_EXPIRED_AT | date('Y-m-d')}"
+  }
+}
+</script> 
+    {% ENDFOR %}  
+{% ENDIF %}
+    <!-- /END SEO -->
+
+    <!-- Скрипты -->
+    <!-- Скрипты магазина-->
+<script defer type="text/javascript" src="{ASSETS_STYLES_PATH}main.js?design=sample"></script>
+    <!-- /END Скрипты -->
+  </body>
+</html>
