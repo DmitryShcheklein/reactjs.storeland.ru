@@ -1,37 +1,116 @@
 <title>{PAGE_TITLE}</title>
-<meta name="description" content="{PAGE_META_DESCRIPTION}">
-<meta name="keywords" content="{PAGE_META_KEYWORDS}">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<meta name="format-detection" content="telephone=no">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<link rel="icon" href="{ASSETS_IMAGES_PATH}favicon.ico?design=@@DESIGN_NAME" type="image/x-icon">
-<link rel="shortcut icon" href="{ASSETS_IMAGES_PATH}favicon.ico?design=@@DESIGN_NAME" type="image/x-icon">
+<meta name="description" content="{PAGE_META_DESCRIPTION}" />
+<meta name="keywords" content="{PAGE_META_KEYWORDS}" />
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1, maximum-scale=1"
+/>
+<meta name="format-detection" content="telephone=no" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link
+  rel="icon"
+  href="{ASSETS_IMAGES_PATH}favicon.ico?design=@@DESIGN_NAME"
+  type="image/x-icon"
+/>
+<link
+  rel="shortcut icon"
+  href="{ASSETS_IMAGES_PATH}favicon.ico?design=@@DESIGN_NAME"
+  type="image/x-icon"
+/>
 
 <!-- Open Graph -->
-<meta property="og:title" content="{PAGE_TITLE}">
-<meta property="og:description" content="{PAGE_META_DESCRIPTION}">
-<meta property="og:image" content="{% IF MOD_LNAME=goods %}{GOODS_IMAGE_MEDIUM}{% ELSE %}{INDEX_PAGE_URL}design/logo.png{% ENDIF %}">
-<meta property="og:url" content="{INDEX_PAGE_URL}">
-<meta property="og:site_name" content="{SETTINGS_STORE_NAME}">
-<meta property="og:type" content="website">
+<meta property="og:title" content="{PAGE_TITLE}" />
+<meta property="og:description" content="{PAGE_META_DESCRIPTION}" />
+<meta
+  property="og:image"
+  content="{% IF MOD_LNAME=goods %}{GOODS_IMAGE_MEDIUM}{% ELSE %}{INDEX_PAGE_URL}design/logo.png{% ENDIF %}"
+/>
+<meta property="og:url" content="{INDEX_PAGE_URL}" />
+<meta property="og:site_name" content="{SETTINGS_STORE_NAME}" />
+<meta property="og:type" content="website" />
 
 <!-- SEO параметр определяющий главную страницу для фильтрации её дублей -->
 {% IF PAGE_CANONICAL %}
-<link rel="canonical" href="{PAGE_CANONICAL}">
+<link rel="canonical" href="{PAGE_CANONICAL}" />
 {% ENDIF %}
 
 <!-- Подключаемые Иконки -->
-<link rel="stylesheet" type="text/css" href="/design/icomoon.css?design=@@DESIGN_NAME" />
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="/design/icomoon.css?design=@@DESIGN_NAME"
+/>
 
 <!-- Основные Стили для всех страниц -->
-<link rel="stylesheet" type="text/css" href="{ASSETS_STYLES_PATH}default.css?design=@@DESIGN_NAME">
-<link rel="stylesheet" type="text/css" href="{ASSETS_JS_PATH}main.css?design=@@DESIGN_NAME">
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{ASSETS_STYLES_PATH}default.css?design=@@DESIGN_NAME"
+/>
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{ASSETS_JS_PATH}main.css?design=@@DESIGN_NAME"
+/>
 
 <link
   rel="stylesheet"
   href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css"
->
+/>
 
 <!-- Подключаемые скрипты -->
-<script src="{ASSETS_JS_PATH}jquery.min.js?design=@@DESIGN_NAME"></script>
+<!-- <script src="{ASSETS_JS_PATH}jquery.min.js?design=@@DESIGN_NAME"></script> -->
+
+<!-- Подключаем скрипт Babel для трансляции JSX -->
+<script
+  src="https://unpkg.com/@babel/standalone@7.24.0/babel.js"
+  defer
+></script>
+<script type="importmap">
+  {
+    "imports": {
+      "react": "https://esm.sh/react@18.2.0",
+      "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+      "@tanstack/react-query": "https://esm.sh/@tanstack/react-query@5.59.16",
+      "@tanstack/react-query-devtools": "https://esm.sh/@tanstack/react-query-devtools@5.59.16"
+    }
+  }
+</script>
+<!-- <script
+  type="text/babel"
+  data-type="module"
+  defer
+  data-presets="env,react"
+  src="{ASSETS_STYLES_PATH}cart-query-new.js"
+></script> -->
+<!-- Подключаем скрипт React -->
+<!-- <script src="https://unpkg.com/react@18.3.1/files/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/files/umd/react-dom.development.js"></script> -->
+
+<!-- Подключаемые скрипты для формы заказа -->
+<!-- <script src="https://unpkg.com/imask" defer></script>
+<script
+  src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"
+  defer
+></script>
+<script
+  src="https://unpkg.com/react-imask@7.4.0/dist/react-imask.js"
+  defer
+></script>
+<script src="https://unpkg.com/classnames@2.5.1/index.js" defer></script>
+<script src="https://unpkg.com/dayjs@1.11.10/dayjs.min.js" defer></script>
+<script
+  src="https://unpkg.com/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+  defer
+></script>
+<script
+  src="https://unpkg.com/air-datepicker@3.4.0/air-datepicker.js"
+  defer
+></script>
+<link
+  href="
+  https://cdn.jsdelivr.net/npm/air-datepicker@3.4.0/air-datepicker.min.css
+  "
+  rel="stylesheet"
+/> -->

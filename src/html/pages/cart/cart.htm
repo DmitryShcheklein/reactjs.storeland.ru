@@ -1,168 +1,142 @@
-{% IF cart_items_empty %}
-<div class="notification is-warning">
-  Корзина покупок пуста. Вы можете выбрать нужный товар из <a href="{CATALOG_URL}">каталога</a>.
-</div>
-{% ELSE %}
-
-<!-- Заголовок страницы -->
-@@include('../../components/page-title/page-title.html')
-<!-- /END Заголовок страницы -->
-
-<div class="columns">
-  <!-- Корзина: Элементы -->
-  <div class="column is-8">
-    <form action="{CART_URL}" method="post">
-      <input type="hidden" name="fast_order" value="1" />
-      <input type="hidden" name="hash" value="{HASH}" />
-
-      <!-- Товары -->
-      {% FOR cart_items %}
-      <div class="box mb-4" data-id="{cart_items.GOODS_ID}" data-mod-id="{cart_items.GOODS_MOD_ID}">
-        <div class="columns is-vcentered">
-          <!-- Изображение -->
-          <div class="column is-2">
-            <figure class="image">
-              <a href="{cart_items.GOODS_URL}">
-                <img src="{% IF cart_items.GOODS_IMAGE_EMPTY %}{ASSETS_IMAGES_PATH}no-photo.png?design=THEMENAME{% ELSE %}{cart_items.GOODS_IMAGE_ICON}{% ENDIF %}" alt="{cart_items.GOODS_NAME}">
-              </a>
-            </figure>
-          </div>
-
-          <!-- Информация о товаре -->
-          <div class="column is-4">
-            <a href="{cart_items.GOODS_URL}" class="has-text-weight-medium is-size-5">{cart_items.GOODS_NAME}</a>
-            
-            {% IF cart_items.GOODS_MOD_ART_NUMBER %}
-            <div class="mt-2">
-              <span class="has-text-grey">Артикул: </span>
-              <span>{cart_items.GOODS_MOD_ART_NUMBER}</span>
-            </div>
-            {% ENDIF %}
-
-            {% FOR distinctive_properties %}
-            <div class="mt-1">
-              <span class="has-text-grey">{cart_items.distinctive_properties.NAME}: </span>
-              <span>{cart_items.distinctive_properties.VALUE}</span>
-            </div>
-            {% ENDFOR %}
-          </div>
-
-          <!-- Количество -->
-          <div class="column is-2">
-            <div class="field">
-              <input class="input" 
-                     type="number" 
-                     name="form[quantity][{cart_items.GOODS_MOD_ID}]" 
-                     {% IF SETTINGS_GOODS_DONT_PUT_TO_CART_MORE_THAN_AVAILABLE %}max="{cart_items.GOODS_MOD_REST_VALUE}"{% ENDIF %}
-                     min="1" 
-                     value="{cart_items.ORDER_LINE_QUANTITY}"
-              />
-            </div>
-          </div>
-
-          <!-- Цена -->
-          <div class="column is-2 has-text-right">
-            {% IF cart_items.ORDER_LINE_PRICE_OLD > cart_items.ORDER_LINE_PRICE_NOW %}
-            <p class="has-text-grey is-size-6 has-text-line-through">{cart_items.ORDER_LINE_PRICE_OLD | money_format}</p>
-            {% ENDIF %}
-            <p class="has-text-weight-bold is-size-5">{cart_items.ORDER_LINE_PRICE_NOW | money_format}</p>
-          </div>
-
-          <!-- Удалить -->
-          <div class="column is-2 has-text-right">
-            <a href="{cart_items.ORDER_LINE_DELETE_URL}" class="button is-light">
-              <span class="icon">
-                <i class="icon-delete"></i>
-              </span>
-            </a>
-          </div>
-        </div>
-      </div>
-      {% ENDFOR %}
-
-      <!-- Кнопки управления -->
-      <div class="buttons">
-        <a href="{CATALOG_URL}" class="button">
-          <span class="icon">
-            <i class="icon-chevron_left"></i>
-          </span>
-          <span>Вернуться к покупкам</span>
-        </a>
-        <button type="submit" class="button">
-          <span class="icon">
-            <i class="icon-reload"></i>
-          </span>
-          <span>Пересчитать</span>
-        </button>
-      </div>
-    </form>
-  </div>
-
-  <!-- Корзина: Итоговый блок -->
-  <div class="column is-4">
-    <div class="box">
-
-      <!-- Итоги -->
-      <div class="content">
-        <p>
-          <span>Ваша корзина:</span>
-          <span class="has-text-weight-bold">{CART_COUNT_TOTAL}</span>
-          <span>товар{CART_COUNT_TOTAL | gen_word_end("","а","ов")}</span>
-        </p>
-
-        <div class="is-flex is-justify-content-space-between mb-2">
-          <span>Сумма заказа:</span>
-          <span class="has-text-weight-bold">{CART_SUM_NOW | money_format}</span>
-        </div>
-
-        {% FOR cart_discount %}
-          {% IF cart_discount.DISCOUNT_IS_ENABLED %}
-          <div class="is-flex is-justify-content-space-between mb-2">
-            <span>{cart_discount.DISCOUNT_NAME}:</span>
-            <span class="has-text-weight-bold">
-              {% IF cart_discount.IS_PERCENT %}
-                {cart_discount.DISCOUNT_VALUE}%
-              {% ELSE %}
-                {cart_discount.DISCOUNT_VALUE | money_format}
-              {% ENDIF %}
-            </span>
-          </div>
-          {% ENDIF %}
+{
+  "HASH": "{HASH}",
+  "CLIENT_IS_LOGIN": {CLIENT_IS_LOGIN},
+  "SETTINGS_GOODS_DONT_PUT_TO_CART_MORE_THAN_AVAILABLE": {SETTINGS_GOODS_DONT_PUT_TO_CART_MORE_THAN_AVAILABLE},
+  "CURRENCY_CHAR_CODE":"{CURRENCY_CHAR_CODE}",
+  "CART_COUNT_TOTAL": {CART_COUNT_TOTAL},
+  "CART_SUM_NOW": "{CART_SUM_NOW}",
+  "CART_SUM_DELIVERY": "{CART_SUM_DELIVERY}",
+  "CART_SUM_NOW_WITH_DELIVERY": "{CART_SUM_NOW_WITH_DELIVERY}",
+  "CART_SUM_OLD_WITH_DELIVERY": "{CART_SUM_OLD_WITH_DELIVERY}",
+  "CART_SUM_SUPPLIER_WITH_DELIVERY": "{CART_SUM_SUPPLIER_WITH_DELIVERY}",
+  "CART_SUM_NOW_WITH_DISCOUNT": "{CART_SUM_NOW_WITH_DISCOUNT}",
+  "CART_SUM_DISCOUNT": "{CART_SUM_DISCOUNT}",
+  "CART_SUM_DISCOUNT_PERCENT": "{CART_SUM_DISCOUNT_PERCENT}",
+  "CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT": "{CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT}",
+  "SETTINGS_STORE_ORDER_MIN_ORDER_PRICE": {SETTINGS_STORE_ORDER_MIN_ORDER_PRICE | number_format("0",","," ")},
+  "SETTINGS_STORE_ORDER_MIN_PRICE_WITHOUT_DELIVERY": {SETTINGS_STORE_ORDER_MIN_PRICE_WITHOUT_DELIVERY},
+  "cartItems": [
+  {% FOR cart_items %}
+    {
+      "GOODS_ID": {cart_items.GOODS_ID},
+      "GOODS_NAME": "{cart_items.GOODS_NAME}",
+      "GOODS_MOD_ID": {cart_items.GOODS_MOD_ID},
+      "ORDER_LINE_QUANTITY": {cart_items.ORDER_LINE_QUANTITY},
+      "GOODS_MOD_REST_VALUE": {cart_items.GOODS_MOD_REST_VALUE},
+      "GOODS_DONT_PUT_MORE_THAN_AVAILABLE": {SETTINGS_GOODS_DONT_PUT_TO_CART_MORE_THAN_AVAILABLE},
+      "GOODS_MOD_PRICE_NOW": {cart_items.GOODS_MOD_PRICE_NOW},
+      "ORDER_LINE_PRICE_NOW": {cart_items.ORDER_LINE_PRICE_NOW},
+      "GOODS_IMAGE_EMPTY": "{cart_items.GOODS_IMAGE_EMPTY}",
+      "GOODS_IMAGE_EMPTY_URL": "{ASSETS_IMAGES_PATH}no-photo-icon.png?design=conditer",
+      "GOODS_IMAGE_ICON": "{cart_items.GOODS_IMAGE_ICON}",
+      "GOODS_IMAGE": "{cart_items.GOODS_IMAGE_OTHER}",
+      "GOODS_MOD_ART_NUMBER": "{cart_items.GOODS_MOD_ART_NUMBER}",
+      "GOODS_URL": "{cart_items.GOODS_URL}",
+      "distinctiveProperties": [
+        {% IFNOT cart_items.distinctive_properties_empty %}
+        {% FOR distinctive_properties %}
+          {
+            "NAME": "{cart_items.distinctive_properties.NAME}",
+            "VALUE": "{cart_items.distinctive_properties.VALUE}"
+          }
+          {% IFNOT cart_items.distinctive_properties.last %},{% ENDIF %}
         {% ENDFOR %}
-
-        <div class="is-flex is-justify-content-space-between mb-2">
-          <span>Доставка:</span>
-          <span class="has-text-weight-bold">{CART_SUM_DELIVERY | money_format}</span>
-        </div>
-
-        <hr>
-
-        <div class="is-flex is-justify-content-space-between is-size-5">
-          <strong>Итого:</strong>
-          <strong>{CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT | money_format}</strong>
-        </div>
-      </div>
-
-      <!-- Промокод -->
-      <div class="field has-addons mt-4">
-        <div class="control is-expanded">
-          <input class="input" type="text" name="form[coupon_code]" value="{ORDER_FORM_COUPON_CODE}" placeholder="Промокод">
-        </div>
-        <div class="control">
-          <button class="button is-info">Применить</button>
-        </div>
-      </div>
-
-      <!-- Оформление заказа -->
-      <div class="mt-5">
-        <button class="button is-primary is-fullwidth {% IF SETTINGS_STORE_ORDER_MIN_ORDER_PRICE %}is-disabled{% ENDIF %}" {% IF SETTINGS_STORE_ORDER_MIN_ORDER_PRICE %}disabled{% ENDIF %}>
-          Оформить заказ
-        </button>
-        <div class="has-text-centered mt-4">
-          <a href="{CART_TRUNCATE_URL}" class="has-text-grey is-size-7">Очистить корзину</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-{% ENDIF %}
+        {% ENDIF %}  
+      ]
+    }
+  {% IFNOT cart_items.last %},{% ENDIF %}
+  {% ENDFOR %}
+  ],
+  "cartRelatedGoods": [  
+  {% IFNOT cart_related_goods_empty %}
+  {% FOR cart_related_goods %}
+    {
+      "GOODS_NAME": "{cart_related_goods.NAME}",
+      "GOODS_MOD_ID": {cart_related_goods.MIN_PRICE_NOW_ID},
+      "ORDER_LINE_QUANTITY": 1,
+      "MIN_PRICE_NOW_WITHOUT_DISCOUNT": {cart_related_goods.MIN_PRICE_NOW_WITHOUT_DISCOUNT},
+      "GOODS_IMAGE": "{% IF cart_related_goods.IMAGE_EMPTY %}{ASSETS_IMAGES_PATH}no-photo-icon.png?design=conditer{% ELSE %}{cart_related_goods.IMAGE_MEDIUM}{% ENDIF %}"
+    }
+  {% IFNOT cart_related_goods.last %},{% ENDIF %}
+  {% ENDFOR %}
+  {% ENDIF %}
+  ],
+  "recentlyViewedGoods": [  
+  {% IFNOT recently_viewed_goods_empty %}
+  {% FOR recently_viewed_goods %}    
+    {
+      "ID": {recently_viewed_goods.ID},
+      "NB_GOODS_IN_CART": {recently_viewed_goods.NB_GOODS_IN_CART},
+      "GOODS_NAME": "{recently_viewed_goods.NAME}",
+      "GOODS_MOD_ID": {recently_viewed_goods.MIN_PRICE_NOW_ID},
+      "ORDER_LINE_QUANTITY": 1,
+      "MIN_PRICE_NOW_WITHOUT_DISCOUNT": {recently_viewed_goods.MIN_PRICE_NOW_WITHOUT_DISCOUNT},
+      "GOODS_IMAGE": "{% IF recently_viewed_goods.IMAGE_EMPTY %}{ASSETS_IMAGES_PATH}no-photo-icon.png?design=conditer{% ELSE %}{recently_viewed_goods.IMAGE_MEDIUM}{% ENDIF %}"
+    }    
+    {% IFNOT recently_viewed_goods.last %},{% ENDIF %}
+  {% ENDFOR %}
+  {% ENDIF %}
+  ],
+  "goodsFromCategory6037761": [  
+  {% IFNOT goods_from_category_6037761_empty %}
+  {% FOR goods_from_category_6037761 %}    
+    {
+      "ID": {goods_from_category_6037761.ID},
+      "NB_GOODS_IN_CART": {goods_from_category_6037761.NB_GOODS_IN_CART},
+      "GOODS_NAME": "{goods_from_category_6037761.NAME}",
+      "GOODS_MOD_ID": {goods_from_category_6037761.MIN_PRICE_NOW_ID},
+      "ORDER_LINE_QUANTITY": 1,
+      "MIN_PRICE_NOW_WITHOUT_DISCOUNT": {goods_from_category_6037761.MIN_PRICE_NOW_WITHOUT_DISCOUNT},
+      "GOODS_IMAGE": "{% IF goods_from_category_6037761.IMAGE_EMPTY %}{ASSETS_IMAGES_PATH}no-photo-icon.png?design=conditer{% ELSE %}{goods_from_category_6037761.IMAGE_MEDIUM}{% ENDIF %}"
+    }    
+    {% IFNOT goods_from_category_6037761.last %},{% ENDIF %}
+  {% ENDFOR %}
+  {% ENDIF %}
+  ],
+  "favoritesGoods": [  
+  {% IFNOT favorites_goods_empty %}
+  {% FOR favorites_goods %}
+    {      
+      "ID": {favorites_goods.ID},      
+      "GOODS_MOD_ID": {favorites_goods.MIN_PRICE_NOW_ID}
+    }
+  {% IFNOT favorites_goods.last %},{% ENDIF %}
+  {% ENDFOR %}
+  {% ENDIF %}
+  ],
+  "compareGoods": [  
+  {% IFNOT compare_goods_empty %}
+  {% FOR compare_goods %}
+    {      
+      "ID": "{compare_goods.ID}"
+    }
+  {% IFNOT compare_goods.last %},{% ENDIF %}
+  {% ENDFOR %}
+  {% ENDIF %}
+  ],
+  "goodsModInfo": [
+    {% IFNOT goods_mod_info_empty %}
+    {% FOR goods_mod_info %}
+      {      
+        "GOODS_MOD_ID": {goods_mod_info.GOODS_MOD_ID}
+      }
+    {% IFNOT goods_mod_info.last %},{% ENDIF %}
+    {% ENDFOR %}
+    {% ENDIF %}
+  ],
+  "cartDiscount": {
+    {% FOR cart_discount %}
+    {% IF cart_discount.DISCOUNT_IS_ENABLED %}    
+      "DISCOUNT_TYPE": "{cart_discount.DISCOUNT_TYPE}",
+      "DISCOUNT_NAME": "{cart_discount.DISCOUNT_NAME}",
+      "DISCOUNT_VALUE": {cart_discount.DISCOUNT_VALUE},
+      "IS_PERCENT": {% IF cart_discount.IS_PERCENT %}1{% ELSE %}0{% ENDIF %},
+      "END_PRICE": "{cart_discount.END_PRICE}",
+      "DISCOUNT_TYPE_DESCRIPTION": "{cart_discount.DISCOUNT_TYPE_DESCRIPTION}"    
+    {% ENDIF %}
+  {% ENDFOR %}
+  },
+  "FORM_NOTICE": "{% IF FORM_NOTICE %}{FORM_NOTICE | addslashes}{% ENDIF %}",
+  "FORM_NOTICE_STATUS": "{% IF FORM_NOTICE_IS_GOOD %}success{% ELSE %}error{% ENDIF %}",
+  "cartSum": "{% FOR cart_sum %}NOW: {cart_sum.NOW};DISCOUNT:{cart_sum.DISCOUNT};NOW_WITH_DELIVERY_AND_DISCOUNT:{cart_sum.NOW_WITH_DELIVERY_AND_DISCOUNT};{% ENDFOR %}"
+}
