@@ -63,30 +63,34 @@
 <!-- <script src="{ASSETS_JS_PATH}jquery.min.js?design=@@DESIGN_NAME"></script> -->
 
 <!-- Подключаем скрипт Babel для трансляции JSX -->
+<script src="https://unpkg.com/@babel/standalone@7.24.0/babel.js"></script>
+
+<!-- React и ReactDOM -->
 <script
-  src="https://unpkg.com/@babel/standalone@7.24.0/babel.js"
-  defer
+  src="https://unpkg.com/react@18/umd/react.development.js"
+  crossorigin
 ></script>
-<script type="importmap">
-  {
-    "imports": {
-      "react": "https://esm.sh/react@18.2.0",
-      "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-      "@tanstack/react-query": "https://esm.sh/@tanstack/react-query@5.59.16",
-      "@tanstack/react-query-devtools": "https://esm.sh/@tanstack/react-query-devtools@5.59.16"
-    }
-  }
-</script>
-<!-- <script
+<script
+  src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"
+  crossorigin
+></script>
+<!-- TanStack React Query v4 (UMD) -->
+<script src="https://unpkg.com/@tanstack/react-query@4/build/umd/index.production.js"></script>
+
+<!-- Devtools для React Query v4 (UMD) -->
+<script src="https://unpkg.com/@tanstack/react-query-devtools@4.41.0/build/umd/index.development.js"></script>
+<!-- Axios -->
+<script src="https://unpkg.com/axios@1.12.2/dist/axios.js"></script>
+<script
   type="text/babel"
   data-type="module"
-  defer
-  data-presets="env,react"
+  src="{ASSETS_STYLES_PATH}react-query-hooks.js"
+></script>
+<script
+  type="text/babel"
+  data-type="module"
   src="{ASSETS_STYLES_PATH}cart-query-new.js"
-></script> -->
-<!-- Подключаем скрипт React -->
-<!-- <script src="https://unpkg.com/react@18.3.1/files/umd/react.development.js"></script>
-<script src="https://unpkg.com/react-dom@18.3.1/files/umd/react-dom.development.js"></script> -->
+></script>
 
 <!-- Подключаемые скрипты для формы заказа -->
 <!-- <script src="https://unpkg.com/imask" defer></script>
