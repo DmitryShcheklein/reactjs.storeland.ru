@@ -26,10 +26,15 @@ function useCart({ deliveryId, zoneId, couponCode, isCouponSend }) {
   return useQuery({
     queryKey: [QUERY_KEYS.Cart],
     queryFn: async () => {
-      console.log(deliveryId);
       const formData = new FormData();
-      formData.append('form[delivery][id]', deliveryId);
-      formData.append('form[delivery][zone_id]', zoneId);
+
+      if (deliveryId) {
+        formData.append('form[delivery][id]', deliveryId);
+      }
+
+      if (zoneId) {
+        formData.append('form[delivery][zone_id]', zoneId);
+      }
 
       if (isCouponSend) {
         formData.append('form[coupon_code]', couponCode);
@@ -71,7 +76,6 @@ function useCart({ deliveryId, zoneId, couponCode, isCouponSend }) {
 
       return orderStepsPageData || cartPageData;
     },
-
     enabled: Boolean(deliveryId),
   });
 }
