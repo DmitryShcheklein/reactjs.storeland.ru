@@ -1,4 +1,4 @@
-const { useQuery } = ReactQuery;
+const { useQuery, useMutation } = ReactQuery;
 
 const QUERY_KEYS = {
   Cart: 'Cart',
@@ -76,11 +76,33 @@ function useCart({ deliveryId, zoneId, couponCode, isCouponSend }) {
 
       return orderStepsPageData || cartPageData;
     },
-    enabled: Boolean(deliveryId),
+    // enabled: Boolean(deliveryId),
+  });
+}
+function useClearCartMutation(options) {
+  return useMutation({
+    mutationFn: async () => {
+      await axios.get(`/cart/truncate/`);
+
+      queryClient.setQueryData([QUERY_KEYS.Cart], {});
+    },
+    ...options,
   });
 }
 
+function useClearCartItemMutation(options) {
+  return useMutation({
+    mutationFn: async (itemId) => {
+      await axios.get(`/cart/delete/${itemId}`);
+    },
+    ...options,
+  });
+}
+
+window.QUERY_KEYS = QUERY_KEYS;
 window.ReactQueryHooks = {
   useQuickFormData,
   useCart,
+  useClearCartMutation,
+  useClearCartItemMutation,
 };
