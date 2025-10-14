@@ -3,14 +3,17 @@
   "ORDER_FORM_CONTACT_PHONE": "{ORDER_FORM_CONTACT_PHONE}",
   "ORDER_FORM_CONTACT_EMAIL": "{ORDER_FORM_CONTACT_EMAIL}",  
   "CLIENT_IS_LOGIN": {CLIENT_IS_LOGIN},
+  
   "ORDER_FORM_CONTACT_ADDR": "{ORDER_FORM_CONTACT_ADDR}",
   "ORDER_FORM_CONTACT_CITY": "{ORDER_FORM_CONTACT_CITY}",
-  "ORDER_FORM_CONTACT_REGION" : "{ORDER_FORM_CONTACT_REGION}",
-  "ORDER_FORM_CONTACT_ZIP_CODE":"{ORDER_FORM_CONTACT_ZIP_CODE}",
-  "ORDER_FORM_CONTACT_COUNTRY":"{ORDER_FORM_CONTACT_COUNTRY}",
-  "ORDER_FORM_DELIVERY_COUNTRY_ID":"{ORDER_FORM_DELIVERY_COUNTRY_ID}",
+  "ORDER_FORM_CONTACT_REGION": "{ORDER_FORM_CONTACT_REGION}",
+  "ORDER_FORM_CONTACT_ZIP_CODE": "{ORDER_FORM_CONTACT_ZIP_CODE}",
+  "ORDER_FORM_CONTACT_COUNTRY": "{ORDER_FORM_CONTACT_COUNTRY}",
+  "ORDER_FORM_DELIVERY_COUNTRY_ID": "{ORDER_FORM_DELIVERY_COUNTRY_ID}",
+  
   "ORDER_DISCOUNT_COUPON_IS_ENABLED": {% IF ORDER_DISCOUNT_COUPON_IS_ENABLED %}true{% ELSE %}false{% ENDIF %},
-  "SETTINGS_ORDER_FIELDS" :{
+  
+  "SETTINGS_ORDER_FIELDS": {
     "ConvenientTime": {
       "isVisible": {% IF SETTINGS_ORDER_FIELDS_CONVENIENT_TIME < 3 %}true{% ELSE %}false{% ENDIF %},
       "isRequired": {% IF SETTINGS_ORDER_FIELDS_CONVENIENT_TIME = 1 %}true{% ELSE %}false{% ENDIF %}
@@ -40,87 +43,88 @@
       "isRequired": {% IF SETTINGS_ORDER_FIELDS_COMMENT = 1 %}true{% ELSE %}false{% ENDIF %}
     }
   },
+  
   "countryList": [
-{% FOR country_list %}
-{
-  "id": "{country_list.ID}",
-  "name": "{country_list.NAME}"
-}
-{% IFNOT country_list.last %},{% ENDIF %}
-{% ENDFOR %}
-],
+    {% FOR country_list %}
+    {
+      "id": "{country_list.ID}",
+      "name": "{country_list.NAME}"
+    }{% IFNOT country_list.last %},{% ENDIF %}
+    {% ENDFOR %}
+  ],
+  
   "convenient_time_from_list": [
-{% FOR convenient_time_from_list %}
-{
-  "ID": "{convenient_time_from_list.ID}",
-  "SELECTED": "{convenient_time_from_list.SELECTED}",
-  "HOUR": "{convenient_time_from_list.HOUR}",
-  "HOUR_INT": "{convenient_time_from_list.HOUR_INT}"
-}
-{% IFNOT convenient_time_from_list.last %},{% ENDIF %}
-{% ENDFOR %}
-],
+    {% FOR convenient_time_from_list %}
+    {
+      "ID": "{convenient_time_from_list.ID}",
+      "SELECTED": "{convenient_time_from_list.SELECTED}",
+      "HOUR": "{convenient_time_from_list.HOUR}",
+      "HOUR_INT": "{convenient_time_from_list.HOUR_INT}"
+    }{% IFNOT convenient_time_from_list.last %},{% ENDIF %}
+    {% ENDFOR %}
+  ],
+  
   "convenient_time_to_list": [
-{% FOR convenient_time_to_list %}
-{
-  "ID": "{convenient_time_to_list.ID}",
-  "SELECTED": "{convenient_time_to_list.SELECTED}",
-  "HOUR": "{convenient_time_to_list.HOUR}",
-  "HOUR_INT": "{convenient_time_to_list.HOUR_INT}"
-}
-{% IFNOT convenient_time_to_list.last %},{% ENDIF %}
-{% ENDFOR %}
-],
+    {% FOR convenient_time_to_list %}
+    {
+      "ID": "{convenient_time_to_list.ID}",
+      "SELECTED": "{convenient_time_to_list.SELECTED}",
+      "HOUR": "{convenient_time_to_list.HOUR}",
+      "HOUR_INT": "{convenient_time_to_list.HOUR_INT}"
+    }{% IFNOT convenient_time_to_list.last %},{% ENDIF %}
+    {% ENDFOR %}
+  ],
+  
   "deliveries": [
-  {% FOR order_delivery %}
-   {
+    {% FOR order_delivery %}
+    {
       "id": "{order_delivery.ID}",
       "name": "{order_delivery.NAME}",
       "price": {order_delivery.PRICE},
       "endPrice": {order_delivery.END_PRICE},
-     "sumLessPrice": {order_delivery.SUM_LESS_PRICE},
-     "rulesListEmpty": {order_delivery.rules_list_empty},
-     "rulesList": [
-              {% FOR rules_list %}
-               { "sumMorePrice": {order_delivery.rules_list.SUM_MORE_PRICE},
-                  "price": {order_delivery.rules_list.PRICE}
-                  }
-                  {% IFNOT order_delivery.rules_list.last %},{% ENDIF %}
-              {% ENDFOR %} 
-         ]  ,
-     "zoneListEmpty": {order_delivery.zone_list_empty},
-     "zoneList" : 
-     
-     [ {% FOR zone_list %}
-      { "name": "{order_delivery.zone_list.NAME}",
-        "zoneId": "{order_delivery.zone_list.ID}",
-        "price": {order_delivery.zone_list.PRICE},
-        "endPrice": {order_delivery.zone_list.END_PRICE}, 
-        "zoneRuleListEmpty": {order_delivery.zone_list.zone_rule_list_empty},
-         "zoneRuleList": [
-             {% FOR zone_rule_list %}
-             { "sumMorePrice": {order_delivery.zone_list.zone_rule_list.SUM_MORE_PRICE},
-               "price": {order_delivery.zone_list.zone_rule_list.PRICE} 
-             }
-             {% IFNOT order_delivery.zone_list.zone_rule_list.last %},{% ENDIF %}
-             {% ENDFOR %} 
-             ]
-      }
-      {% IFNOT order_delivery.zone_list.last %},{% ENDIF %}
-      {% ENDFOR %} ],
-       
-     "availablePaymentList": [
-             {% FOR available_payment_list %}
-                 { "deliveryId": {order_delivery.ID},
-                     "id": "{order_delivery.available_payment_list.ID}",
-                     "name": "{order_delivery.available_payment_list.NAME}"
-                 }
-                 {% IFNOT order_delivery.available_payment_list.last %},{% ENDIF %}
-             {% ENDFOR %}
-           ] 
-
-     }
-     {% IFNOT order_delivery.last %},{% ENDIF %}
-  {% ENDFOR %}
-]
+      "sumLessPrice": {order_delivery.SUM_LESS_PRICE},
+      
+      "rulesListEmpty": {order_delivery.rules_list_empty},
+      "rulesList": [
+        {% FOR rules_list %}
+        {
+          "sumMorePrice": {order_delivery.rules_list.SUM_MORE_PRICE},
+          "price": {order_delivery.rules_list.PRICE}
+        }{% IFNOT order_delivery.rules_list.last %},{% ENDIF %}
+        {% ENDFOR %}
+      ],
+      
+      "zoneListEmpty": {order_delivery.zone_list_empty},
+      "zoneList": [
+        {% FOR zone_list %}
+        {
+          "name": "{order_delivery.zone_list.NAME}",
+          "zoneId": "{order_delivery.zone_list.ID}",
+          "price": {order_delivery.zone_list.PRICE},
+          "endPrice": {order_delivery.zone_list.END_PRICE},
+          "zoneRuleListEmpty": {order_delivery.zone_list.zone_rule_list_empty},
+          "zoneRuleList": [
+            {% FOR zone_rule_list %}
+            {
+              "sumMorePrice": {order_delivery.zone_list.zone_rule_list.SUM_MORE_PRICE},
+              "price": {order_delivery.zone_list.zone_rule_list.PRICE}
+            }{% IFNOT order_delivery.zone_list.zone_rule_list.last %},{% ENDIF %}
+            {% ENDFOR %}
+          ]
+        }{% IFNOT order_delivery.zone_list.last %},{% ENDIF %}
+        {% ENDFOR %}
+      ],
+      
+      "availablePaymentList": [
+        {% FOR available_payment_list %}
+        {
+          "deliveryId": {order_delivery.ID},
+          "id": "{order_delivery.available_payment_list.ID}",
+          "name": "{order_delivery.available_payment_list.NAME}"
+        }{% IFNOT order_delivery.available_payment_list.last %},{% ENDIF %}
+        {% ENDFOR %}
+      ]
+    }{% IFNOT order_delivery.last %},{% ENDIF %}
+    {% ENDFOR %}
+  ]
 }
