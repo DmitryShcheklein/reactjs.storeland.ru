@@ -1,8 +1,23 @@
 const { createRoot } = ReactDOM;
 const { QueryClient, QueryClientProvider, useQuery, useMutation } = ReactQuery;
 const { ReactQueryDevtools } = window.ReactQueryDevtools;
+const { quickFormApi, cartApi, orderApi } = window.ReactQueryHooks;
 
-const { quickFormApi, cartApi } = window.ReactQueryHooks;
+const queryClient = new QueryClient();
+
+queryClient.prefetchQuery(quickFormApi.getQuickFormData());
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Cart />
+      <ReactQueryDevtools initialIsOpen={true} />
+    </QueryClientProvider>
+  );
+}
+
+const root = createRoot(document.getElementById('root'));
+root.render(<App />);
 
 function Cart() {
   const { data: quickFormData } = useQuery(quickFormApi.getQuickFormData());
@@ -27,6 +42,21 @@ function Cart() {
     mutationFn: cartApi.deleteItem,
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: [cartApi.baseKey] });
+    },
+  });
+
+  const createOrderMutation = useMutation({
+    mutationFn: orderApi.createOrder,
+    onSuccess: ({ data }) => {
+      const { status, location: redirectLink, message } = data;
+
+      if (status === 'error') {
+        console.error(message);
+      }
+
+      if (redirectLink) {
+        location.href = redirectLink;
+      }
     },
   });
 
@@ -174,19 +204,3 @@ function Cart() {
     </div>
   );
 }
-
-const queryClient = new QueryClient();
-
-queryClient.prefetchQuery(quickFormApi.getQuickFormData());
-
-function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <Cart />
-      <ReactQueryDevtools initialIsOpen={true} />
-    </QueryClientProvider>
-  );
-}
-
-const root = createRoot(document.getElementById('root'));
-root.render(<App />);

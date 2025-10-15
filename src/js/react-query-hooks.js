@@ -3,6 +3,7 @@ const { useQuery, useMutation, queryOptions } = ReactQuery;
 const QUERY_KEYS = {
   Cart: 'Cart',
   QuickFormData: 'QuickFormData',
+  Order: 'Order',
 };
 
 const quickFormApi = {
@@ -93,9 +94,68 @@ const cartApi = {
   deleteItem: async (itemId) => {
     await axios.get(`/cart/delete/${itemId}`);
   },
+  addCart: async (form) => {
+    const formData = new FormData(form);
+
+    const response = await axios.post(`/cart/add/`, formData, {
+      params: {
+        ajax_q: 1,
+        hash: window.HASH,
+      },
+    });
+
+    return response;
+  },
+};
+
+function useCreateOrderMutation() {
+  return useMutation({
+    mutationFn: async (form) => {
+      const formData = new FormData(form);
+
+      for (const pair of formData.entries()) {
+        // console.log(pair[0] + ', ' + pair[1]);formData
+      }
+      const response = await axios.post(`/order/stage/confirm`, formData, {
+        params: {
+          ajax_q: 1,
+          hash: window.HASH,
+        },
+      });
+
+      return response;
+    },
+    onSuccess: ({ data }) => {
+      const { status, location: redirectLink, message } = data;
+
+      if (status === 'error') {
+        console.error(message);
+      }
+      if (redirectLink) {
+        location.href = redirectLink;
+      }
+    },
+  });
+}
+
+const orderApi = {
+  baseKey: QUERY_KEYS.Order,
+  createOrder: async (form) => {
+    const formData = new FormData(form);
+
+    const response = await axios.post(`/order/stage/confirm`, formData, {
+      params: {
+        ajax_q: 1,
+        hash: window.HASH,
+      },
+    });
+
+    return response;
+  },
 };
 
 window.ReactQueryHooks = {
   quickFormApi,
   cartApi,
+  orderApi,
 };
