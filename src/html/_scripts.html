@@ -37,10 +37,19 @@
   src="{ASSETS_STYLES_PATH}cart-query-new.js"
 ></script>
 
+<!-- Передаем данные из шаблона в JS -->
+<!-- <script>window.HASH = '{HASH}'</script>
+<script>window.CART_IS_EMPTY = {% IF cart_count_empty %}true{% ELSE %}false{% ENDIF %}</script>
+<script
+  type="text/babel"
+  data-type="module"
+  src="{ASSETS_STYLES_PATH}cart-query-old.js"
+></script> -->
+
 
 
 <!-- Подключаемые скрипты для формы заказа -->
-<!-- <script src="https://unpkg.com/imask" defer></script>
+<script src="https://unpkg.com/imask" defer></script>
 <script
   src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"
   defer
@@ -64,4 +73,4 @@
   https://cdn.jsdelivr.net/npm/air-datepicker@3.4.0/air-datepicker.min.css
   "
   rel="stylesheet"
-/> -->
+/>
