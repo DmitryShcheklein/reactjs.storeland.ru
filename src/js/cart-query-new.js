@@ -1,3 +1,4 @@
+const { useState, useEffect, useRef, useCallback } = window.React;
 const { createRoot } = ReactDOM;
 const { QueryClient, QueryClientProvider, useQuery, useMutation } = ReactQuery;
 const { ReactQueryDevtools } = window.ReactQueryDevtools;
@@ -11,7 +12,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Cart />
-      <ReactQueryDevtools initialIsOpen={true} />
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 }
@@ -20,26 +21,10 @@ const root = createRoot(document.getElementById('root'));
 root.render(<App />);
 
 function Cart() {
-  const { data: quickFormData } = useQuery(quickFormApi.getQuickFormData());
-  const [firstDelivery] = quickFormData?.deliveries || [];
-  const { data: cartData } = useQuery(
-    cartApi.getCart({
-      deliveryId: firstDelivery?.id,
-      zoneId: firstDelivery?.zoneList[0]?.zoneId,
-      couponCode: '0000',
-      isCouponSend: !!1,
-    })
-  );
+  const { data: cartData } = useQuery(cartApi.getCart());
 
   const clearCartMutation = useMutation({
     mutationFn: cartApi.clearCart,
-    onSuccess: async () => {
-      queryClient.invalidateQueries({ queryKey: [cartApi.baseKey] });
-    },
-  });
-
-  const clearCartItemMutation = useMutation({
-    mutationFn: cartApi.deleteItem,
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: [cartApi.baseKey] });
     },
@@ -83,63 +68,7 @@ function Cart() {
               </thead>
               <tbody>
                 {cartData?.cartItems.map((goods) => (
-                  <tr key={goods.GOODS_ID}>
-                    <td>
-                      <div className="is-flex is-align-items-center">
-                        {goods.GOODS_IMAGE && (
-                          <figure className="image is-64x64 mr-2">
-                            <img
-                              src={goods.GOODS_IMAGE}
-                              alt={goods.GOODS_NAME}
-                            />
-                          </figure>
-                        )}
-                        <div>
-                          <p className="is-size-5">{goods.GOODS_NAME}</p>
-                          <p className="is-size-7 has-text-grey">
-                            {goods.GOODS_MOD_ART_NUMBER}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="has-text-weight-bold">
-                      {goods.GOODS_MOD_PRICE_NOW}
-                    </td>
-                    <td>
-                      <div className="field has-addons">
-                        <p className="control">
-                          <button className="button is-small">-</button>
-                        </p>
-                        <p className="control">
-                          <input
-                            className="input is-small has-text-centered"
-                            type="text"
-                            value={goods.ORDER_LINE_QUANTITY}
-                            readOnly
-                            style={{ width: '50px' }}
-                          />
-                        </p>
-                        <p className="control">
-                          <button className="button is-small">+</button>
-                        </p>
-                      </div>
-                    </td>
-                    <td className="has-text-weight-bold">
-                      {goods.ORDER_LINE_PRICE_NOW}
-                    </td>
-                    <td>
-                      <button
-                        className="button is-small is-danger is-light"
-                        onClick={() =>
-                          clearCartItemMutation.mutate(goods.GOODS_MOD_ID)
-                        }
-                      >
-                        <span className="icon">
-                          <i className="icon-delete"></i>
-                        </span>
-                      </button>
-                    </td>
-                  </tr>
+                  <GoodsItem key={goods.GOODS_MOD_ID} goods={goods} />
                 ))}
               </tbody>
             </table>
@@ -202,5 +131,80 @@ function Cart() {
         </>
       )}
     </div>
+  );
+}
+
+function GoodsItem({ goods }) {
+  const {
+    GOODS_MOD_ID,
+    GOODS_NAME,
+    GOODS_PRICE,
+    ORDER_LINE_QUANTITY,
+    ORDER_LINE_SUM,
+    GOODS_IMAGE,
+    GOODS_MOD_ART_NUMBER,
+    GOODS_MOD_PRICE_NOW,
+    ORDER_LINE_PRICE_NOW,
+  } = goods;
+  const [inputValue, setInputValue] = useState(ORDER_LINE_QUANTITY);
+
+  const clearCartItemMutation = useMutation({
+    mutationFn: cartApi.deleteItem,
+    onSuccess: async () => {
+      queryClient.invalidateQueries({ queryKey: [cartApi.baseKey] });
+    },
+  });
+  return (
+    <tr key={goods.GOODS_ID}>
+      <td>
+        <div className="is-flex is-align-items-center">
+          {GOODS_IMAGE && (
+            <figure className="image is-64x64 mr-2">
+              <img src={GOODS_IMAGE} alt={GOODS_NAME} />
+            </figure>
+          )}
+          <div>
+            <p className="is-size-5">{GOODS_NAME}</p>
+            <p className="is-size-7 has-text-grey">{GOODS_MOD_ART_NUMBER}</p>
+          </div>
+        </div>
+      </td>
+      <td className="has-text-weight-bold">{GOODS_MOD_PRICE_NOW}</td>
+      <td>
+        <div className="field has-addons">
+          <p className="control">
+            <button className="button is-small">-</button>
+          </p>
+          <p className="control">
+            <input
+              name={`form[quantity][${GOODS_MOD_ID}]`}
+              className="input is-small has-text-centered"
+              type="text"
+              value={inputValue}
+              onChange={(e) => {
+                console.log(e.target.value);
+                setInputValue(e.target.value);
+                queryClient.invalidateQueries({ queryKey: [cartApi.baseKey] });
+              }}
+              style={{ width: '50px' }}
+            />
+          </p>
+          <p className="control">
+            <button className="button is-small">+</button>
+          </p>
+        </div>
+      </td>
+      <td className="has-text-weight-bold">{ORDER_LINE_PRICE_NOW}</td>
+      <td>
+        <button
+          className="button is-small is-danger is-light"
+          onClick={() => clearCartItemMutation.mutate(GOODS_MOD_ID)}
+        >
+          <span className="icon">
+            <i className="icon-delete"></i>
+          </span>
+        </button>
+      </td>
+    </tr>
   );
 }

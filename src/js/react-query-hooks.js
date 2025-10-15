@@ -26,9 +26,48 @@ const quickFormApi = {
   },
 };
 
+function useCartState() {
+  const { data: quickFormData } = useQuery(quickFormApi.getQuickFormData());
+  const [firstDelivery] = quickFormData?.orderDelivery || [];
+  console.log('firstDelivery', firstDelivery);
+  const INITIAL_FORM_DATA = {
+    form: {
+      delivery: {
+        id: firstDelivery?.id,
+        zone_id: firstDelivery?.zoneList[0]?.zoneId,
+      },
+      payment: {
+        id: null,
+      },
+      coupon_code: '',
+      isCouponSend: false,
+    },
+    cartItems: window.CART?.cartItems,
+  };
+  const key = 'CartState';
+  const query = useQuery({
+    queryKey: [key],
+    initialData: INITIAL_FORM_DATA,
+    queryFn: () => initialData,
+    enabled: false,
+  });
+
+  return [query.data, (value) => queryClient.setQueryData([key], value)];
+}
+
 const cartApi = {
   baseKey: QUERY_KEYS.Cart,
-  getCart: ({ deliveryId, zoneId, couponCode, isCouponSend } = {}) => {
+  getCart: ({} = {}) => {
+    const [cartState, setCartState] = useCartState();
+    const {
+      cartItems,
+      form: {
+        delivery: { id: deliveryId, zone_id: zoneId },
+        coupon_code: couponCode,
+        isCouponSend,
+      },
+    } = cartState;
+    console.log(cartState);
     return queryOptions({
       queryKey: [QUERY_KEYS.Cart, deliveryId, zoneId],
       initialData: window.CART,
@@ -47,7 +86,7 @@ const cartApi = {
           formData.append('form[coupon_code]', couponCode);
         }
 
-        window.CART?.cartItems?.forEach((item) =>
+        cartItems?.forEach((item) =>
           formData.append(
             `form[quantity][${item.GOODS_MOD_ID}]`,
             item.ORDER_LINE_QUANTITY
