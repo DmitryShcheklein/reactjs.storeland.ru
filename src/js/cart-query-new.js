@@ -105,7 +105,7 @@ function Cart() {
                         }
                       >
                         <span className="icon">
-                          <i className="icon-trash"></i>
+                          <i className="icon-delete"></i>
                         </span>
                       </button>
                     </td>
