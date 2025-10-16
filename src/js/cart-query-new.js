@@ -2,7 +2,8 @@ const { useState, useEffect, useRef, useCallback } = window.React;
 const { createRoot } = ReactDOM;
 const { QueryClient, QueryClientProvider, useQuery, useMutation } = ReactQuery;
 const { ReactQueryDevtools } = window.ReactQueryDevtools;
-const { quickFormApi, cartApi, orderApi } = window.ReactQueryHooks;
+const { quickFormApi, cartApi, orderApi, useCartState } =
+  window.ReactQueryHooks;
 
 const queryClient = new QueryClient();
 
@@ -21,7 +22,15 @@ const root = createRoot(document.getElementById('root'));
 root.render(<App />);
 
 function Cart() {
-  const { data: cartData } = useQuery(cartApi.getCart());
+  const { data: quickFormData } = useQuery(quickFormApi.getQuickFormData());
+  const [firstDelivery] = quickFormData?.orderDelivery || [];
+
+  const { data: cartData } = useQuery(
+    cartApi.getCart({
+      deliveryId: firstDelivery?.id,
+      zoneId: firstDelivery?.zoneList[0]?.zoneId,
+    })
+  );
 
   const clearCartMutation = useMutation({
     mutationFn: cartApi.clearCart,
@@ -154,6 +163,7 @@ function GoodsItem({ goods }) {
       queryClient.invalidateQueries({ queryKey: [cartApi.baseKey] });
     },
   });
+
   return (
     <tr key={goods.GOODS_ID}>
       <td>

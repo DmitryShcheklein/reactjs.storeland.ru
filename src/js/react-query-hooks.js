@@ -26,15 +26,12 @@ const quickFormApi = {
   },
 };
 
-function useCartState() {
-  const { data: quickFormData } = useQuery(quickFormApi.getQuickFormData());
-  const [firstDelivery] = quickFormData?.orderDelivery || [];
-  console.log('firstDelivery', firstDelivery);
+function useCartState({ deliveryId, zoneId, queryClient } = {}) {
   const INITIAL_FORM_DATA = {
     form: {
       delivery: {
-        id: firstDelivery?.id,
-        zone_id: firstDelivery?.zoneList[0]?.zoneId,
+        id: deliveryId,
+        zone_id: zoneId,
       },
       payment: {
         id: null,
@@ -57,17 +54,7 @@ function useCartState() {
 
 const cartApi = {
   baseKey: QUERY_KEYS.Cart,
-  getCart: ({} = {}) => {
-    const [cartState, setCartState] = useCartState();
-    const {
-      cartItems,
-      form: {
-        delivery: { id: deliveryId, zone_id: zoneId },
-        coupon_code: couponCode,
-        isCouponSend,
-      },
-    } = cartState;
-    console.log(cartState);
+  getCart: ({ deliveryId, zoneId, couponCode, isCouponSend } = {}) => {
     return queryOptions({
       queryKey: [QUERY_KEYS.Cart, deliveryId, zoneId],
       initialData: window.CART,
@@ -86,12 +73,12 @@ const cartApi = {
           formData.append('form[coupon_code]', couponCode);
         }
 
-        cartItems?.forEach((item) =>
-          formData.append(
-            `form[quantity][${item.GOODS_MOD_ID}]`,
-            item.ORDER_LINE_QUANTITY
-          )
-        );
+        // cartItems?.forEach((item) =>
+        //   formData.append(
+        //     `form[quantity][${item.GOODS_MOD_ID}]`,
+        //     item.ORDER_LINE_QUANTITY
+        //   )
+        // );
 
         const { data: cartPageDataString } = await axios.post(
           `/cart`,
@@ -197,4 +184,5 @@ window.ReactQueryHooks = {
   quickFormApi,
   cartApi,
   orderApi,
+  useCartState,
 };
