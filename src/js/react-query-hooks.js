@@ -1,5 +1,5 @@
 const { useQuery, useMutation, queryOptions } = ReactQuery;
-
+const { useState, useEffect, useRef, useCallback } = window.React;
 const QUERY_KEYS = {
   Cart: 'Cart',
   QuickFormData: 'QuickFormData',
@@ -26,30 +26,108 @@ const quickFormApi = {
   },
 };
 
-function useCartState({ deliveryId, zoneId, queryClient } = {}) {
-  const INITIAL_FORM_DATA = {
-    form: {
-      delivery: {
-        id: deliveryId,
-        zone_id: zoneId,
-      },
-      payment: {
-        id: null,
-      },
-      coupon_code: '',
-      isCouponSend: false,
+// Хук для управления состоянием выбранной доставки
+function useQuickFormState() {
+  const key = 'DeliveryState';
+  const { data, isLoading } = useQuery({
+    queryKey: [QUERY_KEYS.QuickFormData],
+    queryFn: async () => {
+      const { data } = await axios.get(`/cart/add`, {
+        responseType: 'text',
+        params: {
+          ajax_q: 1,
+          fast_order: 1,
+        },
+      });
+      return JSON.parse(data);
     },
-    cartItems: window.CART?.cartItems,
-  };
-  const key = 'CartState';
-  const query = useQuery({
-    queryKey: [key],
-    initialData: INITIAL_FORM_DATA,
-    queryFn: () => initialData,
-    enabled: false,
   });
 
-  return [query.data, (value) => queryClient.setQueryData([key], value)];
+  // Получаем первую доставку и зону по умолчанию
+  const firstDelivery = data?.orderDelivery?.[0] || {};
+  const firstZone = firstDelivery?.zoneList?.[0] || {};
+
+  // Состояние выбранной доставки
+  const [selectedDelivery, setSelectedDelivery] = useState({
+    id: firstDelivery?.id,
+    zoneId: firstZone?.zoneId,
+  });
+
+  // Обновляем состояние при загрузке данных
+  useEffect(() => {
+    if (data && !isLoading) {
+      setSelectedDelivery({
+        id: firstDelivery?.id,
+        zoneId: firstZone?.zoneId,
+      });
+    }
+  }, [data, isLoading]);
+
+  return {
+    deliveryOptions: data?.orderDelivery || [],
+    selectedDelivery,
+    setSelectedDelivery,
+    isLoading,
+  };
+}
+
+// Хук для управления корзиной с учетом выбранной доставки
+function useCartWithDelivery(
+  deliveryId,
+  zoneId,
+  couponCode = '',
+  isCouponSend = false
+) {
+  const cartQuery = useQuery({
+    queryKey: [QUERY_KEYS.Cart, deliveryId, zoneId, couponCode, isCouponSend],
+    enabled: Boolean(deliveryId),
+    queryFn: async () => {
+      const formData = new FormData();
+
+      if (deliveryId) {
+        formData.append('form[delivery][id]', deliveryId);
+      }
+
+      if (zoneId) {
+        formData.append('form[delivery][zone_id]', zoneId);
+      }
+
+      if (isCouponSend) {
+        formData.append('form[coupon_code]', couponCode);
+      }
+
+      const { data: cartPageDataString } = await axios.post(`/cart`, formData, {
+        responseType: 'text',
+        params: {
+          only_body: 1,
+          hash: window.HASH,
+        },
+      });
+      const cartPageData = JSON.parse(cartPageDataString);
+
+      let orderStepsPageData;
+      if (isCouponSend && couponCode) {
+        const { cartRelatedGoods } = cartPageData;
+        const { data: stepsOrderDataString } = await axios.post(
+          `/order/stage/confirm`,
+          formData,
+          {
+            responseType: 'text',
+            params: {
+              only_body: 1,
+              ajax_q: 1,
+            },
+          }
+        );
+        orderStepsPageData = JSON.parse(stepsOrderDataString);
+        orderStepsPageData.cartRelatedGoods = cartRelatedGoods;
+      }
+
+      return orderStepsPageData || cartPageData;
+    },
+  });
+
+  return cartQuery;
 }
 
 const cartApi = {
@@ -184,5 +262,6 @@ window.ReactQueryHooks = {
   quickFormApi,
   cartApi,
   orderApi,
-  useCartState,
+  useDeliveryState: useQuickFormState,
+  useCartWithDelivery,
 };
