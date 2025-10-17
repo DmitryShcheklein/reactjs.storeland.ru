@@ -2,17 +2,22 @@ const { useState, useEffect, useRef, useCallback } = window.React;
 const { createRoot } = ReactDOM;
 const { QueryClient, QueryClientProvider, useQuery, useMutation } = ReactQuery;
 const { ReactQueryDevtools } = window.ReactQueryDevtools;
-const { quickFormApi, cartApi, orderApi, useCartState } =
-  window.ReactQueryHooks;
+const {
+  quickFormApi,
+  cartApi,
+  orderApi,
+  useQuickFormState,
+  useCartWithDelivery,
+} = window.ReactQueryHooks;
 
 const queryClient = new QueryClient();
-
-queryClient.prefetchQuery(quickFormApi.getQuickFormData());
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Cart />
+      <OrderForm />
+      <Total />
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
@@ -22,37 +27,21 @@ const root = createRoot(document.getElementById('root'));
 root.render(<App />);
 
 function Cart() {
-  const { data: quickFormData } = useQuery(quickFormApi.getQuickFormData());
-  const [firstDelivery] = quickFormData?.orderDelivery || [];
+  // Используем новый хук для управления состоянием доставки
+  const {
+    deliveryOptions,
+    selectedDelivery,
+    setSelectedDelivery,
+    isLoading: isDeliveryLoading,
+  } = useQuickFormState();
 
-  const { data: cartData } = useQuery(
-    cartApi.getCart({
-      deliveryId: firstDelivery?.id,
-      zoneId: firstDelivery?.zoneList[0]?.zoneId,
-    })
+  // Используем новый хук для получения данных корзины с учетом выбранной доставки
+  const { data: cartData, isLoading: isCartLoading } = useCartWithDelivery(
+    selectedDelivery.id,
+    selectedDelivery.zoneId,
+    couponCode,
+    isCouponSend
   );
-
-  const clearCartMutation = useMutation({
-    mutationFn: cartApi.clearCart,
-    onSuccess: async () => {
-      queryClient.invalidateQueries({ queryKey: [cartApi.baseKey] });
-    },
-  });
-
-  const createOrderMutation = useMutation({
-    mutationFn: orderApi.createOrder,
-    onSuccess: ({ data }) => {
-      const { status, location: redirectLink, message } = data;
-
-      if (status === 'error') {
-        console.error(message);
-      }
-
-      if (redirectLink) {
-        location.href = redirectLink;
-      }
-    },
-  });
 
   return (
     <div className="container">
@@ -81,61 +70,6 @@ function Cart() {
                 ))}
               </tbody>
             </table>
-          </div>
-
-          <div className="columns">
-            <div className="column is-8">
-              <div className="field">
-                <div className="control">
-                  <input
-                    className="input"
-                    type="text"
-                    placeholder="Введите промокод"
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="column is-4">
-              <div className="box">
-                <div className="content">
-                  <p className="is-size-5">
-                    Итого:{' '}
-                    <span className="has-text-weight-bold">
-                      {cartData?.CART_SUM_NOW}
-                    </span>
-                  </p>
-                  <p className="is-size-5">
-                    Скидка:{' '}
-                    <span className="has-text-weight-bold has-text-danger">
-                      {cartData?.CART_SUM_DISCOUNT}
-                    </span>
-                  </p>
-                  <p className="is-size-5">
-                    Доставка:{' '}
-                    <span className="has-text-weight-bold">
-                      {cartData?.CART_SUM_DELIVERY}
-                    </span>
-                  </p>
-                  <hr />
-                  <p className="is-size-4">
-                    Итого с доставкой и скидкой:{' '}
-                    <span className="has-text-weight-bold">
-                      {cartData?.CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT}
-                    </span>
-                  </p>
-                </div>
-
-                <div className="buttons is-flex is-justify-content-space-between">
-                  <button
-                    className="button is-danger"
-                    onClick={() => clearCartMutation.mutate()}
-                  >
-                    Очистить корзину
-                  </button>
-                  <button className="button is-primary">Оформить заказ</button>
-                </div>
-              </div>
-            </div>
           </div>
         </>
       )}
@@ -217,4 +151,116 @@ function GoodsItem({ goods }) {
       </td>
     </tr>
   );
+}
+
+function Total() {
+  const [couponCode, setCouponCode] = useState('');
+  const [isCouponSend, setIsCouponSend] = useState(false);
+
+  // Используем новый хук для управления состоянием доставки
+  const {
+    deliveryOptions,
+    selectedDelivery,
+    setSelectedDelivery,
+    isLoading: isDeliveryLoading,
+  } = useQuickFormState();
+
+  // Используем новый хук для получения данных корзины с учетом выбранной доставки
+  const { data: cartData, isLoading: isCartLoading } = useCartWithDelivery(
+    selectedDelivery.id,
+    selectedDelivery.zoneId,
+    couponCode,
+    isCouponSend
+  );
+
+  const clearCartMutation = useMutation({
+    mutationFn: cartApi.clearCart,
+    onSuccess: async () => {
+      queryClient.invalidateQueries({ queryKey: [cartApi.baseKey] });
+    },
+  });
+
+  const createOrderMutation = useMutation({
+    mutationFn: orderApi.createOrder,
+    onSuccess: ({ data }) => {
+      const { status, location: redirectLink, message } = data;
+
+      if (status === 'error') {
+        console.error(message);
+      }
+
+      if (redirectLink) {
+        location.href = redirectLink;
+      }
+    },
+  });
+
+  return (
+    <>
+      <div className="field has-addons">
+        <div className="control is-expanded">
+          <input
+            className="input"
+            type="text"
+            placeholder="Введите промокод"
+            value={couponCode}
+            onChange={(e) => setCouponCode(e.target.value)}
+          />
+        </div>
+        <div className="control">
+          <button
+            className="button is-info"
+            onClick={() => setIsCouponSend(true)}
+            disabled={!couponCode}
+          >
+            Применить
+          </button>
+        </div>
+      </div>
+
+      <div className="box">
+        <div className="content">
+          <p className="is-size-5">
+            Итого:{' '}
+            <span className="has-text-weight-bold">
+              {cartData?.CART_SUM_NOW}
+            </span>
+          </p>
+          <p className="is-size-5">
+            Скидка:{' '}
+            <span className="has-text-weight-bold has-text-danger">
+              {cartData?.CART_SUM_DISCOUNT}
+            </span>
+          </p>
+          <p className="is-size-5">
+            Доставка:{' '}
+            <span className="has-text-weight-bold">
+              {cartData?.CART_SUM_DELIVERY}
+            </span>
+          </p>
+          <hr />
+          <p className="is-size-4">
+            Итого с доставкой и скидкой:{' '}
+            <span className="has-text-weight-bold">
+              {cartData?.CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT}
+            </span>
+          </p>
+        </div>
+
+        <div className="buttons is-flex is-justify-content-space-between">
+          <button
+            className="button is-danger"
+            onClick={() => clearCartMutation.mutate()}
+          >
+            Очистить корзину
+          </button>
+          <button className="button is-primary">Оформить заказ</button>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function OrderForm() {
+  return <></>;
 }
