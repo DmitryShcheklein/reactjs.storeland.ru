@@ -8,9 +8,11 @@ const {
   orderApi,
   useQuickFormState,
   useCartWithDelivery,
+  queryClient,
+  useCartState,
 } = window.ReactQueryHooks;
 
-const queryClient = new QueryClient();
+// const queryClient = new QueryClient();
 
 function App() {
   return (
@@ -159,17 +161,18 @@ function GoodsItem({ goods }) {
 function Total() {
   const [couponCode, setCouponCode] = useState('');
   const [isCouponSend, setIsCouponSend] = useState(false);
-
+  // const [cartState, setCartState] = useCartState();
   const { selectedDelivery, isLoading: isDeliveryLoading } =
     useQuickFormState();
-
+  // console.log(selectedDelivery.id);
   const { data: cartData, isLoading: isCartLoading } = useCartWithDelivery(
-    selectedDelivery.id,
-    selectedDelivery.zoneId,
+    // selectedDelivery.id,
+    // selectedDelivery.zoneId,
     couponCode,
     isCouponSend
   );
-  console.log(cartData?.CART_SUM_DELIVERY);
+
+  // console.log(cartData?.CART_SUM_DELIVERY);
 
   const clearCartMutation = useMutation({
     mutationFn: cartApi.clearCart,
@@ -299,11 +302,16 @@ function OrderForm() {
     isLoading: isDeliveryLoading,
   } = useQuickFormState();
 
-  const { data: cartData, isLoading: isCartLoading } = useCartWithDelivery(
-    selectedDelivery.id,
-    selectedDelivery.zoneId
-  );
-
+  // const { data: cartData, isLoading: isCartLoading } = useCartWithDelivery(
+  //   selectedDelivery.id,
+  //   selectedDelivery.zoneId
+  // );
+  const [cartState, setCartState] = useCartState();
+  // useEffect(() => {
+  //   queryClient.invalidateQueries(['Cart']);
+  // }, [selectedDelivery.id, selectedDelivery.zoneId]);
+  // console.log('form', selectedDelivery.id);
+  // console.log(cartData?.CART_SUM_DELIVERY);
   return (
     <div className="box mb-5">
       {/* Выбор доставки */}
@@ -312,13 +320,24 @@ function OrderForm() {
         <div className="control">
           <div className="select is-fullwidth">
             <select
-              value={selectedDelivery.id}
+              // value={selectedDelivery.id}
+              value={cartState?.form?.delivery?.id}
               onChange={(e) => {
                 const deliveryId = e.target.value;
                 const delivery =
                   deliveryOptions.find((d) => d.id === deliveryId) ||
                   deliveryOptions[0];
-                setSelectedDelivery(delivery);
+                // setSelectedDelivery(delivery);
+                setCartState({
+                  ...cartState,
+                  form: {
+                    ...cartState.form,
+                    delivery: {
+                      ...cartState.form.delivery,
+                      id: deliveryId,
+                    },
+                  },
+                });
               }}
               disabled={isDeliveryLoading}
             >
