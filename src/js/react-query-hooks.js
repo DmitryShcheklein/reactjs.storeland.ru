@@ -73,15 +73,17 @@ function useQuickFormState() {
 
 // Хук для управления корзиной с учетом выбранной доставки
 function useCartWithDelivery(
-  deliveryId,
-  zoneId,
+  deliveryId = '',
+  zoneId = '',
   couponCode = '',
   isCouponSend = false
 ) {
   const cartQuery = useQuery({
-    queryKey: [QUERY_KEYS.Cart, deliveryId, zoneId, couponCode, isCouponSend],
+    queryKey: [QUERY_KEYS.Cart, deliveryId, zoneId],
     enabled: Boolean(deliveryId),
+    initialData: window.CART,
     queryFn: async () => {
+      console.log(deliveryId);
       const formData = new FormData();
 
       if (deliveryId) {
@@ -262,6 +264,6 @@ window.ReactQueryHooks = {
   quickFormApi,
   cartApi,
   orderApi,
-  useDeliveryState: useQuickFormState,
+  useQuickFormState,
   useCartWithDelivery,
 };

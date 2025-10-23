@@ -15,9 +15,22 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Cart />
-      <OrderForm />
-      <Total />
+      <div className="container">
+        <h1 className="title is-2">Корзина</h1>
+
+        <div className="columns">
+          {/* Левая колонка: Корзина и форма заказа */}
+          <div className="column is-8">
+            <Cart />
+            <OrderForm />
+          </div>
+
+          {/* Правая колонка: Итоги и купон */}
+          <div className="column is-4">
+            <Total />
+          </div>
+        </div>
+      </div>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
@@ -27,50 +40,40 @@ const root = createRoot(document.getElementById('root'));
 root.render(<App />);
 
 function Cart() {
-  // Используем новый хук для управления состоянием доставки
-  const {
-    deliveryOptions,
-    selectedDelivery,
-    setSelectedDelivery,
-    isLoading: isDeliveryLoading,
-  } = useQuickFormState();
-
-  // Используем новый хук для получения данных корзины с учетом выбранной доставки
-  const { data: cartData, isLoading: isCartLoading } = useCartWithDelivery(
-    selectedDelivery.id,
-    selectedDelivery.zoneId,
-    couponCode,
-    isCouponSend
-  );
+  const { data: cartData, isLoading: isCartLoading } = useCartWithDelivery();
 
   return (
-    <div className="container">
-      <h1 className="title is-2">Корзина</h1>
-
+    <div className="box mb-5">
       {!cartData?.cartItems?.length ? (
         <div className="notification is-warning">
           <p className="is-size-5">Ваша корзина пуста</p>
         </div>
       ) : (
         <>
-          <div className="box">
-            <table className="table is-fullwidth is-striped is-hoverable">
+          <table className="table is-fullwidth is-striped is-hoverable">
+            {isCartLoading ? (
               <thead>
                 <tr>
-                  <th>Товар</th>
-                  <th>Цена</th>
-                  <th>Количество</th>
-                  <th>Сумма</th>
-                  <th></th>
+                  <th>Грузим корзину...</th>
                 </tr>
               </thead>
-              <tbody>
-                {cartData?.cartItems.map((goods) => (
-                  <GoodsItem key={goods.GOODS_MOD_ID} goods={goods} />
-                ))}
-              </tbody>
-            </table>
-          </div>
+            ) : null}
+
+            <thead>
+              <tr>
+                <th>Товар</th>
+                <th>Цена</th>
+                <th>Количество</th>
+                <th>Сумма</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {cartData?.cartItems.map((goods) => (
+                <GoodsItem key={goods.GOODS_MOD_ID} goods={goods} />
+              ))}
+            </tbody>
+          </table>
         </>
       )}
     </div>
@@ -157,21 +160,16 @@ function Total() {
   const [couponCode, setCouponCode] = useState('');
   const [isCouponSend, setIsCouponSend] = useState(false);
 
-  // Используем новый хук для управления состоянием доставки
-  const {
-    deliveryOptions,
-    selectedDelivery,
-    setSelectedDelivery,
-    isLoading: isDeliveryLoading,
-  } = useQuickFormState();
+  const { selectedDelivery, isLoading: isDeliveryLoading } =
+    useQuickFormState();
 
-  // Используем новый хук для получения данных корзины с учетом выбранной доставки
   const { data: cartData, isLoading: isCartLoading } = useCartWithDelivery(
     selectedDelivery.id,
     selectedDelivery.zoneId,
     couponCode,
     isCouponSend
   );
+  console.log(cartData?.CART_SUM_DELIVERY);
 
   const clearCartMutation = useMutation({
     mutationFn: cartApi.clearCart,
@@ -195,9 +193,20 @@ function Total() {
     },
   });
 
+  // Компонент скелетона для цен
+  const PriceSkeleton = () => (
+    <span
+      className="skeleton"
+      style={{ width: '100px', height: '24px', display: 'inline-block' }}
+    ></span>
+  );
+
   return (
-    <>
-      <div className="field has-addons">
+    <div className="box sticky-top" style={{ position: 'sticky', top: '20px' }}>
+      <h3 className="title is-4 mb-4">Ваш заказ</h3>
+
+      {/* Купон */}
+      <div className="field has-addons mb-5">
         <div className="control is-expanded">
           <input
             className="input"
@@ -218,49 +227,169 @@ function Total() {
         </div>
       </div>
 
-      <div className="box">
-        <div className="content">
-          <p className="is-size-5">
-            Итого:{' '}
-            <span className="has-text-weight-bold">
-              {cartData?.CART_SUM_NOW}
-            </span>
-          </p>
-          <p className="is-size-5">
-            Скидка:{' '}
-            <span className="has-text-weight-bold has-text-danger">
-              {cartData?.CART_SUM_DISCOUNT}
-            </span>
-          </p>
-          <p className="is-size-5">
-            Доставка:{' '}
-            <span className="has-text-weight-bold">
-              {cartData?.CART_SUM_DELIVERY}
-            </span>
-          </p>
-          <hr />
-          <p className="is-size-4">
-            Итого с доставкой и скидкой:{' '}
-            <span className="has-text-weight-bold">
-              {cartData?.CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT}
-            </span>
-          </p>
-        </div>
+      {/* Итоги заказа */}
+      <div className="content">
+        <p className="is-size-5 is-flex is-justify-content-space-between">
+          <span>Итого:</span>
+          <span className="has-text-weight-bold">
+            {isCartLoading || isDeliveryLoading ? (
+              <PriceSkeleton />
+            ) : (
+              cartData?.CART_SUM_NOW
+            )}
+          </span>
+        </p>
+        <p className="is-size-5 is-flex is-justify-content-space-between">
+          <span>Скидка:</span>
+          <span className="has-text-weight-bold has-text-danger">
+            {isCartLoading || isDeliveryLoading ? (
+              <PriceSkeleton />
+            ) : (
+              cartData?.CART_SUM_DISCOUNT
+            )}
+          </span>
+        </p>
 
-        <div className="buttons is-flex is-justify-content-space-between">
-          <button
-            className="button is-danger"
-            onClick={() => clearCartMutation.mutate()}
-          >
-            Очистить корзину
-          </button>
-          <button className="button is-primary">Оформить заказ</button>
-        </div>
+        <p className="is-size-5 is-flex is-justify-content-space-between">
+          <span>Доставка:</span>
+          <span className="has-text-weight-bold">
+            {isCartLoading || isDeliveryLoading ? (
+              <PriceSkeleton />
+            ) : (
+              cartData?.CART_SUM_DELIVERY
+            )}
+          </span>
+        </p>
+        <hr />
+        <p className="is-size-4 is-flex is-justify-content-space-between">
+          <span>Итого:</span>
+          <span className="has-text-weight-bold">
+            {isCartLoading || isDeliveryLoading ? (
+              <PriceSkeleton />
+            ) : (
+              cartData?.CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT
+            )}
+          </span>
+        </p>
       </div>
-    </>
+
+      <div className="buttons is-flex is-justify-content-space-between">
+        <button
+          className="button is-danger"
+          onClick={() => clearCartMutation.mutate()}
+        >
+          Очистить корзину
+        </button>
+        <button
+          className="button is-primary is-fullwidth mt-3"
+          onClick={() => createOrderMutation.mutate()}
+        >
+          Оформить заказ
+        </button>
+      </div>
+    </div>
   );
 }
 
 function OrderForm() {
-  return <></>;
+  const {
+    deliveryOptions,
+    selectedDelivery,
+    setSelectedDelivery,
+    isLoading: isDeliveryLoading,
+  } = useQuickFormState();
+
+  const { data: cartData, isLoading: isCartLoading } = useCartWithDelivery(
+    selectedDelivery.id,
+    selectedDelivery.zoneId
+  );
+
+  return (
+    <div className="box mb-5">
+      {/* Выбор доставки */}
+      <div className="field mb-4">
+        <label className="label">Доставка</label>
+        <div className="control">
+          <div className="select is-fullwidth">
+            <select
+              value={selectedDelivery.id}
+              onChange={(e) => {
+                const deliveryId = e.target.value;
+                const delivery =
+                  deliveryOptions.find((d) => d.id === deliveryId) ||
+                  deliveryOptions[0];
+                setSelectedDelivery(delivery);
+              }}
+              disabled={isDeliveryLoading}
+            >
+              {isDeliveryLoading ? (
+                <option>Загрузка...</option>
+              ) : (
+                deliveryOptions.map((delivery) => (
+                  <option key={delivery.id} value={delivery.id}>
+                    {delivery.name} ({delivery.price})
+                  </option>
+                ))
+              )}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <h3 className="title is-4 mb-4">Данные для заказа</h3>
+
+      <div className="field">
+        <label className="label">ФИО</label>
+        <div className="control">
+          <input
+            className="input"
+            type="text"
+            placeholder="Введите ваше полное имя"
+          />
+        </div>
+      </div>
+
+      <div className="field">
+        <label className="label">Email</label>
+        <div className="control">
+          <input
+            className="input"
+            type="email"
+            placeholder="Введите ваш email"
+          />
+        </div>
+      </div>
+
+      <div className="field">
+        <label className="label">Телефон</label>
+        <div className="control">
+          <input
+            className="input"
+            type="tel"
+            placeholder="Введите ваш телефон"
+          />
+        </div>
+      </div>
+
+      <div className="field">
+        <label className="label">Адрес доставки</label>
+        <div className="control">
+          <textarea
+            className="textarea"
+            placeholder="Введите адрес доставки"
+          ></textarea>
+        </div>
+      </div>
+
+      <div className="field">
+        <label className="label">Комментарий к заказу</label>
+        <div className="control">
+          <textarea
+            className="textarea"
+            placeholder="Дополнительная информация к заказу"
+          ></textarea>
+        </div>
+      </div>
+    </div>
+  );
 }
