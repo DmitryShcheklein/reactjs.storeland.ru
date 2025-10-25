@@ -159,18 +159,10 @@ function GoodsItem({ goods }) {
 }
 
 function Total() {
-  const [couponCode, setCouponCode] = useState('');
-  const [isCouponSend, setIsCouponSend] = useState(false);
-  // const [cartState, setCartState] = useCartState();
-  const { selectedDelivery, isLoading: isDeliveryLoading } =
-    useQuickFormState();
-  // console.log(selectedDelivery.id);
-  const { data: cartData, isLoading: isCartLoading } = useCartWithDelivery(
-    // selectedDelivery.id,
-    // selectedDelivery.zoneId,
-    couponCode,
-    isCouponSend
-  );
+  const [cartState, setCartState] = useCartState();
+  const { isLoading: isDeliveryLoading } = useQuickFormState();
+
+  const { data: cartData, isLoading: isCartLoading } = useCartWithDelivery();
 
   // console.log(cartData?.CART_SUM_DELIVERY);
 
@@ -198,10 +190,10 @@ function Total() {
 
   // Компонент скелетона для цен
   const PriceSkeleton = () => (
-    <span
-      className="skeleton"
-      style={{ width: '100px', height: '24px', display: 'inline-block' }}
-    ></span>
+    <div
+      className="skeleton-block"
+      style={{ width: '100px', height: '50px' }}
+    ></div>
   );
 
   return (
@@ -209,7 +201,7 @@ function Total() {
       <h3 className="title is-4 mb-4">Ваш заказ</h3>
 
       {/* Купон */}
-      <div className="field has-addons mb-5">
+      {/* <div className="field has-addons mb-5">
         <div className="control is-expanded">
           <input
             className="input"
@@ -228,52 +220,52 @@ function Total() {
             Применить
           </button>
         </div>
-      </div>
+      </div> */}
 
       {/* Итоги заказа */}
       <div className="content">
-        <p className="is-size-5 is-flex is-justify-content-space-between">
+        <div className="is-size-5 is-flex is-justify-content-space-between">
           <span>Итого:</span>
-          <span className="has-text-weight-bold">
+          <div className="has-text-weight-bold">
             {isCartLoading || isDeliveryLoading ? (
               <PriceSkeleton />
             ) : (
               cartData?.CART_SUM_NOW
             )}
-          </span>
-        </p>
-        <p className="is-size-5 is-flex is-justify-content-space-between">
+          </div>
+        </div>
+        <div className="is-size-5 is-flex is-justify-content-space-between">
           <span>Скидка:</span>
-          <span className="has-text-weight-bold has-text-danger">
+          <div className="has-text-weight-bold has-text-danger">
             {isCartLoading || isDeliveryLoading ? (
               <PriceSkeleton />
             ) : (
               cartData?.CART_SUM_DISCOUNT
             )}
-          </span>
-        </p>
+          </div>
+        </div>
 
-        <p className="is-size-5 is-flex is-justify-content-space-between">
+        <div className="is-size-5 is-flex is-justify-content-space-between">
           <span>Доставка:</span>
-          <span className="has-text-weight-bold">
+          <div className="has-text-weight-bold">
             {isCartLoading || isDeliveryLoading ? (
               <PriceSkeleton />
             ) : (
               cartData?.CART_SUM_DELIVERY
             )}
-          </span>
-        </p>
+          </div>
+        </div>
         <hr />
-        <p className="is-size-4 is-flex is-justify-content-space-between">
+        <div className="is-size-4 is-flex is-justify-content-space-between">
           <span>Итого:</span>
-          <span className="has-text-weight-bold">
+          <div className="has-text-weight-bold">
             {isCartLoading || isDeliveryLoading ? (
               <PriceSkeleton />
             ) : (
               cartData?.CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT
             )}
-          </span>
-        </p>
+          </div>
+        </div>
       </div>
 
       <div className="buttons is-flex is-justify-content-space-between">
@@ -295,23 +287,9 @@ function Total() {
 }
 
 function OrderForm() {
-  const {
-    deliveryOptions,
-    selectedDelivery,
-    setSelectedDelivery,
-    isLoading: isDeliveryLoading,
-  } = useQuickFormState();
-
-  // const { data: cartData, isLoading: isCartLoading } = useCartWithDelivery(
-  //   selectedDelivery.id,
-  //   selectedDelivery.zoneId
-  // );
+  const { deliveryOptions, isLoading: isDeliveryLoading } = useQuickFormState();
   const [cartState, setCartState] = useCartState();
-  // useEffect(() => {
-  //   queryClient.invalidateQueries(['Cart']);
-  // }, [selectedDelivery.id, selectedDelivery.zoneId]);
-  // console.log('form', selectedDelivery.id);
-  // console.log(cartData?.CART_SUM_DELIVERY);
+
   return (
     <div className="box mb-5">
       {/* Выбор доставки */}
@@ -327,7 +305,7 @@ function OrderForm() {
                 const delivery =
                   deliveryOptions.find((d) => d.id === deliveryId) ||
                   deliveryOptions[0];
-                // setSelectedDelivery(delivery);
+                console.log(delivery);
                 setCartState({
                   ...cartState,
                   form: {
@@ -341,15 +319,11 @@ function OrderForm() {
               }}
               disabled={isDeliveryLoading}
             >
-              {isDeliveryLoading ? (
-                <option>Загрузка...</option>
-              ) : (
-                deliveryOptions.map((delivery) => (
-                  <option key={delivery.id} value={delivery.id}>
-                    {delivery.name} ({delivery.price})
-                  </option>
-                ))
-              )}
+              {deliveryOptions.map((delivery) => (
+                <option key={delivery.id} value={delivery.id}>
+                  {delivery.name} ({delivery.id}) {delivery.price}
+                </option>
+              ))}
             </select>
           </div>
         </div>
