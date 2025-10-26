@@ -207,6 +207,7 @@ function Total() {
       <div className="field has-addons mb-5">
         <div className="control is-expanded">
           <input
+            readOnly={isActiveCoupon}
             className="input"
             type="text"
             placeholder="Введите промокод"
@@ -239,7 +240,7 @@ function Total() {
                 };
               });
             }}
-            disabled={!cartState.form.couponCode}
+            disabled={!cartState.form.couponCode || isActiveCoupon}
           >
             {isActiveCoupon ? <>Применён</> : <>Применить</>}
           </button>
