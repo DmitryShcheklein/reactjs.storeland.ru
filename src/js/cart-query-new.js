@@ -3,16 +3,14 @@ const { createRoot } = ReactDOM;
 const { QueryClient, QueryClientProvider, useQuery, useMutation } = ReactQuery;
 const { ReactQueryDevtools } = window.ReactQueryDevtools;
 const {
-  quickFormApi,
-  cartApi,
-  orderApi,
-  useQuickFormState,
-  useCartWithDelivery,
+  useQuickFormData,
+  useCartData,
   queryClient,
-  useCartState,
+  useCartGlobalState,
+  useCreateOrderMutation,
+  useClearCartMutation,
+  useDeleteItemMutation,
 } = window.ReactQueryHooks;
-
-// const queryClient = new QueryClient();
 
 function App() {
   return (
@@ -42,7 +40,7 @@ const root = createRoot(document.getElementById('root'));
 root.render(<App />);
 
 function Cart() {
-  const { data: cartData, isLoading: isCartLoading } = useCartWithDelivery();
+  const { data: cartData, isLoading: isCartLoading } = useCartData();
 
   return (
     <div className="box mb-5">
@@ -96,12 +94,7 @@ function GoodsItem({ goods }) {
   } = goods;
   const [inputValue, setInputValue] = useState(ORDER_LINE_QUANTITY);
 
-  const clearCartItemMutation = useMutation({
-    mutationFn: cartApi.deleteItem,
-    onSuccess: async () => {
-      queryClient.invalidateQueries({ queryKey: [cartApi.baseKey] });
-    },
-  });
+  const clearCartItemMutation = useDeleteItemMutation();
 
   return (
     <tr key={goods.GOODS_ID}>
@@ -133,7 +126,6 @@ function GoodsItem({ goods }) {
               onChange={(e) => {
                 console.log(e.target.value);
                 setInputValue(e.target.value);
-                queryClient.invalidateQueries({ queryKey: [cartApi.baseKey] });
               }}
               style={{ width: '50px' }}
             />
@@ -159,41 +151,30 @@ function GoodsItem({ goods }) {
 }
 
 function Total() {
-  const [cartState, setCartState] = useCartState();
-  const { isLoading: isDeliveryLoading } = useQuickFormState();
+  const [cartState, setCartState] = useCartGlobalState();
+  const { isLoading: isDeliveryLoading } = useQuickFormData();
 
-  const { data: cartData, isLoading: isCartLoading } = useCartWithDelivery();
-
+  const {
+    data: cartData,
+    isLoading: isCartLoading,
+    isPlaceholderData,
+    isPending,
+  } = useCartData();
+  console.log(isPending, isCartLoading, isPlaceholderData);
   // console.log(cartData?.CART_SUM_DELIVERY);
 
-  const clearCartMutation = useMutation({
-    mutationFn: cartApi.clearCart,
-    onSuccess: async () => {
-      queryClient.invalidateQueries({ queryKey: [cartApi.baseKey] });
-    },
-  });
+  const clearCartMutation = useClearCartMutation();
 
-  const createOrderMutation = useMutation({
-    mutationFn: orderApi.createOrder,
-    onSuccess: ({ data }) => {
-      const { status, location: redirectLink, message } = data;
-
-      if (status === 'error') {
-        console.error(message);
-      }
-
-      if (redirectLink) {
-        location.href = redirectLink;
-      }
-    },
-  });
+  const createOrderMutation = useCreateOrderMutation();
 
   // Компонент скелетона для цен
   const PriceSkeleton = () => (
     <div
-      className="skeleton-block"
+      // className="skeleton-block"
       style={{ width: '100px', height: '50px' }}
-    ></div>
+    >
+      ...
+    </div>
   );
 
   return (
@@ -287,8 +268,8 @@ function Total() {
 }
 
 function OrderForm() {
-  const { deliveryOptions, isLoading: isDeliveryLoading } = useQuickFormState();
-  const [cartState, setCartState] = useCartState();
+  const { deliveryOptions, isLoading: isDeliveryLoading } = useQuickFormData();
+  const [cartState, setCartState] = useCartGlobalState();
 
   return (
     <div className="box mb-5">
@@ -305,7 +286,7 @@ function OrderForm() {
                 const delivery =
                   deliveryOptions.find((d) => d.id === deliveryId) ||
                   deliveryOptions[0];
-                console.log(delivery);
+                // console.log(delivery);
                 setCartState({
                   ...cartState,
                   form: {

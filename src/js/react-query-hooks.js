@@ -1,23 +1,22 @@
-const { QueryClient, useQuery, useMutation, queryOptions } = ReactQuery;
+const { QueryClient, useQuery, useMutation, queryOptions, keepPreviousData } =
+  ReactQuery;
 const { useState, useEffect, useRef, useCallback } = window.React;
-const queryClient = new QueryClient({
-  // defaultOptions: {
-  //   queries: {
-  //     refetchOnWindowFocus: false, // default: true
-  //   },
-  // },
-});
+const queryClient = new QueryClient();
+
 const QUERY_KEYS = {
   Cart: 'Cart',
-  QuickFormData: 'QuickFormData',
+  QuickForm: 'QuickForm',
   Order: 'Order',
+  CartGlobalState: 'CartGlobalState',
 };
 
 const quickFormApi = {
-  baseKey: QUERY_KEYS.QuickFormData,
+  baseKey: QUERY_KEYS.QuickForm,
   getQuickFormData: () => {
     return queryOptions({
-      queryKey: [QUERY_KEYS.QuickFormData],
+      queryKey: [QUERY_KEYS.QuickForm],
+      placeholderData: keepPreviousData,
+      staleTime: 1000 * 60 * 5,
       queryFn: async () => {
         const { data } = await axios.get(`/cart/add`, {
           responseType: 'text',
@@ -33,7 +32,7 @@ const quickFormApi = {
   },
 };
 
-function useCartState() {
+function useCartGlobalState() {
   const INITIAL_FORM_DATA = {
     form: {
       delivery: {
@@ -49,7 +48,7 @@ function useCartState() {
   };
 
   const query = useQuery({
-    queryKey: [QUERY_KEYS.CartState],
+    queryKey: [QUERY_KEYS.CartGlobalState],
     initialData: INITIAL_FORM_DATA,
     queryFn: () => initialData,
     enabled: false,
@@ -57,18 +56,18 @@ function useCartState() {
 
   return [
     query.data,
-    (value) => queryClient.setQueryData([QUERY_KEYS.CartState], value),
+    (value) => queryClient.setQueryData([QUERY_KEYS.CartGlobalState], value),
   ];
 }
 // Хук для управления состоянием выбранной доставки
-function useQuickFormState() {
+function useQuickFormData() {
   const { data, isLoading } = useQuery(quickFormApi.getQuickFormData());
 
   // Получаем первую доставку и зону по умолчанию
   const firstDelivery = data?.orderDelivery?.[0] || {};
   const firstZone = firstDelivery?.zoneList?.[0] || {};
 
-  const [cartState, setCartState] = useCartState();
+  const [cartState, setCartState] = useCartGlobalState();
 
   // Обновляем состояние при загрузке данных
   useEffect(() => {
@@ -94,8 +93,8 @@ function useQuickFormState() {
 }
 
 // Хук для управления корзиной с учетом выбранной доставки
-function useCartWithDelivery() {
-  const [cartState] = useCartState();
+function useCartData() {
+  const [cartState] = useCartGlobalState();
   const deliveryId = cartState.form.delivery.id;
   const zoneId = cartState.form.delivery.zoneId;
   const isCouponSend = cartState.form.isCouponSend;
@@ -105,6 +104,7 @@ function useCartWithDelivery() {
     queryKey: [QUERY_KEYS.Cart, deliveryId, zoneId],
     enabled: Boolean(deliveryId),
     initialData: window.CART,
+    placeholderData: keepPreviousData,
     queryFn: async () => {
       const formData = new FormData();
 
@@ -159,6 +159,7 @@ const cartApi = {
       queryKey: [QUERY_KEYS.Cart, deliveryId, zoneId],
       initialData: window.CART,
       queryFn: async () => {
+        await new Promise((resolve) => setTimeout(resolve, 3_0000));
         const formData = new FormData();
 
         if (deliveryId) {
@@ -220,7 +221,7 @@ const cartApi = {
   deleteItem: async (itemId) => {
     await axios.get(`/cart/delete/${itemId}`);
   },
-  addCart: async (form) => {
+  addToCart: async (form) => {
     const formData = new FormData(form);
 
     const response = await axios.post(`/cart/add/`, formData, {
@@ -234,35 +235,22 @@ const cartApi = {
   },
 };
 
-function useCreateOrderMutation() {
+const useClearCartMutation = () => {
   return useMutation({
-    mutationFn: async (form) => {
-      const formData = new FormData(form);
-
-      for (const pair of formData.entries()) {
-        // console.log(pair[0] + ', ' + pair[1]);formData
-      }
-      const response = await axios.post(`/order/stage/confirm`, formData, {
-        params: {
-          ajax_q: 1,
-          hash: window.HASH,
-        },
-      });
-
-      return response;
-    },
-    onSuccess: ({ data }) => {
-      const { status, location: redirectLink, message } = data;
-
-      if (status === 'error') {
-        console.error(message);
-      }
-      if (redirectLink) {
-        location.href = redirectLink;
-      }
+    mutationFn: cartApi.clearCart,
+    onSuccess: async () => {
+      queryClient.invalidateQueries({ queryKey: [cartApi.baseKey] });
     },
   });
-}
+};
+const useDeleteItemMutation = () => {
+  return useMutation({
+    mutationFn: cartApi.deleteItem,
+    onSuccess: async () => {
+      queryClient.invalidateQueries({ queryKey: [cartApi.baseKey] });
+    },
+  });
+};
 
 const orderApi = {
   baseKey: QUERY_KEYS.Order,
@@ -280,12 +268,28 @@ const orderApi = {
   },
 };
 
+function useCreateOrderMutation() {
+  return useMutation({
+    mutationFn: orderApi.createOrder,
+    onSuccess: ({ data }) => {
+      const { status, location: redirectLink, message } = data;
+
+      if (status === 'error') {
+        console.error(message);
+      }
+      if (redirectLink) {
+        location.href = redirectLink;
+      }
+    },
+  });
+}
+
 window.ReactQueryHooks = {
   queryClient,
-  quickFormApi,
-  cartApi,
-  orderApi,
-  useQuickFormState,
-  useCartWithDelivery,
-  useCartState,
+  useQuickFormData,
+  useCartData,
+  useCartGlobalState,
+  useCreateOrderMutation,
+  useClearCartMutation,
+  useDeleteItemMutation,
 };
