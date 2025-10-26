@@ -179,8 +179,9 @@ function Total() {
     isLoading: isCartLoading,
     isPlaceholderData,
     isPending,
+    isRefetching,
   } = useCartData();
-  console.log(isPending, isCartLoading, isPlaceholderData);
+  console.log(isRefetching, isCartLoading, isPlaceholderData);
   // console.log(cartData?.CART_SUM_DELIVERY);
 
   const clearCartMutation = useClearCartMutation();
@@ -189,12 +190,12 @@ function Total() {
 
   // Компонент скелетона для цен
   const PriceSkeleton = () => (
-    <div
+    <span
       // className="skeleton-block"
       style={{ width: '100px', height: '50px' }}
     >
       ...
-    </div>
+    </span>
   );
 
   return (
@@ -228,7 +229,7 @@ function Total() {
         <div className="is-size-5 is-flex is-justify-content-space-between">
           <span>Итого:</span>
           <div className="has-text-weight-bold">
-            {isCartLoading || isDeliveryLoading ? (
+            {isRefetching || isCartLoading || isDeliveryLoading ? (
               <PriceSkeleton />
             ) : (
               cartData?.CART_SUM_NOW
@@ -238,7 +239,7 @@ function Total() {
         <div className="is-size-5 is-flex is-justify-content-space-between">
           <span>Скидка:</span>
           <div className="has-text-weight-bold has-text-danger">
-            {isCartLoading || isDeliveryLoading ? (
+            {isRefetching || isCartLoading || isDeliveryLoading ? (
               <PriceSkeleton />
             ) : (
               cartData?.CART_SUM_DISCOUNT
@@ -249,7 +250,7 @@ function Total() {
         <div className="is-size-5 is-flex is-justify-content-space-between">
           <span>Доставка:</span>
           <div className="has-text-weight-bold">
-            {isCartLoading || isDeliveryLoading ? (
+            {isRefetching || isCartLoading || isDeliveryLoading ? (
               <PriceSkeleton />
             ) : (
               cartData?.CART_SUM_DELIVERY
