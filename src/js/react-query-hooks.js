@@ -45,6 +45,12 @@ function useCartGlobalState() {
       couponCode: '',
       isCouponSend: false,
     },
+    cartItems: window.CART.cartItems.map(
+      ({ GOODS_MOD_ID, ORDER_LINE_QUANTITY }) => ({
+        id: GOODS_MOD_ID,
+        qty: ORDER_LINE_QUANTITY,
+      })
+    ),
   };
 
   const query = useQuery({
@@ -99,67 +105,28 @@ function useCartData() {
   const zoneId = cartState.form.delivery.zoneId;
   const isCouponSend = cartState.form.isCouponSend;
   const couponCode = cartState.form.coupon_code;
+  const cartItems = cartState.cartItems;
 
-  return useQuery({
-    queryKey: [QUERY_KEYS.Cart, deliveryId, zoneId],
-    enabled: Boolean(deliveryId),
-    initialData: window.CART,
-    placeholderData: keepPreviousData,
-    queryFn: async () => {
-      const formData = new FormData();
-
-      if (deliveryId) {
-        formData.append('form[delivery][id]', deliveryId);
-      }
-
-      if (zoneId) {
-        formData.append('form[delivery][zone_id]', zoneId);
-      }
-
-      if (isCouponSend) {
-        formData.append('form[coupon_code]', couponCode);
-      }
-
-      const { data: cartPageDataString } = await axios.post(`/cart`, formData, {
-        responseType: 'text',
-        params: {
-          only_body: 1,
-          hash: window.HASH,
-        },
-      });
-      const cartPageData = JSON.parse(cartPageDataString);
-
-      let orderStepsPageData;
-      if (isCouponSend && couponCode) {
-        const { cartRelatedGoods } = cartPageData;
-        const { data: stepsOrderDataString } = await axios.post(
-          `/order/stage/confirm`,
-          formData,
-          {
-            responseType: 'text',
-            params: {
-              only_body: 1,
-              ajax_q: 1,
-            },
-          }
-        );
-        orderStepsPageData = JSON.parse(stepsOrderDataString);
-        orderStepsPageData.cartRelatedGoods = cartRelatedGoods;
-      }
-
-      return orderStepsPageData || cartPageData;
-    },
-  });
+  return useQuery(
+    cartApi.getCart({ deliveryId, zoneId, couponCode, isCouponSend, cartItems })
+  );
 }
 
 const cartApi = {
   baseKey: QUERY_KEYS.Cart,
-  getCart: ({ deliveryId, zoneId, couponCode, isCouponSend } = {}) => {
+  getCart: ({
+    deliveryId,
+    zoneId,
+    couponCode,
+    isCouponSend,
+    cartItems,
+  } = {}) => {
     return queryOptions({
-      queryKey: [QUERY_KEYS.Cart, deliveryId, zoneId],
+      queryKey: [QUERY_KEYS.Cart, deliveryId, zoneId, cartItems],
+      enabled: Boolean(deliveryId),
       initialData: window.CART,
+      // placeholderData: keepPreviousData,
       queryFn: async () => {
-        await new Promise((resolve) => setTimeout(resolve, 3_0000));
         const formData = new FormData();
 
         if (deliveryId) {
@@ -174,12 +141,9 @@ const cartApi = {
           formData.append('form[coupon_code]', couponCode);
         }
 
-        // cartItems?.forEach((item) =>
-        //   formData.append(
-        //     `form[quantity][${item.GOODS_MOD_ID}]`,
-        //     item.ORDER_LINE_QUANTITY
-        //   )
-        // );
+        cartItems?.forEach((item) =>
+          formData.append(`form[quantity][${item.id}]`, item.qty)
+        );
 
         const { data: cartPageDataString } = await axios.post(
           `/cart`,
@@ -188,7 +152,7 @@ const cartApi = {
             responseType: 'text',
             params: {
               only_body: 1,
-              hash: window.HASH,
+              hash: window.CART.HASH,
             },
           }
         );
@@ -209,12 +173,11 @@ const cartApi = {
             }
           );
           orderStepsPageData = JSON.parse(stepsOrderDataString);
-          orderStepsPageData.cartRelatedGoods = cartRelatedGoods; // BUG: в пошаговом заказе нет массива сопутствующих
+          orderStepsPageData.cartRelatedGoods = cartRelatedGoods;
         }
 
         return orderStepsPageData || cartPageData;
       },
-      enabled: Boolean(deliveryId || zoneId),
     });
   },
   clearCart: async () => await axios.get(`/cart/truncate/`),
@@ -227,7 +190,7 @@ const cartApi = {
     const response = await axios.post(`/cart/add/`, formData, {
       params: {
         ajax_q: 1,
-        hash: window.HASH,
+        hash: window.CART.HASH,
       },
     });
 
@@ -260,7 +223,7 @@ const orderApi = {
     const response = await axios.post(`/order/stage/confirm`, formData, {
       params: {
         ajax_q: 1,
-        hash: window.HASH,
+        hash: window.CART.HASH,
       },
     });
 

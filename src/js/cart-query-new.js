@@ -92,7 +92,17 @@ function GoodsItem({ goods }) {
     GOODS_MOD_PRICE_NOW,
     ORDER_LINE_PRICE_NOW,
   } = goods;
+  const [cartState, setCartState] = useCartGlobalState();
   const [inputValue, setInputValue] = useState(ORDER_LINE_QUANTITY);
+
+  useEffect(() => {
+    setCartState({
+      ...cartState,
+      cartItems: cartState.cartItems.map((item) =>
+        item.id === GOODS_MOD_ID ? { ...item, qty: inputValue } : item
+      ),
+    });
+  }, [inputValue]);
 
   const clearCartItemMutation = useDeleteItemMutation();
 
@@ -115,7 +125,12 @@ function GoodsItem({ goods }) {
       <td>
         <div className="field has-addons">
           <p className="control">
-            <button className="button is-small">-</button>
+            <button
+              className="button is-small"
+              onClick={() => setInputValue(Math.max(1, inputValue - 1))}
+            >
+              -
+            </button>
           </p>
           <p className="control">
             <input
@@ -131,7 +146,12 @@ function GoodsItem({ goods }) {
             />
           </p>
           <p className="control">
-            <button className="button is-small">+</button>
+            <button
+              className="button is-small"
+              onClick={() => setInputValue(Math.max(1, Number(inputValue) + 1))}
+            >
+              +
+            </button>
           </p>
         </div>
       </td>
