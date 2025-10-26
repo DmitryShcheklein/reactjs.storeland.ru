@@ -181,7 +181,7 @@ function Total() {
     isPending,
     isRefetching,
   } = useCartData();
-  console.log(isRefetching, isCartLoading, isPlaceholderData);
+  // console.log(isRefetching, isCartLoading, isPlaceholderData);
   // console.log(cartData?.CART_SUM_DELIVERY);
 
   const clearCartMutation = useClearCartMutation();
@@ -197,32 +197,54 @@ function Total() {
       ...
     </span>
   );
+  const isActiveCoupon = cartData?.cartDiscount?.DISCOUNT_TYPE === 'coupon';
 
   return (
     <div className="box sticky-top" style={{ position: 'sticky', top: '20px' }}>
       <h3 className="title is-4 mb-4">Ваш заказ</h3>
 
       {/* Купон */}
-      {/* <div className="field has-addons mb-5">
+      <div className="field has-addons mb-5">
         <div className="control is-expanded">
           <input
             className="input"
             type="text"
             placeholder="Введите промокод"
-            value={couponCode}
-            onChange={(e) => setCouponCode(e.target.value)}
+            value={cartState.form.couponCode}
+            onChange={(e) => {
+              // setCouponCode(e.target.value);
+              setCartState((prev) => {
+                return {
+                  ...prev,
+                  form: {
+                    ...prev.form,
+                    couponCode: e.target.value,
+                  },
+                };
+              });
+            }}
           />
         </div>
         <div className="control">
           <button
             className="button is-info"
-            onClick={() => setIsCouponSend(true)}
-            disabled={!couponCode}
+            onClick={() => {
+              setCartState((prev) => {
+                return {
+                  ...prev,
+                  form: {
+                    ...prev.form,
+                    isCouponSend: true,
+                  },
+                };
+              });
+            }}
+            disabled={!cartState.form.couponCode}
           >
-            Применить
+            {isActiveCoupon ? <>Применён</> : <>Применить</>}
           </button>
         </div>
-      </div> */}
+      </div>
 
       {/* Итоги заказа */}
       <div className="content">

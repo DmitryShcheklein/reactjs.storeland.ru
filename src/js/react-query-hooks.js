@@ -104,7 +104,7 @@ function useCartData() {
   const deliveryId = cartState.form.delivery.id;
   const zoneId = cartState.form.delivery.zoneId;
   const isCouponSend = cartState.form.isCouponSend;
-  const couponCode = cartState.form.coupon_code;
+  const couponCode = cartState.form.couponCode;
   const cartItems = cartState.cartItems;
 
   return useQuery(
@@ -122,7 +122,7 @@ const cartApi = {
     cartItems,
   } = {}) => {
     return queryOptions({
-      queryKey: [QUERY_KEYS.Cart, deliveryId, zoneId, cartItems],
+      queryKey: [QUERY_KEYS.Cart, deliveryId, zoneId, cartItems, isCouponSend],
       enabled: Boolean(deliveryId),
       initialData: window.CART,
       // placeholderData: keepPreviousData,
@@ -137,7 +137,7 @@ const cartApi = {
           formData.append('form[delivery][zone_id]', zoneId);
         }
 
-        if (isCouponSend) {
+        if (isCouponSend && couponCode) {
           formData.append('form[coupon_code]', couponCode);
         }
 
