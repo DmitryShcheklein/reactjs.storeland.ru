@@ -101,28 +101,21 @@ function useQuickFormData() {
 // Хук для управления корзиной с учетом выбранной доставки
 function useCartData() {
   const [cartState] = useCartGlobalState();
-  const deliveryId = cartState.form.delivery.id;
-  const zoneId = cartState.form.delivery.zoneId;
-  const isCouponSend = cartState.form.isCouponSend;
-  const couponCode = cartState.form.couponCode;
-  const cartItems = cartState.cartItems;
 
-  return useQuery(
-    cartApi.getCart({ deliveryId, zoneId, couponCode, isCouponSend, cartItems })
-  );
+  return useQuery(cartApi.getCart(cartState));
 }
 
 const cartApi = {
   baseKey: QUERY_KEYS.Cart,
-  getCart: ({
-    deliveryId,
-    zoneId,
-    couponCode,
-    isCouponSend,
-    cartItems,
-  } = {}) => {
+  getCart: (cartState) => {
+    const deliveryId = cartState.form.delivery.id;
+    const zoneId = cartState.form.delivery.zoneId;
+    const isCouponSend = cartState.form.isCouponSend;
+    const couponCode = cartState.form.couponCode;
+    const cartItems = cartState.cartItems;
+
     return queryOptions({
-      queryKey: [QUERY_KEYS.Cart, deliveryId, zoneId, cartItems, isCouponSend],
+      queryKey: [QUERY_KEYS.Cart],
       enabled: Boolean(deliveryId),
       initialData: window.CART,
       // placeholderData: keepPreviousData,
