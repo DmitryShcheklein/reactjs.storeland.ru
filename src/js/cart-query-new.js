@@ -42,7 +42,7 @@ root.render(<App />);
 function Cart() {
   const { data: cartData, isLoading: isCartLoading, isFetched } = useCartData();
   const isCartEmpty =
-    window.CART_IS_EMPTY || (!cartData?.CART_COUNT_TOTAL && isFetched);
+    !window.CART_COUNT_TOTAL || (!cartData?.CART_COUNT_TOTAL && isFetched);
 
   return (
     <div className="box mb-5">

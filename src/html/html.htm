@@ -27,8 +27,9 @@
           {% IF MOD_LNAME = cart %}
           <div class="col-center col">
             <div id="root"></div>
-              <script>window.HASH = '{HASH}'</script>
-              <script>window.CART_IS_EMPTY = {% IF CART_COUNT_TOTAL %}false{% ELSE %}true{% ENDIF %}</script>
+            
+            <script>window.HASH = '{HASH}'</script>
+            <script>window.CART_COUNT_TOTAL = {CART_COUNT_TOTAL}</script>
             <!-- <details>
               <summary>BODY 777</summary>
               <pre>{BODY}</pre>
