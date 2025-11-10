@@ -40,11 +40,13 @@ const root = createRoot(document.getElementById('root'));
 root.render(<App />);
 
 function Cart() {
-  const { data: cartData, isLoading: isCartLoading } = useCartData();
+  const { data: cartData, isLoading: isCartLoading, isFetched } = useCartData();
+  const isCartEmpty =
+    window.CART_IS_EMPTY || (!cartData?.CART_COUNT_TOTAL && isFetched);
 
   return (
     <div className="box mb-5">
-      {!cartData?.cartItems?.length ? (
+      {isCartEmpty ? (
         <div className="notification is-warning">
           <p className="is-size-5">Ваша корзина пуста</p>
         </div>
@@ -69,7 +71,7 @@ function Cart() {
               </tr>
             </thead>
             <tbody>
-              {cartData?.cartItems.map((goods) => (
+              {cartData?.cartItems?.map((goods) => (
                 <GoodsItem key={goods.GOODS_MOD_ID} goods={goods} />
               ))}
             </tbody>

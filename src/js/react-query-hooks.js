@@ -45,12 +45,7 @@ function useCartGlobalState() {
       couponCode: '',
       isCouponSend: false,
     },
-    cartItems: window.CART.cartItems.map(
-      ({ GOODS_MOD_ID, ORDER_LINE_QUANTITY }) => ({
-        id: GOODS_MOD_ID,
-        qty: ORDER_LINE_QUANTITY,
-      })
-    ),
+    cartItems: [],
   };
 
   const query = useQuery({
@@ -116,8 +111,7 @@ const cartApi = {
 
     return queryOptions({
       queryKey: [QUERY_KEYS.Cart],
-      enabled: Boolean(deliveryId),
-      initialData: window.CART,
+      enabled: Boolean(deliveryId && !window.CART_IS_EMPTY),
       // placeholderData: keepPreviousData,
       queryFn: async () => {
         const formData = new FormData();
@@ -145,7 +139,7 @@ const cartApi = {
             responseType: 'text',
             params: {
               only_body: 1,
-              hash: window.CART.HASH,
+              hash: window.HASH,
             },
           }
         );
@@ -183,7 +177,7 @@ const cartApi = {
     const response = await axios.post(`/cart/add/`, formData, {
       params: {
         ajax_q: 1,
-        hash: window.CART.HASH,
+        hash: window.HASH,
       },
     });
 
@@ -216,7 +210,7 @@ const orderApi = {
     const response = await axios.post(`/order/stage/confirm`, formData, {
       params: {
         ajax_q: 1,
-        hash: window.CART.HASH,
+        hash: window.HASH,
       },
     });
 
