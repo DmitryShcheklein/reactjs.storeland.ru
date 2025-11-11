@@ -3,81 +3,88 @@ const { createRoot } = ReactDOM;
 const { QueryClient, QueryClientProvider, useQuery, useMutation } = ReactQuery;
 const { ReactQueryDevtools } = window.ReactQueryDevtools;
 const {
+  queryClient,
+
   useQuickFormData,
   useCartData,
-  queryClient,
   useCartGlobalState,
   useCreateOrderMutation,
   useClearCartMutation,
   useDeleteItemMutation,
 } = window.ReactQueryHooks;
 
+const root = createRoot(document.getElementById('root'));
+root.render(<App />);
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="container">
-        <h1 className="title is-2">Корзина</h1>
-
-        <div className="columns">
-          {/* Левая колонка: Корзина и форма заказа */}
-          <div className="column is-8">
-            <Cart />
-            <OrderForm />
-          </div>
-
-          {/* Правая колонка: Итоги и купон */}
-          <div className="column is-4">
-            <Total />
-          </div>
-        </div>
-      </div>
+      <CartPage />
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 }
 
-const root = createRoot(document.getElementById('root'));
-root.render(<App />);
-
-function Cart() {
-  const { data: cartData, isLoading: isCartLoading, isFetched } = useCartData();
+function CartPage() {
+  const { data: cartData, isLoading, isFetched } = useCartData();
   const isCartEmpty =
     !window.CART_COUNT_TOTAL || (!cartData?.CART_COUNT_TOTAL && isFetched);
 
   return (
-    <div className="box mb-5">
-      {isCartEmpty ? (
-        <div className="notification is-warning">
-          <p className="is-size-5">Ваша корзина пуста</p>
-        </div>
-      ) : (
-        <>
-          <table className="table is-fullwidth is-striped is-hoverable">
-            {isCartLoading ? (
-              <thead>
-                <tr>
-                  <th>Грузим корзину...</th>
-                </tr>
-              </thead>
-            ) : null}
+    <>
+      <div className="container">
+        <h1 className="title is-2">Корзина</h1>
 
-            <thead>
-              <tr>
-                <th>Товар</th>
-                <th>Цена</th>
-                <th>Количество</th>
-                <th>Сумма</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {cartData?.cartItems?.map((goods) => (
-                <GoodsItem key={goods.GOODS_MOD_ID} goods={goods} />
-              ))}
-            </tbody>
-          </table>
-        </>
-      )}
+        {isCartEmpty ? (
+          <div className="notification is-warning">
+            <p className="is-size-5">Ваша корзина пуста</p>
+          </div>
+        ) : (
+          <>
+            {isLoading ? <p className="title is-6">Загрузка...</p> : null}
+
+            <div className={`columns ${isLoading ? 'is-hidden' : ''}`}>
+              {/* Левая колонка: Корзина и форма заказа */}
+              <div className="column is-8">
+                <Cart />
+                <OrderForm />
+              </div>
+
+              {/* Правая колонка: Итоги и купон */}
+              <div className="column is-4">
+                <Total />
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </>
+  );
+}
+function Cart() {
+  const { data: cartData, isPreviousData } = useCartData();
+
+  return (
+    <div className="box mb-5">
+      <table
+        className="table is-fullwidth is-striped is-hoverable"
+        style={isPreviousData ? { opacity: 0.5 } : {}}
+      >
+        <thead>
+          <tr>
+            <th>Товар</th>
+            <th>Цена</th>
+            <th>Количество</th>
+            <th>Сумма</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {cartData?.cartItems?.map((goods) => (
+            <GoodsItem key={goods.GOODS_MOD_ID} goods={goods} />
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -98,11 +105,16 @@ function GoodsItem({ goods }) {
   const [inputValue, setInputValue] = useState(ORDER_LINE_QUANTITY);
 
   useEffect(() => {
-    setCartState({
-      ...cartState,
-      cartItems: cartState.cartItems.map((item) =>
-        item.id === GOODS_MOD_ID ? { ...item, qty: inputValue } : item
-      ),
+    setCartState((prev) => {
+      const hasItem = prev.cartItems.some((item) => item.id === GOODS_MOD_ID);
+
+      const updatedItems = hasItem
+        ? prev.cartItems.map((item) =>
+            item.id === GOODS_MOD_ID ? { ...item, qty: inputValue } : item
+          )
+        : [...prev.cartItems, { id: GOODS_MOD_ID, qty: inputValue }];
+
+      return { ...prev, cartItems: updatedItems };
     });
   }, [inputValue]);
 

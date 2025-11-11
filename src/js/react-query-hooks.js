@@ -15,7 +15,7 @@ const quickFormApi = {
   getQuickFormData: () => {
     return queryOptions({
       queryKey: [QUERY_KEYS.QuickForm],
-      placeholderData: keepPreviousData,
+      keepPreviousData: true,
       staleTime: 1000 * 60 * 5,
       queryFn: async () => {
         const { data } = await axios.get(`/cart/add`, {
@@ -110,9 +110,9 @@ const cartApi = {
     const cartItems = cartState.cartItems;
 
     return queryOptions({
-      queryKey: [QUERY_KEYS.Cart],
+      queryKey: [QUERY_KEYS.Cart, deliveryId, zoneId, cartItems],
       enabled: Boolean(deliveryId && !window.CART_IS_EMPTY),
-      // placeholderData: keepPreviousData,
+      keepPreviousData: true,
       queryFn: async () => {
         const formData = new FormData();
 
@@ -236,6 +236,7 @@ function useCreateOrderMutation() {
 
 window.ReactQueryHooks = {
   queryClient,
+  quickFormApi,
   useQuickFormData,
   useCartData,
   useCartGlobalState,
