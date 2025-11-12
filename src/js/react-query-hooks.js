@@ -45,7 +45,11 @@ function useCartGlobalState() {
       couponCode: '',
       isCouponSend: false,
     },
-    cartItems: [],
+    cartItems:
+      window.BODY.cartItems?.map(({ GOODS_MOD_ID, ORDER_LINE_QUANTITY }) => ({
+        id: GOODS_MOD_ID,
+        qty: ORDER_LINE_QUANTITY,
+      })) || [],
   };
 
   const query = useQuery({
@@ -95,24 +99,31 @@ function useQuickFormData() {
 
 // Хук для управления корзиной с учетом выбранной доставки
 function useCartData() {
-  const [cartState] = useCartGlobalState();
-
-  return useQuery(cartApi.getCart(cartState));
+  return useQuery(cartApi.getCart());
 }
 
 const cartApi = {
   baseKey: QUERY_KEYS.Cart,
-  getCart: (cartState) => {
+  getCart: () => {
+    const [cartState] = useCartGlobalState();
     const deliveryId = cartState.form.delivery.id;
     const zoneId = cartState.form.delivery.zoneId;
     const isCouponSend = cartState.form.isCouponSend;
     const couponCode = cartState.form.couponCode;
     const cartItems = cartState.cartItems;
 
+    if (!deliveryId) {
+      return queryOptions({
+        queryKey: ['empty'],
+      });
+    }
     return queryOptions({
       queryKey: [QUERY_KEYS.Cart, deliveryId, zoneId, cartItems],
-      enabled: Boolean(deliveryId && !window.CART_IS_EMPTY),
+      // queryKey: [QUERY_KEYS.Cart],
+      enabled: Boolean(deliveryId && window.BODY.CART_COUNT_TOTAL),
       keepPreviousData: true,
+      placeholderData: window.BODY,
+      // initialData: window.BODY,
       queryFn: async () => {
         const formData = new FormData();
 
@@ -132,34 +143,29 @@ const cartApi = {
           formData.append(`form[quantity][${item.id}]`, item.qty)
         );
 
-        const { data: cartPageDataString } = await axios.post(
-          `/cart`,
-          formData,
-          {
-            responseType: 'text',
-            params: {
-              only_body: 1,
-              hash: window.HASH,
-            },
-          }
-        );
-        const cartPageData = JSON.parse(cartPageDataString);
+        const { data: cartPageData } = await axios.post(`/cart`, formData, {
+          responseType: 'json',
+          params: {
+            only_body: 1,
+            hash: window.BODY.HASH,
+          },
+        });
 
         let orderStepsPageData;
         if (isCouponSend && couponCode) {
           const { cartRelatedGoods } = cartPageData;
-          const { data: stepsOrderDataString } = await axios.post(
+          const { data: stepsOrderData } = await axios.post(
             `/order/stage/confirm`,
             formData,
             {
-              responseType: 'text',
+              responseType: 'json',
               params: {
                 only_body: 1,
                 ajax_q: 1,
               },
             }
           );
-          orderStepsPageData = JSON.parse(stepsOrderDataString);
+          orderStepsPageData = stepsOrderData;
           orderStepsPageData.cartRelatedGoods = cartRelatedGoods;
         }
 
@@ -170,6 +176,8 @@ const cartApi = {
   clearCart: async () => await axios.get(`/cart/truncate/`),
   deleteItem: async (itemId) => {
     await axios.get(`/cart/delete/${itemId}`);
+
+    return itemId;
   },
   addToCart: async (form) => {
     const formData = new FormData(form);
@@ -177,7 +185,7 @@ const cartApi = {
     const response = await axios.post(`/cart/add/`, formData, {
       params: {
         ajax_q: 1,
-        hash: window.HASH,
+        hash: window.BODY.HASH,
       },
     });
 
@@ -194,10 +202,19 @@ const useClearCartMutation = () => {
   });
 };
 const useDeleteItemMutation = () => {
+  const [cartState, setCartState] = useCartGlobalState();
+
   return useMutation({
     mutationFn: cartApi.deleteItem,
-    onSuccess: async () => {
+    onError: async (error) => {
+      console.error('Error deleting item:', error);
+    },
+    onSuccess: async (itemId) => {
       queryClient.invalidateQueries({ queryKey: [cartApi.baseKey] });
+      setCartState({
+        ...cartState,
+        cartItems: cartState.cartItems.filter((item) => item.id !== itemId),
+      });
     },
   });
 };
@@ -210,7 +227,7 @@ const orderApi = {
     const response = await axios.post(`/order/stage/confirm`, formData, {
       params: {
         ajax_q: 1,
-        hash: window.HASH,
+        hash: window.BODY.HASH,
       },
     });
 
@@ -237,6 +254,7 @@ function useCreateOrderMutation() {
 window.ReactQueryHooks = {
   queryClient,
   quickFormApi,
+
   useQuickFormData,
   useCartData,
   useCartGlobalState,
