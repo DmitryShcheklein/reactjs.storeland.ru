@@ -28,7 +28,7 @@ function App() {
 function CartPage() {
   const { data: cartData, isLoading, isFetched } = useCartData();
   const isCartEmpty =
-    !window.CART_COUNT_TOTAL || (!cartData?.CART_COUNT_TOTAL && isFetched);
+    !window.BODY.CART_COUNT_TOTAL || (!cartData?.CART_COUNT_TOTAL && isFetched);
 
   return (
     <>
@@ -41,9 +41,7 @@ function CartPage() {
           </div>
         ) : (
           <>
-            {isLoading ? <p className="title is-6">Загрузка...</p> : null}
-
-            <div className={`columns ${isLoading ? 'is-hidden' : ''}`}>
+            <div className={`columns`}>
               {/* Левая колонка: Корзина и форма заказа */}
               <div className="column is-8">
                 <Cart />
@@ -105,16 +103,11 @@ function GoodsItem({ goods }) {
   const [inputValue, setInputValue] = useState(ORDER_LINE_QUANTITY);
 
   useEffect(() => {
-    setCartState((prev) => {
-      const hasItem = prev.cartItems.some((item) => item.id === GOODS_MOD_ID);
-
-      const updatedItems = hasItem
-        ? prev.cartItems.map((item) =>
-            item.id === GOODS_MOD_ID ? { ...item, qty: inputValue } : item
-          )
-        : [...prev.cartItems, { id: GOODS_MOD_ID, qty: inputValue }];
-
-      return { ...prev, cartItems: updatedItems };
+    setCartState({
+      ...cartState,
+      cartItems: cartState.cartItems.map((item) =>
+        item.id === GOODS_MOD_ID ? { ...item, qty: inputValue } : item
+      ),
     });
   }, [inputValue]);
 
