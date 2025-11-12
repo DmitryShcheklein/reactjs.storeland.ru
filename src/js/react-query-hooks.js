@@ -1,6 +1,5 @@
-const { QueryClient, useQuery, useMutation, queryOptions, keepPreviousData } =
-  ReactQuery;
 const { useState, useEffect, useRef, useCallback } = window.React;
+const { QueryClient, useQuery, useMutation, queryOptions } = ReactQuery;
 const queryClient = new QueryClient();
 
 const QUERY_KEYS = {
@@ -112,18 +111,12 @@ const cartApi = {
     const couponCode = cartState.form.couponCode;
     const cartItems = cartState.cartItems;
 
-    if (!deliveryId) {
-      return queryOptions({
-        queryKey: ['empty'],
-      });
-    }
     return queryOptions({
-      queryKey: [QUERY_KEYS.Cart, deliveryId, zoneId, cartItems],
-      // queryKey: [QUERY_KEYS.Cart],
+      queryKey: [QUERY_KEYS.Cart, deliveryId, zoneId, isCouponSend, cartItems],
       enabled: Boolean(deliveryId && window.BODY.CART_COUNT_TOTAL),
       keepPreviousData: true,
-      placeholderData: window.BODY,
       // initialData: window.BODY,
+      placeholderData: window.BODY,
       queryFn: async () => {
         const formData = new FormData();
 

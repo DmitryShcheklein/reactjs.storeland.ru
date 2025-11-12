@@ -26,9 +26,10 @@ function App() {
 }
 
 function CartPage() {
-  const { data: cartData, isLoading, isFetched } = useCartData();
+  const { data: cartData } = useCartData();
+
   const isCartEmpty =
-    !window.BODY.CART_COUNT_TOTAL || (!cartData?.CART_COUNT_TOTAL && isFetched);
+    !window.BODY.CART_COUNT_TOTAL || (cartData && !cartData.CART_COUNT_TOTAL);
 
   return (
     <>
@@ -205,7 +206,7 @@ function Total() {
     </span>
   );
   const isActiveCoupon = cartData?.cartDiscount?.DISCOUNT_TYPE === 'coupon';
-
+  // console.log(isActiveCoupon);
   return (
     <div className="box sticky-top" style={{ position: 'sticky', top: '20px' }}>
       <h3 className="title is-4 mb-4">Ваш заказ</h3>
@@ -220,7 +221,6 @@ function Total() {
             placeholder="Введите промокод"
             value={cartState.form.couponCode}
             onChange={(e) => {
-              // setCouponCode(e.target.value);
               setCartState((prev) => {
                 return {
                   ...prev,
@@ -233,6 +233,30 @@ function Total() {
             }}
           />
         </div>
+        {cartState.form.couponCode ? (
+          <div className="control">
+            <button
+              className="button is-error"
+              onClick={() => {
+                setCartState((prev) => {
+                  return {
+                    ...prev,
+                    form: {
+                      ...prev.form,
+                      couponCode: '',
+                      isCouponSend: !prev.form.isCouponSend,
+                    },
+                  };
+                });
+              }}
+            >
+              <span className="icon">
+                <i className="icon-delete"></i>
+              </span>
+            </button>
+          </div>
+        ) : null}
+
         <div className="control">
           <button
             className="button is-info"
@@ -242,12 +266,12 @@ function Total() {
                   ...prev,
                   form: {
                     ...prev.form,
-                    isCouponSend: true,
+                    isCouponSend: !prev.form.isCouponSend,
                   },
                 };
               });
             }}
-            disabled={!cartState.form.couponCode || isActiveCoupon}
+            disabled={isActiveCoupon}
           >
             {isActiveCoupon ? <>Применён</> : <>Применить</>}
           </button>
