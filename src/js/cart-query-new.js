@@ -181,7 +181,8 @@ function GoodsItem({ goods }) {
 function Total() {
   const [cartState, setCartState] = useCartGlobalState();
   const { isLoading: isDeliveryLoading } = useQuickFormData();
-
+  const [couponCode, setCouponCode] = useState('0000');
+  const [isCouponSend, setIsCouponSend] = useState(false);
   const {
     data: cartData,
     isLoading: isCartLoading,
@@ -206,6 +207,10 @@ function Total() {
     </span>
   );
   const isActiveCoupon = cartData?.cartDiscount?.DISCOUNT_TYPE === 'coupon';
+  console.log(cartData?.cartDiscount?.DISCOUNT_TYPE);
+  if (!isActiveCoupon && isCouponSend) {
+    console.error('Купон не применён');
+  }
   // console.log(isActiveCoupon);
   return (
     <div className="box sticky-top" style={{ position: 'sticky', top: '20px' }}>
@@ -219,32 +224,25 @@ function Total() {
             className="input"
             type="text"
             placeholder="Введите промокод"
-            value={cartState.form.couponCode}
+            value={couponCode}
             onChange={(e) => {
-              setCartState((prev) => {
-                return {
-                  ...prev,
-                  form: {
-                    ...prev.form,
-                    couponCode: e.target.value,
-                  },
-                };
-              });
+              setCouponCode(e.target.value);
             }}
           />
         </div>
-        {cartState.form.couponCode ? (
+        {couponCode ? (
           <div className="control">
             <button
               className="button is-error"
               onClick={() => {
+                setIsCouponSend(false);
+                setCouponCode('');
                 setCartState((prev) => {
                   return {
                     ...prev,
                     form: {
                       ...prev.form,
                       couponCode: '',
-                      isCouponSend: !prev.form.isCouponSend,
                     },
                   };
                 });
@@ -259,14 +257,15 @@ function Total() {
 
         <div className="control">
           <button
-            className="button is-info"
+            className={`button is-info ${isCartLoading || isPlaceholderData ? 'is-loading' : ''}`}
             onClick={() => {
+              setIsCouponSend(true);
               setCartState((prev) => {
                 return {
                   ...prev,
                   form: {
                     ...prev.form,
-                    isCouponSend: !prev.form.isCouponSend,
+                    couponCode,
                   },
                 };
               });

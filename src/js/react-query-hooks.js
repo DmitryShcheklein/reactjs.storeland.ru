@@ -112,7 +112,7 @@ const cartApi = {
     const cartItems = cartState.cartItems;
 
     return queryOptions({
-      queryKey: [QUERY_KEYS.Cart, deliveryId, zoneId, isCouponSend, cartItems],
+      queryKey: [QUERY_KEYS.Cart, deliveryId, zoneId, couponCode, cartItems],
       enabled: Boolean(deliveryId && window.BODY.CART_COUNT_TOTAL),
       keepPreviousData: true,
       // initialData: window.BODY,
@@ -127,8 +127,9 @@ const cartApi = {
         if (zoneId) {
           formData.append('form[delivery][zone_id]', zoneId);
         }
+        console.log('couponCode', couponCode);
 
-        if (isCouponSend && couponCode) {
+        if (couponCode) {
           formData.append('form[coupon_code]', couponCode);
         }
 
@@ -145,7 +146,7 @@ const cartApi = {
         });
 
         let orderStepsPageData;
-        if (isCouponSend && couponCode) {
+        if (couponCode) {
           const { cartRelatedGoods } = cartPageData;
           const { data: stepsOrderData } = await axios.post(
             `/order/stage/confirm`,
