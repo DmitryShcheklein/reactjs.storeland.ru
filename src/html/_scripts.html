@@ -5,28 +5,25 @@
   src="{ASSETS_STYLES_PATH}main.js?design=@@DESIGN_NAME"
 ></script>
 
-
-
 <!-- Подключаем скрипт Babel для трансляции JSX -->
 <script src="https://unpkg.com/@babel/standalone@7.24.0/babel.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@19?dev",
+    "react-dom/": "https://esm.sh/react-dom@19/",
+    "@tanstack/react-query": "https://esm.sh/@tanstack/react-query@5",
+    "@tanstack/react-query-devtools": "https://esm.sh/@tanstack/react-query-devtools@5.1?dev",
+    "axios": "https://esm.sh/axios@1.6.8/dist/browser/axios.js"
+  }
+}
+</script>
+<script type="text/babel" data-type="module" src="{ASSETS_STYLES_PATH}cart-query-RTK-5.js"></script>
 
-<!-- React и ReactDOM -->
-<script
-  src="https://unpkg.com/react@18/umd/react.development.js"
-  crossorigin
-></script>
-<script
-  src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"
-  crossorigin
-></script>
-<!-- TanStack React Query v4 (UMD) -->
-<script src="https://unpkg.com/@tanstack/react-query@4/build/umd/index.production.js"></script>
 
-<!-- Devtools для React Query v4 (UMD) -->
-<script src="https://unpkg.com/@tanstack/react-query-devtools@4.41.0/build/umd/index.development.js"></script>
-<!-- Axios -->
-<script src="https://unpkg.com/axios@1.12.2/dist/axios.js"></script>
-<script
+
+
+<!-- <script
   type="text/babel"
   data-type="module"
   src="{ASSETS_STYLES_PATH}react-query-hooks.js"
@@ -35,7 +32,7 @@
   type="text/babel"
   data-type="module"
   src="{ASSETS_STYLES_PATH}cart-query-new.js"
-></script>
+></script> -->
 
 <!-- Передаем данные из шаблона в JS -->
 <!-- <script>window.HASH = '{HASH}'</script>
@@ -49,7 +46,7 @@
 
 
 <!-- Подключаемые скрипты для формы заказа -->
-<script src="https://unpkg.com/imask" defer></script>
+<!-- <script src="https://unpkg.com/imask" defer></script>
 <script
   src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"
   defer
@@ -73,4 +70,4 @@
   https://cdn.jsdelivr.net/npm/air-datepicker@3.4.0/air-datepicker.min.css
   "
   rel="stylesheet"
-/>
+/> -->
