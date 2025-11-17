@@ -115,8 +115,8 @@ const cartApi = {
       queryKey: [QUERY_KEYS.Cart, deliveryId, zoneId, couponCode, cartItems],
       enabled: Boolean(deliveryId && window.BODY.CART_COUNT_TOTAL),
       keepPreviousData: true,
-      // initialData: window.BODY,
-      placeholderData: window.BODY,
+      initialData: window.BODY,
+      // placeholderData: window.BODY,
       queryFn: async () => {
         const formData = new FormData();
 
@@ -204,6 +204,14 @@ const useDeleteItemMutation = () => {
       console.error('Error deleting item:', error);
     },
     onSuccess: async (itemId) => {
+      console.log('before delete', window.BODY.cartItems);
+      window.BODY = {
+        ...window.BODY,
+        cartItems: window.BODY.cartItems.filter(
+          (item) => item.GOODS_MOD_ID !== itemId
+        ),
+      };
+      console.log('after delete', window.BODY.cartItems);
       queryClient.invalidateQueries({ queryKey: [cartApi.baseKey] });
       setCartState({
         ...cartState,

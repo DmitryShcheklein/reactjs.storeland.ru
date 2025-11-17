@@ -190,7 +190,12 @@ function Total() {
     isPending,
     isRefetching,
   } = useCartData();
-  // console.log(isRefetching, isCartLoading, isPlaceholderData);
+  console.log({
+    isLoading: isCartLoading,
+    isPlaceholderData,
+    isPending,
+    isRefetching,
+  });
   // console.log(cartData?.CART_SUM_DELIVERY);
 
   const clearCartMutation = useClearCartMutation();
