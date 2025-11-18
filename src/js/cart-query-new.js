@@ -20,28 +20,29 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <CartPage />
-      <ReactQueryDevtools initialIsOpen={false} />
+      <ReactQueryDevtools initialIsOpen={false} position="bottom-right" />
     </QueryClientProvider>
   );
 }
 
 function CartPage() {
-  const { data: cartData } = useCartData();
+  const { data: cartData, isLoading: isCartLoading } = useCartData();
+  const { isLoading: isQuickFormLoading } = useQuickFormData();
 
   const isCartEmpty =
-    !window.BODY.CART_COUNT_TOTAL || (cartData && !cartData.CART_COUNT_TOTAL);
+    window.CART_IS_EMPTY || (cartData && !cartData.CART_COUNT_TOTAL);
 
   return (
     <>
-      <div className="container">
-        <h1 className="title is-2">Корзина</h1>
-
-        {isCartEmpty ? (
-          <div className="notification is-warning">
-            <p className="is-size-5">Ваша корзина пуста</p>
-          </div>
-        ) : (
-          <>
+      {isCartEmpty ? (
+        <div className="notification is-warning">
+          <p className="is-size-5">Ваша корзина пуста</p>
+        </div>
+      ) : (
+        <>
+          {isCartLoading || isQuickFormLoading ? (
+            <progress className="progress is-small is-primary" max="100" />
+          ) : (
             <div className={`columns`}>
               {/* Левая колонка: Корзина и форма заказа */}
               <div className="column is-8">
@@ -54,9 +55,9 @@ function CartPage() {
                 <Total />
               </div>
             </div>
-          </>
-        )}
-      </div>
+          )}
+        </>
+      )}
     </>
   );
 }
@@ -147,7 +148,6 @@ function GoodsItem({ goods }) {
               type="text"
               value={inputValue}
               onChange={(e) => {
-                console.log(e.target.value);
                 setInputValue(e.target.value);
               }}
               style={{ width: '50px' }}
@@ -180,7 +180,7 @@ function GoodsItem({ goods }) {
 
 function Total() {
   const [cartState, setCartState] = useCartGlobalState();
-  const { isLoading: isDeliveryLoading } = useQuickFormData();
+  const { isLoading: isQuickFormLoading } = useQuickFormData();
   const [couponCode, setCouponCode] = useState('0000');
   const [isCouponSend, setIsCouponSend] = useState(false);
   const {
@@ -190,12 +190,12 @@ function Total() {
     isPending,
     isRefetching,
   } = useCartData();
-  console.log({
-    isLoading: isCartLoading,
-    isPlaceholderData,
-    isPending,
-    isRefetching,
-  });
+  // console.log({
+  //   isLoading: isCartLoading,
+  //   isPlaceholderData,
+  //   isPending,
+  //   isRefetching,
+  // });
   // console.log(cartData?.CART_SUM_DELIVERY);
 
   const clearCartMutation = useClearCartMutation();
@@ -212,11 +212,11 @@ function Total() {
     </span>
   );
   const isActiveCoupon = cartData?.cartDiscount?.DISCOUNT_TYPE === 'coupon';
-  console.log(cartData?.cartDiscount?.DISCOUNT_TYPE);
+
   if (!isActiveCoupon && isCouponSend) {
     console.error('Купон не применён');
   }
-  // console.log(isActiveCoupon);
+
   return (
     <div className="box sticky-top" style={{ position: 'sticky', top: '20px' }}>
       <h3 className="title is-4 mb-4">Ваш заказ</h3>
@@ -287,7 +287,7 @@ function Total() {
         <div className="is-size-5 is-flex is-justify-content-space-between">
           <span>Итого:</span>
           <div className="has-text-weight-bold">
-            {isRefetching || isCartLoading || isDeliveryLoading ? (
+            {isRefetching || isCartLoading || isQuickFormLoading ? (
               <PriceSkeleton />
             ) : (
               cartData?.CART_SUM_NOW
@@ -297,7 +297,7 @@ function Total() {
         <div className="is-size-5 is-flex is-justify-content-space-between">
           <span>Скидка:</span>
           <div className="has-text-weight-bold has-text-danger">
-            {isRefetching || isCartLoading || isDeliveryLoading ? (
+            {isRefetching || isCartLoading || isQuickFormLoading ? (
               <PriceSkeleton />
             ) : (
               cartData?.CART_SUM_DISCOUNT
@@ -308,7 +308,7 @@ function Total() {
         <div className="is-size-5 is-flex is-justify-content-space-between">
           <span>Доставка:</span>
           <div className="has-text-weight-bold">
-            {isRefetching || isCartLoading || isDeliveryLoading ? (
+            {isRefetching || isCartLoading || isQuickFormLoading ? (
               <PriceSkeleton />
             ) : (
               cartData?.CART_SUM_DELIVERY
@@ -319,7 +319,7 @@ function Total() {
         <div className="is-size-4 is-flex is-justify-content-space-between">
           <span>Итого:</span>
           <div className="has-text-weight-bold">
-            {isCartLoading || isDeliveryLoading ? (
+            {isCartLoading || isQuickFormLoading ? (
               <PriceSkeleton />
             ) : (
               cartData?.CART_SUM_NOW_WITH_DELIVERY_AND_DISCOUNT
@@ -347,8 +347,9 @@ function Total() {
 }
 
 function OrderForm() {
-  const { deliveryOptions, isLoading: isDeliveryLoading } = useQuickFormData();
+  const { data, isLoading: isDeliveryLoading } = useQuickFormData();
   const [cartState, setCartState] = useCartGlobalState();
+  const deliveryOptions = data?.orderDelivery || [];
 
   return (
     <div className="box mb-5">
@@ -358,14 +359,10 @@ function OrderForm() {
         <div className="control">
           <div className="select is-fullwidth">
             <select
-              // value={selectedDelivery.id}
               value={cartState?.form?.delivery?.id}
               onChange={(e) => {
                 const deliveryId = e.target.value;
-                const delivery =
-                  deliveryOptions.find((d) => d.id === deliveryId) ||
-                  deliveryOptions[0];
-                // console.log(delivery);
+
                 setCartState({
                   ...cartState,
                   form: {
