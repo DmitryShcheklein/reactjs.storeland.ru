@@ -1,4 +1,3 @@
-const { useState, useEffect, useRef, useCallback } = window.React;
 const { QueryClient, useQuery, useMutation, queryOptions } = ReactQuery;
 const queryClient = new QueryClient();
 
@@ -9,28 +8,7 @@ const QUERY_KEYS = {
   CartGlobalState: 'CartGlobalState',
 };
 
-const quickFormApi = {
-  baseKey: QUERY_KEYS.QuickForm,
-  getQuickFormData: () => {
-    return queryOptions({
-      queryKey: [QUERY_KEYS.QuickForm],
-      keepPreviousData: true,
-      staleTime: 1000 * 60 * 5,
-      queryFn: async () => {
-        const { data } = await axios.get(`/cart/add`, {
-          responseType: 'text',
-          params: {
-            ajax_q: 1,
-            fast_order: 1,
-          },
-        });
-
-        return JSON.parse(data);
-      },
-    });
-  },
-};
-
+// Cart global state
 function useCartGlobalState() {
   const INITIAL_FORM_DATA = {
     form: {
@@ -44,11 +22,7 @@ function useCartGlobalState() {
       couponCode: '',
       isCouponSend: false,
     },
-    cartItems:
-      window.BODY.cartItems?.map(({ GOODS_MOD_ID, ORDER_LINE_QUANTITY }) => ({
-        id: GOODS_MOD_ID,
-        qty: ORDER_LINE_QUANTITY,
-      })) || [],
+    cartItems: [],
   };
 
   const query = useQuery({
@@ -63,48 +37,59 @@ function useCartGlobalState() {
     (value) => queryClient.setQueryData([QUERY_KEYS.CartGlobalState], value),
   ];
 }
-// Хук для управления состоянием выбранной доставки
-function useQuickFormData() {
-  const { data, isLoading } = useQuery(quickFormApi.getQuickFormData());
 
-  // Получаем первую доставку и зону по умолчанию
-  const firstDelivery = data?.orderDelivery?.[0] || {};
-  const firstZone = firstDelivery?.zoneList?.[0] || {};
+// QuickForm
+const quickFormApi = {
+  baseKey: QUERY_KEYS.QuickForm,
+  getData: () => {
+    const [cartState, setCartState] = useCartGlobalState();
 
-  const [cartState, setCartState] = useCartGlobalState();
-
-  // Обновляем состояние при загрузке данных
-  useEffect(() => {
-    if (data && !isLoading) {
-      setCartState({
-        ...cartState,
-        form: {
-          ...cartState.form,
-          delivery: {
-            ...cartState.form.delivery,
-            id: firstDelivery?.id,
-            zoneId: firstZone?.zoneId,
+    return queryOptions({
+      queryKey: [QUERY_KEYS.QuickForm],
+      keepPreviousData: true,
+      staleTime: 1000 * 60 * 5,
+      queryFn: async () => {
+        const { data } = await axios.get(`/cart/add`, {
+          responseType: 'json',
+          params: {
+            ajax_q: 1,
+            fast_order: 1,
           },
-        },
-      });
-    }
-  }, [data, isLoading]);
+        });
 
-  return {
-    deliveryOptions: data?.orderDelivery || [],
-    isLoading,
-  };
+        return data;
+      },
+      onSuccess: (data) => {
+        // Получаем первую доставку и зону по умолчанию
+        const firstDelivery = data?.orderDelivery?.[0] || {};
+        const firstZone = firstDelivery?.zoneList?.[0] || {};
+
+        // Обновляем состояние при загрузке данных
+        setCartState({
+          ...cartState,
+          form: {
+            ...cartState.form,
+            delivery: {
+              ...cartState.form.delivery,
+              id: firstDelivery?.id,
+              zoneId: firstZone?.zoneId,
+            },
+          },
+        });
+      },
+    });
+  },
+};
+
+function useQuickFormData() {
+  return useQuery(quickFormApi.getData());
 }
 
-// Хук для управления корзиной с учетом выбранной доставки
-function useCartData() {
-  return useQuery(cartApi.getCart());
-}
-
+// Cart
 const cartApi = {
   baseKey: QUERY_KEYS.Cart,
   getCart: () => {
-    const [cartState] = useCartGlobalState();
+    const [cartState, setCartState] = useCartGlobalState();
     const deliveryId = cartState.form.delivery.id;
     const zoneId = cartState.form.delivery.zoneId;
     const isCouponSend = cartState.form.isCouponSend;
@@ -113,10 +98,8 @@ const cartApi = {
 
     return queryOptions({
       queryKey: [QUERY_KEYS.Cart, deliveryId, zoneId, couponCode, cartItems],
-      enabled: Boolean(deliveryId && window.BODY.CART_COUNT_TOTAL),
+      enabled: Boolean(deliveryId && !window.CART_IS_EMPTY),
       keepPreviousData: true,
-      initialData: window.BODY,
-      // placeholderData: window.BODY,
       queryFn: async () => {
         const formData = new FormData();
 
@@ -141,7 +124,7 @@ const cartApi = {
           responseType: 'json',
           params: {
             only_body: 1,
-            hash: window.BODY.HASH,
+            hash: window.HASH,
           },
         });
 
@@ -165,28 +148,45 @@ const cartApi = {
 
         return orderStepsPageData || cartPageData;
       },
+      onSuccess: (data = {}) => {
+        const { cartItems, goodsModInfo, favoritesGoods, cartDiscount } = data;
+        const isCouponEnabled = cartDiscount?.DISCOUNT_TYPE === 'coupon';
+
+        setCartState((prev) => ({
+          ...prev,
+          form: {
+            ...prev.form,
+            isCouponSend: isCouponEnabled,
+          },
+          cartItems: cartItems?.map(
+            ({ GOODS_MOD_ID, ORDER_LINE_QUANTITY }) => ({
+              id: GOODS_MOD_ID,
+              qty: ORDER_LINE_QUANTITY,
+            })
+          ),
+          compareGoods: goodsModInfo,
+          favoritesGoods,
+        }));
+      },
     });
   },
-  clearCart: async () => await axios.get(`/cart/truncate/`),
-  deleteItem: async (itemId) => {
-    await axios.get(`/cart/delete/${itemId}`);
-
-    return itemId;
-  },
+  clearCart: async () => axios.get(`/cart/truncate/`),
+  deleteItem: async (itemId) => axios.get(`/cart/delete/${itemId}`),
   addToCart: async (form) => {
     const formData = new FormData(form);
 
-    const response = await axios.post(`/cart/add/`, formData, {
+    return axios.post(`/cart/add/`, formData, {
       params: {
         ajax_q: 1,
-        hash: window.BODY.HASH,
+        hash: window.HASH,
       },
     });
-
-    return response;
   },
 };
 
+function useCartData() {
+  return useQuery(cartApi.getCart());
+}
 const useClearCartMutation = () => {
   return useMutation({
     mutationFn: cartApi.clearCart,
@@ -196,31 +196,15 @@ const useClearCartMutation = () => {
   });
 };
 const useDeleteItemMutation = () => {
-  const [cartState, setCartState] = useCartGlobalState();
-
   return useMutation({
     mutationFn: cartApi.deleteItem,
-    onError: async (error) => {
-      console.error('Error deleting item:', error);
-    },
-    onSuccess: async (itemId) => {
-      console.log('before delete', window.BODY.cartItems);
-      window.BODY = {
-        ...window.BODY,
-        cartItems: window.BODY.cartItems.filter(
-          (item) => item.GOODS_MOD_ID !== itemId
-        ),
-      };
-      console.log('after delete', window.BODY.cartItems);
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: [cartApi.baseKey] });
-      setCartState({
-        ...cartState,
-        cartItems: cartState.cartItems.filter((item) => item.id !== itemId),
-      });
     },
   });
 };
 
+// Order
 const orderApi = {
   baseKey: QUERY_KEYS.Order,
   createOrder: async (form) => {
@@ -229,7 +213,7 @@ const orderApi = {
     const response = await axios.post(`/order/stage/confirm`, formData, {
       params: {
         ajax_q: 1,
-        hash: window.BODY.HASH,
+        hash: window.HASH,
       },
     });
 
