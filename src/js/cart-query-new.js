@@ -41,7 +41,7 @@ function CartPage() {
       ) : (
         <>
           {isCartLoading || isQuickFormLoading ? (
-            <progress className="progress is-small is-primary" max="100" />
+            <h2 className="title is-6">Загрузка корзины...</h2>
           ) : (
             <div className={`columns`}>
               {/* Левая колонка: Корзина и форма заказа */}
@@ -63,6 +63,10 @@ function CartPage() {
 }
 function Cart() {
   const { data: cartData, isPreviousData } = useCartData();
+
+  if (!cartData) {
+    return null;
+  }
 
   return (
     <div className="box mb-5">
@@ -204,16 +208,11 @@ function Total() {
 
   // Компонент скелетона для цен
   const PriceSkeleton = () => (
-    <span
-      // className="skeleton-block"
-      style={{ width: '100px', height: '50px' }}
-    >
-      ...
-    </span>
+    <span style={{ width: '100px', height: '50px' }}>...</span>
   );
-  const isActiveCoupon = cartData?.cartDiscount?.DISCOUNT_TYPE === 'coupon';
+  const isActiveCoupon = cartState.form.isCouponSend;
 
-  if (!isActiveCoupon && isCouponSend) {
+  if (!isActiveCoupon && isCouponSend && couponCode) {
     console.error('Купон не применён');
   }
 
@@ -235,6 +234,7 @@ function Total() {
             }}
           />
         </div>
+
         {couponCode ? (
           <div className="control">
             <button
@@ -275,7 +275,7 @@ function Total() {
                 };
               });
             }}
-            disabled={isActiveCoupon}
+            disabled={isActiveCoupon || isCartLoading}
           >
             {isActiveCoupon ? <>Применён</> : <>Применить</>}
           </button>
